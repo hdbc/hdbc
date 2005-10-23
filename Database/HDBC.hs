@@ -33,7 +33,7 @@ Written by John Goerzen, jgoerzen\@complete.org
 
 module Database.HDBC 
     (Connection,
-     disconnect
+     disconnect, commit, rollback, lrun
 
     )
 
