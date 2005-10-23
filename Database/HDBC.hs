@@ -32,8 +32,11 @@ Written by John Goerzen, jgoerzen\@complete.org
 -}
 
 module Database.HDBC 
-    (
+    (Connection,
+     disconnect
+
     )
 
 where
+import Database.HDBC.Types
 
