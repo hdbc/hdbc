@@ -37,11 +37,13 @@ Written by John Goerzen, jgoerzen\@complete.org
 
 module Database.HDBC.Types
     (Connection(..),
-     Statement(..)
+     Statement(..),
+     SqlError(..)
 
     )
 
 where
+import Data.Dynamic
 
 {- | Main database handle object.
 

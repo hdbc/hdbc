@@ -45,6 +45,7 @@ module Database.HDBC
 where
 import Database.HDBC.Types
 import Control.Exception
+import Data.Dynamic
 
 
 catchSql :: IO a -> (SqlError -> IO a) -> IO a
