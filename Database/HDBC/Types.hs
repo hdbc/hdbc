@@ -48,7 +48,8 @@ where
 This object must be created by a driver for a specific database (see
 the database driver modules).
 
-
+A call to 'commit' is required to make sure that your changes get committed
+to the database.
 -}
 data Connection = 
     Connection {
@@ -60,6 +61,11 @@ in a sane way when it is garbage-collected.  However, a disconnection may
 raise an error, so you are encouraged to explicitly call 'disconnect'.  Also,
 garbage collection may not run when the program terminates, and some databases
 really like an explicit disconnect.
+
+This function discards any data not committed already.  Database driver
+implementators should explicitly call 'rollback' if their databases don't
+do this automatically on disconnect.
+
 -}
                 disconnect :: IO (),
                 {- | Commit any pending data to the database.
@@ -70,19 +76,37 @@ really like an explicit disconnect.
                    last 'commit' or 'rollback'. -}
                 rollback :: IO (),
                 {- | Execute a single SQL statement.  Returns the number
-                   of rows effected. -}
+                   of rows modified. -}
                 run :: String -> IO Integer,
-                {- | Prepares a statement for execution. -}
+                {- | Prepares a statement for execution. 
+
+                   Question marks in the statement will be replaced by
+                   positional parameters in a later call to 'sexecute'. -}
                 prepare :: String -> IO Statement
                }
 
 data Statement = Statement
-    {sexecute :: [String] -> IO Integer,
-     sexecuteMany :: [[String]] -> IO Integer,
+    {
+     {- | Execute the prepared statement, passing in the given positional
+        parameters (that should take the place of the question marks
+        in the call to 'prepare'. -}
+     sExecute :: [Maybe String] -> IO Integer,
+     {- | Execute the query with many rows. 
+        The return value is the return value from the final row 
+        as if you had called 'sExecute' on it. -}
+     sExecuteMany :: [[Maybe String]] -> IO Integer,
+     {- | Returns true if a query is in progress. -}
      isActive :: IO Bool,
+     {- | Abort a query in progress -- usually not needed. -}
      finish :: IO (),
-     
+
+     {- | Fetches one row from the DB.  Returns 'Nothing' if there
+        are no more rows. -}
+     fetchRow :: IO (Maybe [Maybe String])
     }
 
-
-                
+-- stripped down version of HSQL item
+data SqlError = SqlError {seState :: String,
+                          seNativeError :: Int,
+                          seErrorMsg :: String}
+                deriving (Eq, Show, Read, Typeable)

@@ -32,11 +32,35 @@ Written by John Goerzen, jgoerzen\@complete.org
 -}
 
 module Database.HDBC 
-    (Connection,
-     disconnect, commit, rollback, lrun
-
+    (-- * Database Handles
+     Connection,
+     disconnect, run, prepare, commit, rollback, 
+     -- * Statements
+     sExecute, sExecuteMany, isActive, finish, fetchRow,
+     -- * Exceptions
+     SqlError(..),
+     catchSql, handleSql, sqlExceptions, handleSqlError
     )
 
 where
 import Database.HDBC.Types
+import Control.Exception
 
+
+catchSql :: IO a -> (SqlError -> IO a) -> IO a
+catchSql = catchDyn
+
+handleSql :: (SqlError -> IO a) -> IO a -> IO a
+handleSql h f = catchDyn f h
+
+sqlExceptions :: Exception -> Maybe SqlError
+sqlExceptions e = dynExceptions e >>= fromDynamic
+
+{- | Propogate SQL exceptions to IO monad. -}
+handleSqlError :: IO a -> IO a
+handleSqlError action =
+    catchSql action handler
+    where handler e = fail ("SQL error: " ++ show e)
+
+{-  Execute some code.  If any uncaught exception occurs, run
+'rollback' and re-raise it.  Otherwise, run 'commit' and return. -}
