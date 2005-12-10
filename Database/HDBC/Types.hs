@@ -68,6 +68,8 @@ This function discards any data not committed already.  Database driver
 implementators should explicitly call 'rollback' if their databases don't
 do this automatically on disconnect.
 
+Bad Things (TM) could happen if you call this while you have Statements active.
+
 -}
                 disconnect :: IO (),
                 {- | Commit any pending data to the database.
@@ -91,14 +93,17 @@ data Statement = Statement
     {
      {- | Execute the prepared statement, passing in the given positional
         parameters (that should take the place of the question marks
-        in the call to 'prepare'. -}
+        in the call to 'prepare').  Note that not all databases may
+        be able to return a row count immediately; those that can't
+        will return -1.  Even those that can may be inaccurate.  Use
+        this value with a grain of salt. -}
      sExecute :: [Maybe String] -> IO Integer,
      {- | Execute the query with many rows. 
         The return value is the return value from the final row 
         as if you had called 'sExecute' on it. -}
      sExecuteMany :: [[Maybe String]] -> IO Integer,
      {- | Returns true if a query is in progress. -}
-     isActive :: IO Bool,
+     --isActive :: IO Bool,
      {- | Abort a query in progress -- usually not needed. -}
      finish :: IO (),
 
