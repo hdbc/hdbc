@@ -36,7 +36,7 @@ module Database.HDBC
      Connection,
      disconnect, run, prepare, commit, rollback, 
      -- * Statements
-     sExecute, sExecuteMany, isActive, finish, fetchRow,
+     sExecute, sExecuteMany, {- isActive, -} finish, fetchRow,
      -- * Exceptions
      SqlError(..),
      catchSql, handleSql, sqlExceptions, handleSqlError
