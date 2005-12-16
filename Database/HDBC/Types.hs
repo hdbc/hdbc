@@ -80,8 +80,9 @@ Bad Things (TM) could happen if you call this while you have Statements active.
                    last 'commit' or 'rollback'. -}
                 rollback :: IO (),
                 {- | Execute a single SQL statement.  Returns the number
-                   of rows modified. -}
-                run :: String -> IO Integer,
+                   of rows modified.  The second parameter is a list
+                   of replacement strings, if any. -}
+                run :: String -> [Maybe String] -> IO Integer,
                 {- | Prepares a statement for execution. 
 
                    Question marks in the statement will be replaced by
