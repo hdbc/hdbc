@@ -79,7 +79,7 @@ Bad Things (TM) could happen if you call this while you have Statements active.
                 {- | Roll back to the state the database was in prior to the
                    last 'commit' or 'rollback'. -}
                 rollback :: IO (),
-                {- | Execute a single SQL statement.  Returns the number
+                {- | Execute a single SQL query.  Returns the number
                    of rows modified.  The second parameter is a list
                    of replacement strings, if any. -}
                 run :: String -> [Maybe String] -> IO Integer,
@@ -103,13 +103,14 @@ data Statement = Statement
         The return value is the return value from the final row 
         as if you had called 'sExecute' on it. -}
      sExecuteMany :: [[Maybe String]] -> IO Integer,
-     {- | Returns true if a query is in progress. -}
+     {-  Returns true if a query is in progress. -}
      --isActive :: IO Bool,
      {- | Abort a query in progress -- usually not needed. -}
      finish :: IO (),
 
      {- | Fetches one row from the DB.  Returns 'Nothing' if there
-        are no more rows. -}
+        are no more rows.  Will automatically call 'finish' when
+        the last row is read. -}
      fetchRow :: IO (Maybe [Maybe String])
     }
 
