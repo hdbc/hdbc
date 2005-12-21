@@ -86,7 +86,12 @@ Bad Things (TM) could happen if you call this while you have Statements active.
                 {- | Prepares a statement for execution. 
 
                    Question marks in the statement will be replaced by
-                   positional parameters in a later call to 'sexecute'. -}
+                   positional parameters in a later call to 'sExecute'.
+
+                   Please note that, depending on the database
+                   and the driver, errors in your SQL may be raised
+                   either here or by 'sExecute'.  Make sure you
+                   handle exceptions both places if necessary. -}
                 prepare :: String -> IO Statement
                }
 
@@ -97,14 +102,38 @@ data Statement = Statement
         in the call to 'prepare').  Note that not all databases may
         be able to return a row count immediately; those that can't
         will return -1.  Even those that can may be inaccurate.  Use
-        this value with a grain of salt. -}
+        this value with a grain of salt.
+
+        This function should call finish() to finish the previous
+        execution, if necessary.  (This should be necessary when
+        'isActive' is True.)
+        -}
      sExecute :: [Maybe String] -> IO Integer,
+
      {- | Execute the query with many rows. 
         The return value is the return value from the final row 
-        as if you had called 'sExecute' on it. -}
+        as if you had called 'sExecute' on it.
+
+        Due to optimizations that are possible due to different
+        databases and driver designs, this can often be significantly
+        faster than using 'sExecute' multiple times since queries
+        need to be compiled only once. -}
      sExecuteMany :: [[Maybe String]] -> IO Integer,
-     {-  Returns true if a query is in progress. -}
-     --isActive :: IO Bool,
+     {-  Returns true if a query is in progress.
+         
+         In general, whenever this is True, the driver should know to
+         implicitly call 'finish' when the next 'sExecute' is called.
+
+      Usually, this should be False when
+      the Statement has just been created, True after 'sExecute' is run,
+      and then False after the last row is read (or after 'sExecute' returns
+      no data.)  However, this guideline may vary from driver to driver,
+      especially the behavior after initial creation.
+
+      'finish' should always flip this flag to False (unless 'finish'
+      dies with an exception).  -}
+     isActive :: IO Bool,
+                 
      {- | Abort a query in progress -- usually not needed. -}
      finish :: IO (),
 
