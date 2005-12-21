@@ -57,7 +57,7 @@ module Database.HDBC
      -- ** Execution
      sExecute, sExecuteMany,
      -- ** Fetching Results
-     fetchRow,
+     sFetchRow, sFetchAllRows,
      -- ** Miscellaneous
      finish,
      -- * Exceptions
@@ -67,7 +67,8 @@ module Database.HDBC
 
 where
 import Database.HDBC.Utils(catchSql, handleSql, sqlExceptions,
-                           handleSqlError, withTransaction)
+                           handleSqlError, withTransaction,
+                           sFetchAllRows)
 import Database.HDBC.Types
 
 {- $introduction

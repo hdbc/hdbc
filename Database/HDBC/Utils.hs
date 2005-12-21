@@ -40,6 +40,7 @@ module Database.HDBC.Utils where
 import Database.HDBC.Types
 import Control.Exception
 import Data.Dynamic
+import System.IO.Unsafe
 
 {- | Execute the given IO action.
 
@@ -99,3 +100,32 @@ withTransaction conn func =
          Left e -> 
              do try (rollback conn) -- Discard any exception here
                 throw e
+
+{- | Lazily fetch all rows from an executed 'Statement'.
+
+You can think of this as hGetContents applied to a database result set.
+
+The result of this is a lazy list, and each new row will be read, lazily, from
+the database as the list is processed.
+
+When you have exhausted the list, the 'Statement' will be 'finish'ed.
+
+Please note that the careless use of this function can lead to some unpleasant
+behavior.  In particular, if you have not consumed the entire list, then
+attempt to 'finish' or re-execute the statement, and then attempt to consume
+more elements from the list, the result will almost certainly not be what
+you want.
+
+But then, similar caveats apply with hGetContents.
+
+Bottom line: this is a very convenient abstraction; use it wisely.
+-}
+sFetchAllRows :: Statement -> IO [[Maybe String]]
+sFetchAllRows sth = unsafeInterleaveIO $
+    do row <- sFetchRow sth
+       case row of
+         Nothing -> return []
+         Just x -> do remainder <- sFetchAllRows sth
+                      return (x : remainder)
+
+    

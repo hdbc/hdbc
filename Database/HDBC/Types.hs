@@ -134,7 +134,7 @@ data Statement = Statement
      {- | Fetches one row from the DB.  Returns 'Nothing' if there
         are no more rows.  Will automatically call 'finish' when
         the last row is read. -}
-     fetchRow :: IO (Maybe [Maybe String])
+     sFetchRow :: IO (Maybe [Maybe String])
     }
 
 {- | The main HDBC exception object.  As much information as possible
