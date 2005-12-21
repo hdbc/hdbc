@@ -91,7 +91,7 @@ and vary by database.  So don't do it.
                 {- | Execute a single SQL query.  Returns the number
                    of rows modified.  The second parameter is a list
                    of replacement strings, if any. -}
-                run :: String -> [Maybe String] -> IO Integer,
+                sRun :: String -> [Maybe String] -> IO Integer,
                 {- | Prepares a statement for execution. 
 
                    Question marks in the statement will be replaced by

@@ -44,9 +44,12 @@ module Database.HDBC
      -- * Database Connections
      Connection,
      -- ** Preparing Queries
-     run, prepare,
+     sRun, prepare,
+
      -- ** Transaction Handling
+     -- $transactions
      commit, rollback, withTransaction,
+
      -- ** Miscellaneous
      disconnect, {- clone, -}
      -- * Statements
@@ -131,5 +134,28 @@ Features on the TODO list which will appear shortly include:
 Here is a list of known drivers as of December 21, 2005:
 
  [@Sqlite v3@] Use @darcs get --partial <http://darcs.complete.org/hsql-sqlite3>@
+
+-}
+
+{- $transactions
+
+This section concerns itself with writing (updating) a database.
+
+In HDBC, as with many RDBMS implementations, every write to the database occurs
+within a transaction.  No changes are visible until a commit operation
+occurs, in which case all changes since the transaction started are atomically
+committed.  Also, there is a rollback operation that can undo all changes
+since the transaction started.
+
+HDBC does everything within a transaction.  A transaction is implicitly entered
+when a connection to a database is established, and a transaction is
+implicitly entered after each call to 'commit' or 'rollback' as well.
+
+The practical effect of this is that you must call 'commit' after making
+changes to a database in order for those changes to become visible.  You don't
+have to call 'commit' after /every/ change, just after a batch of them.
+
+Database developers will also be experienced with the atomicity benefits
+of transactions, an explanation of which is outside the scope of this manual.
 
 -}
