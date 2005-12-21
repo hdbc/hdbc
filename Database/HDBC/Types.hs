@@ -134,10 +134,10 @@ data Statement = Statement
       dies with an exception).  -}
      --isActive :: IO Bool,
 
-     {- | True if a statement has been executed.  Flips back to False
+     {-  True if a statement has been executed.  Flips back to False
           when 'finish' is caled.
      -}
-     isExecuted :: IO Bool,
+     -- isExecuted :: IO Bool,
                  
      {- | Abort a query in progress -- usually not needed. -}
      finish :: IO (),
