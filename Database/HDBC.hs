@@ -41,9 +41,14 @@ module Database.HDBC
      -- ** Available Drivers
      -- $drivers
 
-     -- * Database Handles
+     -- * Database Connections
      Connection,
-     disconnect, run, prepare, commit, rollback, 
+     -- ** Preparing Queries
+     run, prepare,
+     -- ** Transaction Handling
+     commit, rollback, withTransaction,
+     -- ** Miscellaneous
+     disconnect, {- clone, -}
      -- * Statements
      Statement,
      -- ** Execution
@@ -58,7 +63,8 @@ module Database.HDBC
     )
 
 where
-import Database.HDBC.Utils
+import Database.HDBC.Utils(catchSql, handleSql, sqlExceptions,
+                           handleSqlError, withTransaction)
 import Database.HDBC.Types
 
 {- $introduction

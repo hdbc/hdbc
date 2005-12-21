@@ -47,11 +47,15 @@ import Data.Dynamic
 
 {- | Main database handle object.
 
-This object must be created by a driver for a specific database (see
-the database driver modules).
+A 'Connection' object is created by specific functions in the module for an
+individual database.  That is, the connect function -- which creates
+this object -- is not standardized through the HDBC interface.
+
+A connection is closed by a call to 'disconnect'.
 
 A call to 'commit' is required to make sure that your changes get committed
-to the database.
+to the database.  In other words, HDBC has /no support for autocommit/, which
+we consider an outdated notion.
 -}
 data Connection = 
     Connection {
@@ -64,11 +68,16 @@ raise an error, so you are encouraged to explicitly call 'disconnect'.  Also,
 garbage collection may not run when the program terminates, and some databases
 really like an explicit disconnect.
 
+So, bottom line is, you're best off calling 'disconnect' directly, but the
+world won't end if you forget.
+
 This function discards any data not committed already.  Database driver
 implementators should explicitly call 'rollback' if their databases don't
 do this automatically on disconnect.
 
-Bad Things (TM) could happen if you call this while you have Statements active.
+Bad Things (TM) could happen if you call this while you have 'Statement's 
+active.  In more precise language, the results in such situations are undefined
+and vary by database.  So don't do it.
 
 -}
                 disconnect :: IO (),
@@ -105,8 +114,7 @@ data Statement = Statement
         this value with a grain of salt.
 
         This function should call finish() to finish the previous
-        execution, if necessary.  (This should be necessary when
-        'isActive' is True.)
+        execution, if necessary.
         -}
      sExecute :: [Maybe String] -> IO Integer,
 
@@ -119,25 +127,6 @@ data Statement = Statement
         faster than using 'sExecute' multiple times since queries
         need to be compiled only once. -}
      sExecuteMany :: [[Maybe String]] -> IO Integer,
-     {-  Returns true if a query is in progress.
-         
-         In general, whenever this is True, the driver should know to
-         implicitly call 'finish' when the next 'sExecute' is called.
-
-      Usually, this should be False when
-      the Statement has just been created, True after 'sExecute' is run,
-      and then False after the last row is read (or after 'sExecute' returns
-      no data.)  However, this guideline may vary from driver to driver,
-      especially the behavior after initial creation.
-
-      'finish' should always flip this flag to False (unless 'finish'
-      dies with an exception).  -}
-     --isActive :: IO Bool,
-
-     {-  True if a statement has been executed.  Flips back to False
-          when 'finish' is caled.
-     -}
-     -- isExecuted :: IO Bool,
                  
      {- | Abort a query in progress -- usually not needed. -}
      finish :: IO (),
@@ -148,7 +137,11 @@ data Statement = Statement
      fetchRow :: IO (Maybe [Maybe String])
     }
 
--- stripped down version of HSQL item
+{- | The main HDBC exception object.  As much information as possible
+is passed from the database through to the application through this object.
+
+Errors generated in the Haskell layer will have seNativeError set to -1.
+-}
 data SqlError = SqlError {seState :: String,
                           seNativeError :: Int,
                           seErrorMsg :: String}
