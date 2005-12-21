@@ -34,10 +34,13 @@ Written by John Goerzen, jgoerzen\@complete.org
 module Database.HDBC 
     (-- * Introduction
      -- $introduction
+
      -- ** Features
      -- $features
+
      -- ** Available Drivers
      -- $drivers
+
      -- * Database Handles
      Connection,
      disconnect, run, prepare, commit, rollback, 
@@ -121,6 +124,6 @@ Features on the TODO list which will appear shortly include:
 
 Here is a list of known drivers as of December 21, 2005:
 
- [@Sqlite v3@] Use darcs get --partial <http://darcs.complete.org/hsql-sqlite3>
+ [@Sqlite v3@] Use @darcs get --partial <http://darcs.complete.org/hsql-sqlite3>@
 
 -}
