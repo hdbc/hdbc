@@ -132,7 +132,12 @@ data Statement = Statement
 
       'finish' should always flip this flag to False (unless 'finish'
       dies with an exception).  -}
-     isActive :: IO Bool,
+     --isActive :: IO Bool,
+
+     {- | True if a statement has been executed.  Flips back to False
+          when 'finish' is caled.
+     -}
+     isExecuted :: IO Bool,
                  
      {- | Abort a query in progress -- usually not needed. -}
      finish :: IO (),
