@@ -5,6 +5,7 @@ Maintainer: John Goerzen <jgoerzen@complete.org>
 Stability: Alpha
 Copyright: Copyright (c) 2005 John Goerzen
 Exposed-Modules: Database.HDBC, Database.HDBC.Types
+Other-Modules: Database.HDBC.Utils
 --Extensions: ExistentialQuantification, AllowOverlappingInstances,
 --    AllowUndecidableInstances, CPP
 -- CPP extension is really only needed in FiniteMap.hs and Rfc2821.hs

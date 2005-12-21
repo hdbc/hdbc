@@ -26,42 +26,101 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
    Stability  : provisional
    Portability: portable
 
-Haskell database interface library.
+Welcome to HDBC, the Haskell Database Connectivity library.
 
 Written by John Goerzen, jgoerzen\@complete.org
 -}
 
 module Database.HDBC 
-    (-- * Database Handles
+    (-- * Introduction
+     -- $introduction
+     -- ** Features
+     -- $features
+     -- ** Available Drivers
+     -- $drivers
+     -- * Database Handles
      Connection,
      disconnect, run, prepare, commit, rollback, 
      -- * Statements
-     sExecute, sExecuteMany, {- isActive, -} finish, fetchRow,
+     Statement,
+     -- ** Execution
+     sExecute, sExecuteMany,
+     -- ** Fetching Results
+     fetchRow,
+     -- ** Miscellaneous
+     finish,
      -- * Exceptions
      SqlError(..),
      catchSql, handleSql, sqlExceptions, handleSqlError
     )
 
 where
+import Database.HDBC.Utils
 import Database.HDBC.Types
-import Control.Exception
-import Data.Dynamic
 
+{- $introduction
 
-catchSql :: IO a -> (SqlError -> IO a) -> IO a
-catchSql = catchDyn
+Welcome to HDBC, Haskell Database Connectivity.
 
-handleSql :: (SqlError -> IO a) -> IO a -> IO a
-handleSql h f = catchDyn f h
+HDBC provides an abstraction layer between Haskell programs and SQL
+relational databases.  This lets you write database code once, in
+Haskell, and have it work with any number of backend SQL databases
+(MySQL, Oracle, PostgreSQL, ODBC-compliant databases, etc.)
 
-sqlExceptions :: Exception -> Maybe SqlError
-sqlExceptions e = dynExceptions e >>= fromDynamic
+HDBC is modeled loosely on Perl's DBI interface
+<http://search.cpan.org/~timb/DBI/DBI.pm>, though it has also
+been influenced by Python's DB-API v2, JDBC in Java, and HSQL in
+Haskell.
 
-{- | Propogate SQL exceptions to IO monad. -}
-handleSqlError :: IO a -> IO a
-handleSqlError action =
-    catchSql action handler
-    where handler e = fail ("SQL error: " ++ show e)
+HDBC is a from-scratch effort.  It is not a reimplementation of HSQL,
+though its purpose is the same.
+-}
 
-{-  Execute some code.  If any uncaught exception occurs, run
-'rollback' and re-raise it.  Otherwise, run 'commit' and return. -}
+{- $features
+
+Features of HDBC include:
+
+ * Ability to use replacable parameters to let one query be
+   executed multiple times (eliminates the need for an escape
+   function)
+
+ * Ability to access returned rows by column number
+
+ * Ability to read data from the SQL server on-demand rather than
+   reading the entire result set up front
+
+ * HUnit testsuite for each backend driver
+
+ * Well-defined standard API and easy backend driver implementation
+
+Features on the TODO list which will appear shortly include:
+
+ * Support for translation between Haskell and SQL types
+
+ * Lazy reading of the entire result set (think hGetContents, but
+   for the results of SELECT)
+
+ * Support for querying metadata (column names, types, etc.)
+
+ * Additional infrastructure for querying database server properties
+
+ * Support for translation between Haskell and SQL types
+
+ * Lazy reading of the entire result set (think hGetContents, but
+   for the results of SELECT)
+
+ * Support for querying metadata (column names, types, etc.)
+
+ * Additional infrastructure for querying database server properties
+
+ * Add-on package to integrate with MissingH (filesystem in a
+   database, backend for AnyDBM, etc.)
+-}
+
+{- $drivers
+
+Here is a list of known drivers as of December 21, 2005:
+
+ [@Sqlite v3@] Use darcs get --partial <http://darcs.complete.org/hsql-sqlite3>
+
+-}
