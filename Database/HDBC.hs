@@ -42,12 +42,12 @@ module Database.HDBC
      -- $drivers
 
      -- * Typing
-     SqlType, SqlValue(..),
+     SqlType(..), SqlValue(..),
 
      -- * Database Connections
      Connection,
      -- ** Preparing Queries
-     sRun, prepare,
+     run, sRun, prepare,
 
      -- ** Transaction Handling
      -- $transactions
@@ -60,9 +60,9 @@ module Database.HDBC
      -- * Statements
      Statement,
      -- ** Execution
-     sExecute, sExecuteMany,
+     execute, sExecute, executeMany, sExecuteMany,
      -- ** Fetching Results
-     sFetchRow, sFetchAllRows,
+     fetchRow, sFetchRow, fetchAllRows, sFetchAllRows,
      -- ** Miscellaneous
      finish, originalQuery,
 
@@ -77,7 +77,8 @@ module Database.HDBC
 where
 import Database.HDBC.Utils(catchSql, handleSql, sqlExceptions,
                            handleSqlError, withTransaction,
-                           sFetchAllRows)
+                           sFetchAllRows, fetchAllRows,
+                           sRun, sExecute, sExecuteMany, sFetchRow)
 import Database.HDBC.Types
 
 {- $introduction

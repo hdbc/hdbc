@@ -67,6 +67,31 @@ handleSqlError action =
     catchSql action handler
     where handler e = fail ("SQL error: " ++ show e)
 
+{- | Like 'run', but take a list of Maybe Strings instead of 'SqlValue's. -}
+sRun :: Connection -> String -> [Maybe String] -> IO Integer
+sRun conn qry lst =
+    run conn qry (map toSql lst)
+
+{- | Like 'execute', but take a list of Maybe Strings instead of
+   'SqlValue's. -}
+sExecute :: Statement -> [Maybe String] -> IO Integer
+sExecute sth lst = execute sth (map toSql lst)
+
+{- | Like 'executeMany', but take a list of Maybe Strings instead of
+   'SqlValue's. -}
+sExecuteMany :: Statement -> [[Maybe String]] -> IO Integer
+sExecuteMany sth lst = 
+    executeMany sth (map (map toSql) lst)
+
+{- | Like 'fetchRow', but return a list of Maybe Strings instead of
+   'SqlValue's. -}
+sFetchRow :: Statement -> IO (Maybe [Maybe String])
+sFetchRow sth =
+    do res <- fetchRow sth
+       case res of
+         Nothing -> return Nothing
+         Just x -> return $ Just $ map fromSql x
+
 {- | Execute some code.  If any uncaught exception occurs, run
 'rollback' and re-raise it.  Otherwise, run 'commit' and return.
 
@@ -120,12 +145,16 @@ But then, similar caveats apply with hGetContents.
 
 Bottom line: this is a very convenient abstraction; use it wisely.
 -}
-sFetchAllRows :: Statement -> IO [[Maybe String]]
-sFetchAllRows sth = unsafeInterleaveIO $
-    do row <- sFetchRow sth
+fetchAllRows :: Statement -> IO [[SqlValue]]
+fetchAllRows sth = unsafeInterleaveIO $
+    do row <- fetchRow sth
        case row of
          Nothing -> return []
-         Just x -> do remainder <- sFetchAllRows sth
+         Just x -> do remainder <- fetchAllRows sth
                       return (x : remainder)
 
-    
+{- | Like 'fetchAllRows', but return Maybe Strings instead of 'SqlValue's. -}
+sFetchAllRows :: Statement -> IO [[Maybe String]]
+sFetchAllRows sth =
+    do res <- fetchAllRows sth
+       return $ map (map fromSql) res

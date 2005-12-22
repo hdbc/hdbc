@@ -39,7 +39,7 @@ module Database.HDBC.Types
     (Connection(..),
      Statement(..),
      SqlError(..),
-     SqlType,
+     SqlType(..),
      SqlValue(..)
 
     )
@@ -96,8 +96,8 @@ and vary by database.  So don't do it.
                 rollback :: IO (),
                 {- | Execute a single SQL query.  Returns the number
                    of rows modified.  The second parameter is a list
-                   of replacement strings, if any. -}
-                sRun :: String -> [Maybe String] -> IO Integer,
+                   of replacement values, if any. -}
+                run :: String -> [SqlValue] -> IO Integer,
                 {- | Prepares a statement for execution. 
 
                    Question marks in the statement will be replaced by
@@ -139,7 +139,7 @@ data Statement = Statement
         This function should call finish() to finish the previous
         execution, if necessary.
         -}
-     sExecute :: [Maybe String] -> IO Integer,
+     execute :: [SqlValue] -> IO Integer,
 
      {- | Execute the query with many rows. 
         The return value is the return value from the final row 
@@ -149,7 +149,7 @@ data Statement = Statement
         databases and driver designs, this can often be significantly
         faster than using 'sExecute' multiple times since queries
         need to be compiled only once. -}
-     sExecuteMany :: [[Maybe String]] -> IO Integer,
+     executeMany :: [[SqlValue]] -> IO Integer,
                  
      {- | Abort a query in progress -- usually not needed. -}
      finish :: IO (),
@@ -157,7 +157,7 @@ data Statement = Statement
      {- | Fetches one row from the DB.  Returns 'Nothing' if there
         are no more rows.  Will automatically call 'finish' when
         the last row is read. -}
-     sFetchRow :: IO (Maybe [Maybe String]),
+     fetchRow :: IO (Maybe [SqlValue]),
      {- | The original query that this 'Statement' was prepared
           with. -}
      originalQuery :: String
