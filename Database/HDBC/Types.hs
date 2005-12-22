@@ -188,8 +188,8 @@ data SqlValue = SqlString String
               | SqlBool Bool
               | SqlDouble Double
               | SqlRational Rational
-              | SqlClockTime ClockTime
-              | SqlTimeDiff 
+              | SqlEpochTime Integer -- ^ Representation of ClockTime or CalendarTime
+              | SqlTimeDiff Integer -- ^ Representation of TimeDiff
               | SqlNull
      deriving (Eq, Show)
 
@@ -200,10 +200,13 @@ instance SqlType String where
     fromSql (SqlInt64 x) = show x
     fromSql (SqlWord32 x) = show x
     fromSql (SqlWord64 x) = show x
+    fromSql (SqlInteger x) = show x
     fromSql (SqlChar x) = [x]
     fromSql (SqlBool x) = show x
     fromSql (SqlDouble x) = show x
     fromSql (SqlRational x) = show x
+    fromSql (SqlEpochTime x) = show x
+    fromSql (SqlTimeDiff x) = show x
     fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to String"
 
 instance SqlType Int where
@@ -218,6 +221,8 @@ instance SqlType Int where
     fromSql (SqlBool x) = if x then 1 else 0
     fromSql (SqlDouble x) = truncate $ x
     fromSql (SqlRational x) = truncate $ x
+    fromSql (SqlEpochTime x) = fromIntegral x
+    fromSql (SqlTimeDiff x) = fromIntegral x
     fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Int"
 
 instance SqlType Int32 where
@@ -232,6 +237,8 @@ instance SqlType Int32 where
     fromSql (SqlBool x) = if x then 1 else 0
     fromSql (SqlDouble x) = truncate $ x
     fromSql (SqlRational x) = truncate $ x
+    fromSql (SqlEpochTime x) = fromIntegral x
+    fromSql (SqlTimeDiff x) = fromIntegral x
     fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Int32"
 
 instance SqlType Int64 where
@@ -246,6 +253,8 @@ instance SqlType Int64 where
     fromSql (SqlBool x) = if x then 1 else 0
     fromSql (SqlDouble x) = truncate $ x
     fromSql (SqlRational x) = truncate $ x
+    fromSql (SqlEpochTime x) = fromIntegral x
+    fromSql (SqlTimeDiff x) = fromIntegral x
     fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Int64"
 
 instance SqlType Word32 where
@@ -260,6 +269,8 @@ instance SqlType Word32 where
     fromSql (SqlBool x) = if x then 1 else 0
     fromSql (SqlDouble x) = truncate $ x
     fromSql (SqlRational x) = truncate $ x
+    fromSql (SqlEpochTime x) = fromIntegral x
+    fromSql (SqlTimeDiff x) = fromIntegral x
     fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Word32"
 
 instance SqlType Word64 where
@@ -274,6 +285,8 @@ instance SqlType Word64 where
     fromSql (SqlBool x) = if x then 1 else 0
     fromSql (SqlDouble x) = truncate $ x
     fromSql (SqlRational x) = truncate $ x
+    fromSql (SqlEpochTime x) = fromIntegral x
+    fromSql (SqlTimeDiff x) = fromIntegral x
     fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Int64"
 
 instance SqlType Integer where
@@ -288,6 +301,8 @@ instance SqlType Integer where
     fromSql (SqlBool x) = if x then 1 else 0
     fromSql (SqlDouble x) = truncate $ x
     fromSql (SqlRational x) = truncate $ x
+    fromSql (SqlEpochTime x) = x
+    fromSql (SqlTimeDiff x) = x
     fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Integer"
 
 instance SqlType Char where
@@ -303,6 +318,8 @@ instance SqlType Char where
     fromSql (SqlBool x) = if x then '1' else '0'
     fromSql (SqlDouble _) = error "fromSql: cannot convert SqlDouble to Char"
     fromSql (SqlRational _) = error "fromSql: cannot convert SqlRational to Char"
+    fromSql (SqlEpochTime _) = error "fromSql: cannot convert SqlEpochTime to Char"
+    fromSql (SqlTimeDiff _) = error "fromSql: cannot convert SqlTimeDiff to Char"
     fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Char"
 
 instance SqlType Double where
@@ -317,6 +334,8 @@ instance SqlType Double where
     fromSql (SqlBool x) = if x then 1.0 else 0.0
     fromSql (SqlDouble x) = x
     fromSql (SqlRational x) = fromRational x
+    fromSql (SqlEpochTime x) = fromIntegral x
+    fromSql (SqlTimeDiff x) = fromIntegral x
     fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Double"
 
 instance SqlType Rational where
@@ -331,6 +350,8 @@ instance SqlType Rational where
     fromSql (SqlBool x) = fromIntegral $ ((fromSql (SqlBool x))::Int)
     fromSql (SqlDouble x) = toRational x
     fromSql (SqlRational x) = x
+    fromSql (SqlEpochTime x) = fromIntegral x
+    fromSql (SqlTimeDiff x) = fromIntegral x
     fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Double"
 
 instance (SqlType a) => SqlType (Maybe a) where
@@ -338,3 +359,18 @@ instance (SqlType a) => SqlType (Maybe a) where
     toSql (Just a) = toSql a
     fromSql SqlNull = Nothing
     fromSql x = Just (fromSql x)
+
+--------------
+-- The following function copied from MissingH.Time.hs
+
+{- | Converts the given timeDiff to the number of seconds it represents.
+
+Uses the same algorithm as normalizeTimeDiff in GHC. -}
+timeDiffToSecs :: TimeDiff -> Integer
+timeDiffToSecs td =
+    (fromIntegral $ tdSec td) +
+    60 * ((fromIntegral $ tdMin td) +
+          60 * ((fromIntegral $ tdHour td) +
+                24 * ((fromIntegral $ tdDay td) +
+                      30 * ((fromIntegral $ tdMonth td) +
+                            365 * (fromIntegral $ tdYear td)))))
