@@ -230,3 +230,30 @@ instance SqlType Char where
     fromSql (SqlRational _) = error "fromSql: cannot convert Rational to Char"
     fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Char"
 
+instance SqlType Double where
+    toSql = SqlDouble
+    fromSql (SqlString x) = read x
+    fromSql (SqlInt x) = fromIntegral x
+    fromSql (SqlInteger x) = fromIntegral x
+    fromSql (SqlChar x) = fromIntegral . ord $ x
+    fromSql (SqlBool x) = if x then 1.0 else 0.0
+    fromSql (SqlDouble x) = x
+    fromSql (SqlRational x) = fromRational x
+    fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Double"
+
+instance SqlType Rational where
+    toSql = SqlRational
+    fromSql (SqlString x) = read x
+    fromSql (SqlInt x) = fromIntegral x
+    fromSql (SqlInteger x) = fromIntegral x
+    fromSql (SqlChar x) = fromIntegral . ord $ x
+    fromSql (SqlBool x) = fromIntegral $ ((fromSql (SqlBool x))::Int)
+    fromSql (SqlDouble x) = toRational x
+    fromSql (SqlRational x) = x
+    fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Double"
+
+instance (SqlType a) => SqlType (Maybe a) where
+    toSql Nothing = SqlNull
+    toSql (Just a) = toSql a
+    fromSql SqlNull = Nothing
+    fromSql x = Just (fromSql x)
