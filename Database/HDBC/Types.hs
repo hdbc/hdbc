@@ -206,7 +206,11 @@ Most people will use 'toSql' and 'fromSql' instead of manipulating
 The default representation of time values is an integer number of seconds.
 Databases such as PostgreSQL with builtin timestamp types can will see
 automatic conversion between these Haskell types to local types.  Other
-databases can just use an int or a string. -}
+databases can just use an int or a string. 
+
+This behavior also exists for other types.  For instance, many databases don't
+have a Rational type, so they'll just use Haskell's show function and
+store a Rational as a string. -}
 data SqlValue = SqlString String 
               | SqlWord32 Word32
               | SqlWord64 Word64
