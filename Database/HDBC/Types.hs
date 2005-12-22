@@ -101,7 +101,10 @@ and vary by database.  So don't do it.
                    and the driver, errors in your SQL may be raised
                    either here or by 'sExecute'.  Make sure you
                    handle exceptions both places if necessary. -}
-                prepare :: String -> IO Statement
+                prepare :: String -> IO Statement,
+                {- | The original query that this 'Statement' was prepared
+                   with. -}
+                originalQuery :: String
                }
 
 data Statement = Statement

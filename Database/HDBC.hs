@@ -51,7 +51,9 @@ module Database.HDBC
      commit, rollback, withTransaction,
 
      -- ** Miscellaneous
-     disconnect, {- clone, -}
+     disconnect, clone, 
+
+
      -- * Statements
      Statement,
      -- ** Execution
@@ -59,10 +61,14 @@ module Database.HDBC
      -- ** Fetching Results
      sFetchRow, sFetchAllRows,
      -- ** Miscellaneous
-     finish,
+     finish, originalQuery,
+
      -- * Exceptions
      SqlError(..),
      catchSql, handleSql, sqlExceptions, handleSqlError
+
+     -- * Threading
+     -- $threading
     )
 
 where
@@ -150,4 +156,36 @@ have to call 'commit' after /every/ change, just after a batch of them.
 Database developers will also be experienced with the atomicity benefits
 of transactions, an explanation of which is outside the scope of this manual.
 
+-}
+
+{- $threading
+
+Thread support in a generalized interface such as HDBC can be complicated
+because support for threading varies across database interfaces.
+
+However, applications using HDBC should be able to rely upon at least a few
+basic guarantees:
+
+ * The HDBC modules may freely be imported and used across all threads.
+
+ * HDBC modules may also freely share database connections and statements;
+   the database or HDBC driver will be responsible for locking if necessary.
+
+I use \"share\" in the same sense as Python's DB-API: multiple threads may use
+the resource without wrapping it in any lock.
+
+However, there are some caveats to the above:
+
+ * Not all databases support more than one active statement for a single
+   connection.  Therefore, for maximum portability, you should use
+   a different connection to the database for each simultaneous query you
+   wish to use.
+   FIXME: describe when a statement is active.
+
+ * Not all databases may support the level of multithreading described above.
+   For those that don't, safe access will be restriced in the HDBC driver
+   by using locks.  Therefore, you can write portable code, but you 
+   only get real multithreading when databases really support it.
+   Details of thread support should be documented in the HDBC
+   driver for each specific database.
 -}
