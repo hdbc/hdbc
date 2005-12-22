@@ -1,3 +1,4 @@
+-- #hide
 {-
 Copyright (C) 2005 John Goerzen <jgoerzen@complete.org>
 
@@ -27,8 +28,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
    Portability: portable
 
 Internal module -- not exported directly.
-
-/You should not be reading this documentation./
 
 Everything in here is expoerted by "Database.HDBC".  Please use -- and read --
 "Database.HDBC" directly.
