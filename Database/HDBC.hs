@@ -106,21 +106,12 @@ Features of HDBC include:
 
  * Well-defined standard API and easy backend driver implementation
 
+ * Lazy reading of the entire result set (think hGetContents, but
+   for the results of SELECT) (see 'sFetchAllRows')
+
 Features on the TODO list which will appear shortly include:
 
  * Support for translation between Haskell and SQL types
-
- * Lazy reading of the entire result set (think hGetContents, but
-   for the results of SELECT)
-
- * Support for querying metadata (column names, types, etc.)
-
- * Additional infrastructure for querying database server properties
-
- * Support for translation between Haskell and SQL types
-
- * Lazy reading of the entire result set (think hGetContents, but
-   for the results of SELECT)
 
  * Support for querying metadata (column names, types, etc.)
 
