@@ -203,8 +203,8 @@ instance SqlType Int where
     fromSql (SqlInteger x) = fromIntegral x
     fromSql (SqlChar x) = ord x
     fromSql (SqlBool x) = if x then 1 else 0
-    fromSql (SqlDouble x) = fromIntegral . truncate $ x
-    fromSql (SqlRational x) = fromIntegral . truncate $ x
+    fromSql (SqlDouble x) = truncate $ x
+    fromSql (SqlRational x) = truncate $ x
     fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Int"
 
 instance SqlType Integer where
@@ -214,8 +214,8 @@ instance SqlType Integer where
     fromSql (SqlInteger x) = x
     fromSql (SqlChar x) = fromIntegral (ord x)
     fromSql (SqlBool x) = if x then 1 else 0
-    fromSql (SqlDouble x) = fromIntegral . truncate $ x
-    fromSql (SqlRational x) = fromIntegral . truncate $ x
+    fromSql (SqlDouble x) = truncate $ x
+    fromSql (SqlRational x) = truncate $ x
     fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Integer"
 
 instance SqlType Char where

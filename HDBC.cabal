@@ -10,5 +10,5 @@ Other-Modules: Database.HDBC.Utils
 --    AllowUndecidableInstances, CPP
 -- CPP extension is really only needed in FiniteMap.hs and Rfc2821.hs
 Build-Depends: base, mtl
-GHC-Options: -O2 -fglasgow-exts
+GHC-Options: -O2 -fglasgow-exts -Wall
 
