@@ -108,9 +108,6 @@ and vary by database.  So don't do it.
                    either here or by 'sExecute'.  Make sure you
                    handle exceptions both places if necessary. -}
                 prepare :: String -> IO Statement,
-                {- | The original query that this 'Statement' was prepared
-                   with. -}
-                originalQuery :: String,
                 {- | Create a new 'Connection' object, pointed at the same
                    server as this object is.  This will generally establish
                    a separate physical connection.
@@ -160,7 +157,10 @@ data Statement = Statement
      {- | Fetches one row from the DB.  Returns 'Nothing' if there
         are no more rows.  Will automatically call 'finish' when
         the last row is read. -}
-     sFetchRow :: IO (Maybe [Maybe String])
+     sFetchRow :: IO (Maybe [Maybe String]),
+     {- | The original query that this 'Statement' was prepared
+          with. -}
+     originalQuery :: String
     }
 
 {- | The main HDBC exception object.  As much information as possible
