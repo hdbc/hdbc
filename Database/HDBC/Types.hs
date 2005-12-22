@@ -45,6 +45,9 @@ module Database.HDBC.Types
 where
 import Data.Dynamic
 import Data.Char(ord)
+import Data.Word
+import Data.Int
+import System.Time
 
 {- | Main database handle object.
 
@@ -176,20 +179,27 @@ class (Read a, Show a) => SqlType a where
     fromSql :: SqlValue -> a
 
 data SqlValue = SqlString String 
-              | SqlInt Int
+              | SqlWord32 Word32
+              | SqlWord64 Word64
+              | SqlInt32 Int32
+              | SqlInt64 Int64
               | SqlInteger Integer
               | SqlChar Char
               | SqlBool Bool
               | SqlDouble Double
               | SqlRational Rational
+              | SqlClockTime ClockTime
+              | SqlTimeDiff 
               | SqlNull
-     deriving (Eq, Show, Read)
+     deriving (Eq, Show)
 
 instance SqlType String where
     toSql = SqlString
     fromSql (SqlString x) = x
-    fromSql (SqlInt x) = show x
-    fromSql (SqlInteger x) = show x
+    fromSql (SqlInt32 x) = show x
+    fromSql (SqlInt64 x) = show x
+    fromSql (SqlWord32 x) = show x
+    fromSql (SqlWord64 x) = show x
     fromSql (SqlChar x) = [x]
     fromSql (SqlBool x) = show x
     fromSql (SqlDouble x) = show x
@@ -197,9 +207,12 @@ instance SqlType String where
     fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to String"
 
 instance SqlType Int where
-    toSql = SqlInt
+    toSql x = SqlInt32 (fromIntegral x)
     fromSql (SqlString x) = read x
-    fromSql (SqlInt x) = x
+    fromSql (SqlInt32 x) = fromIntegral x
+    fromSql (SqlInt64 x) = fromIntegral x
+    fromSql (SqlWord32 x) = fromIntegral x
+    fromSql (SqlWord64 x) = fromIntegral x
     fromSql (SqlInteger x) = fromIntegral x
     fromSql (SqlChar x) = ord x
     fromSql (SqlBool x) = if x then 1 else 0
@@ -207,10 +220,69 @@ instance SqlType Int where
     fromSql (SqlRational x) = truncate $ x
     fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Int"
 
+instance SqlType Int32 where
+    toSql = SqlInt32
+    fromSql (SqlString x) = read x
+    fromSql (SqlInt32 x) = x
+    fromSql (SqlInt64 x) = fromIntegral x
+    fromSql (SqlWord32 x) = fromIntegral x
+    fromSql (SqlWord64 x) = fromIntegral x
+    fromSql (SqlInteger x) = fromIntegral x
+    fromSql (SqlChar x) = fromIntegral $ ord x
+    fromSql (SqlBool x) = if x then 1 else 0
+    fromSql (SqlDouble x) = truncate $ x
+    fromSql (SqlRational x) = truncate $ x
+    fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Int32"
+
+instance SqlType Int64 where
+    toSql = SqlInt64
+    fromSql (SqlString x) = read x
+    fromSql (SqlInt32 x) = fromIntegral x
+    fromSql (SqlInt64 x) = x
+    fromSql (SqlWord32 x) = fromIntegral x
+    fromSql (SqlWord64 x) = fromIntegral x
+    fromSql (SqlInteger x) = fromIntegral x
+    fromSql (SqlChar x) = fromIntegral $ ord x
+    fromSql (SqlBool x) = if x then 1 else 0
+    fromSql (SqlDouble x) = truncate $ x
+    fromSql (SqlRational x) = truncate $ x
+    fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Int64"
+
+instance SqlType Word32 where
+    toSql = SqlWord32
+    fromSql (SqlString x) = read x
+    fromSql (SqlInt32 x) = fromIntegral x
+    fromSql (SqlInt64 x) = fromIntegral x
+    fromSql (SqlWord32 x) = x
+    fromSql (SqlWord64 x) = fromIntegral x
+    fromSql (SqlInteger x) = fromIntegral x
+    fromSql (SqlChar x) = fromIntegral $ ord x
+    fromSql (SqlBool x) = if x then 1 else 0
+    fromSql (SqlDouble x) = truncate $ x
+    fromSql (SqlRational x) = truncate $ x
+    fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Word32"
+
+instance SqlType Word64 where
+    toSql = SqlWord64
+    fromSql (SqlString x) = read x
+    fromSql (SqlInt32 x) = fromIntegral x
+    fromSql (SqlInt64 x) = fromIntegral x
+    fromSql (SqlWord32 x) = fromIntegral x
+    fromSql (SqlWord64 x) = x
+    fromSql (SqlInteger x) = fromIntegral x
+    fromSql (SqlChar x) = fromIntegral (ord x)
+    fromSql (SqlBool x) = if x then 1 else 0
+    fromSql (SqlDouble x) = truncate $ x
+    fromSql (SqlRational x) = truncate $ x
+    fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Int64"
+
 instance SqlType Integer where
     toSql = SqlInteger
     fromSql (SqlString x) = read x
-    fromSql (SqlInt x) = fromIntegral x
+    fromSql (SqlInt32 x) = fromIntegral x
+    fromSql (SqlInt64 x) = fromIntegral x
+    fromSql (SqlWord32 x) = fromIntegral x
+    fromSql (SqlWord64 x) = fromIntegral x
     fromSql (SqlInteger x) = x
     fromSql (SqlChar x) = fromIntegral (ord x)
     fromSql (SqlBool x) = if x then 1 else 0
@@ -222,18 +294,24 @@ instance SqlType Char where
     toSql = SqlChar
     fromSql (SqlString [x]) = x
     fromSql (SqlString _) = error "fromSql: cannot convert SqlString to Char"
-    fromSql (SqlInt _) = error "fromSql: cannot convert SqlInt to Char"
+    fromSql (SqlInt32 _) = error "fromSql: cannot convert SqlInt32 to Char"
+    fromSql (SqlInt64 _) = error "fromSql: cannot convert SqlInt64 to Char"
+    fromSql (SqlWord32 _) = error "fromSql: cannot convert SqlWord32 to Char"
+    fromSql (SqlWord64 _) = error "fromSql: cannot convert SqlWord64 to Char"
     fromSql (SqlInteger _) = error "fromSql: cannot convert SqlInt to Char"
     fromSql (SqlChar x) = x
     fromSql (SqlBool x) = if x then '1' else '0'
-    fromSql (SqlDouble _) = error "fromSql: cannot convert Doublt to Char"
-    fromSql (SqlRational _) = error "fromSql: cannot convert Rational to Char"
+    fromSql (SqlDouble _) = error "fromSql: cannot convert SqlDouble to Char"
+    fromSql (SqlRational _) = error "fromSql: cannot convert SqlRational to Char"
     fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Char"
 
 instance SqlType Double where
     toSql = SqlDouble
     fromSql (SqlString x) = read x
-    fromSql (SqlInt x) = fromIntegral x
+    fromSql (SqlInt32 x) = fromIntegral x
+    fromSql (SqlInt64 x) = fromIntegral x
+    fromSql (SqlWord32 x) = fromIntegral x
+    fromSql (SqlWord64 x) = fromIntegral x
     fromSql (SqlInteger x) = fromIntegral x
     fromSql (SqlChar x) = fromIntegral . ord $ x
     fromSql (SqlBool x) = if x then 1.0 else 0.0
@@ -244,7 +322,10 @@ instance SqlType Double where
 instance SqlType Rational where
     toSql = SqlRational
     fromSql (SqlString x) = read x
-    fromSql (SqlInt x) = fromIntegral x
+    fromSql (SqlInt32 x) = fromIntegral x
+    fromSql (SqlInt64 x) = fromIntegral x
+    fromSql (SqlWord32 x) = fromIntegral x
+    fromSql (SqlWord64 x) = fromIntegral x
     fromSql (SqlInteger x) = fromIntegral x
     fromSql (SqlChar x) = fromIntegral . ord $ x
     fromSql (SqlBool x) = fromIntegral $ ((fromSql (SqlBool x))::Int)
