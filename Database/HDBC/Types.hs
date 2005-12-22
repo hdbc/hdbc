@@ -354,6 +354,24 @@ instance SqlType Rational where
     fromSql (SqlTimeDiff x) = fromIntegral x
     fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Double"
 
+instance SqlType ClockTime where
+    toSql (TOD x _) = SqlEpochTime x
+    fromSql (SqlString x) = TOD (read x) 0
+    fromSql (SqlInt32 x) = TOD (fromIntegral x) 0
+    fromSql (SqlInt64 x) = TOD (fromIntegral x) 0
+    fromSql (SqlWord32 x) = TOD (fromIntegral x) 0
+    fromSql (SqlWord64 x) = TOD (fromIntegral x) 0
+    fromSql (SqlInteger x) = TOD x 0
+    fromSql (SqlInt32 x) = TOD (fromIntegral x) 0
+    fromSql (SqlChar _) = error "fromSql: cannot convert SqlChar to ClockTime"
+    fromSql (SqlBool _) = error "fromSql: cannot convert SqlBool to ClockTime"
+    fromSql (SqlDouble x) = TOD (truncate x) 0
+    fromSql (SqlRational x) = TOD (truncate x) 0
+    fromSql (SqlEpochTime x) = TOD x 0
+    fromSql (SqlTimeDiff x) = error "fromSql: cannot convert SqlTimeDiff to ClockTime"
+    fromSql SqlNull = error "fromSql: cannot convert SqlNull to ClockTime"
+
+
 instance (SqlType a) => SqlType (Maybe a) where
     toSql Nothing = SqlNull
     toSql (Just a) = toSql a
