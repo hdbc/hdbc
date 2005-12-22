@@ -104,7 +104,24 @@ and vary by database.  So don't do it.
                 prepare :: String -> IO Statement,
                 {- | The original query that this 'Statement' was prepared
                    with. -}
-                originalQuery :: String
+                originalQuery :: String,
+                {- | Create a new 'Connection' object, pointed at the same
+                   server as this object is.  This will generally establish
+                   a separate physical connection.
+
+                   When you wish to establish multiple connections to a single
+                   server, the correct way to do so is to establish the
+                   first connection with the driver-specific connection
+                   function, and then clone it for each additional connection.
+                   
+                   This can be important when a database doesn't provide
+                   much thread support itself, and the HDBC driver module
+                   must serialize access to a particular database.
+
+                   This can also be a handy utility function whenever you
+                   need a separate connection to whatever database you are
+                   connected to already. -}
+                clone :: IO Connection
                }
 
 data Statement = Statement
@@ -149,3 +166,17 @@ data SqlError = SqlError {seState :: String,
                           seNativeError :: Int,
                           seErrorMsg :: String}
                 deriving (Eq, Show, Read, Typeable)
+
+
+{- | The main type for expressing Haskell values to SQL databases. -}
+
+class (Read a, Show a) => SqlType a where
+    toSQL :: a -> SqlValue
+    fromSQL :: SqlValue -> a
+
+data SqlValue = SqlString String 
+              | SqlInt Int
+              | SqlChar Char
+              | SqlBool Bool
+              | SqlNull
+     deriving (Eq, Show, Read)
