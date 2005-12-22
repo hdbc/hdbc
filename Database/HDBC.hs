@@ -41,6 +41,9 @@ module Database.HDBC
      -- ** Available Drivers
      -- $drivers
 
+     -- * Typing
+     SqlType, SqlValue(..),
+
      -- * Database Connections
      Connection,
      -- ** Preparing Queries

@@ -38,7 +38,9 @@ Written by John Goerzen, jgoerzen\@complete.org
 module Database.HDBC.Types
     (Connection(..),
      Statement(..),
-     SqlError(..)
+     SqlError(..),
+     SqlType,
+     SqlValue(..)
 
     )
 
@@ -171,13 +173,40 @@ data SqlError = SqlError {seState :: String,
                           seErrorMsg :: String}
                 deriving (Eq, Show, Read, Typeable)
 
+{- | Conversions to and from 'SqlValue's and standard Haskell types.
 
-{- | The main type for expressing Haskell values to SQL databases. -}
+Conversions are powerful; for instance, you can call 'fromSql' on a SqlInt32
+and get a String or a Double out of it.  This class attempts to Do
+The Right Thing whenever possible, and will raise an error when asked to
+do something incorrect.  In particular, when converting to any type
+except a Maybe, 'SqlNull' as the input will cause an error to be raised.
+
+Here are some notes about conversion:
+
+ * Fractions of a second are not preserved on time values
+-}
 
 class (Show a) => SqlType a where
     toSql :: a -> SqlValue
     fromSql :: SqlValue -> a
 
+{- | The main type for expressing Haskell values to SQL databases.
+
+This type is used to marshall Haskell data to and from database APIs.
+HDBC driver interfaces will do their best to use the most accurate and
+efficient way to send a particular value to the database server.
+
+Values read back from the server are put in the most appropriate 'SqlValue'
+type.  'fromSql' can then be used to convert them into whatever type
+is needed locally in Haskell.
+
+Most people will use 'toSql' and 'fromSql' instead of manipulating
+'SqlValue's directly.
+
+The default representation of time values is an integer number of seconds.
+Databases such as PostgreSQL with builtin timestamp types can will see
+automatic conversion between these Haskell types to local types.  Other
+databases can just use an int or a string. -}
 data SqlValue = SqlString String 
               | SqlWord32 Word32
               | SqlWord64 Word64
@@ -190,7 +219,7 @@ data SqlValue = SqlString String
               | SqlRational Rational
               | SqlEpochTime Integer -- ^ Representation of ClockTime or CalendarTime
               | SqlTimeDiff Integer -- ^ Representation of TimeDiff
-              | SqlNull
+              | SqlNull         -- ^ NULL in SQL or Nothing in Haskell
      deriving (Eq, Show)
 
 instance SqlType String where
