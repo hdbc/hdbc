@@ -384,8 +384,11 @@ instance SqlType TimeDiff where
     fromSql (SqlRational x) = secs2td (truncate x)
     fromSql (SqlEpochTime _) = error "fromSql: cannot convert SqlEpochTime to TimeDiff"
     fromSql (SqlTimeDiff x) = secs2td x
-    fromSql SqlNull = error "fromSql: cannot convert SqlNull to ClockTime"
+    fromSql SqlNull = error "fromSql: cannot convert SqlNull to TimeDiff"
 
+instance SqlType CalendarTime where
+    toSql x = toSql (toClockTime x)
+    fromSql = toUTCTime . fromSql
 
 instance (SqlType a) => SqlType (Maybe a) where
     toSql Nothing = SqlNull
