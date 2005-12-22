@@ -44,6 +44,7 @@ module Database.HDBC.Types
 
 where
 import Data.Dynamic
+import Data.Char(ord)
 
 {- | Main database handle object.
 
@@ -171,12 +172,61 @@ data SqlError = SqlError {seState :: String,
 {- | The main type for expressing Haskell values to SQL databases. -}
 
 class (Read a, Show a) => SqlType a where
-    toSQL :: a -> SqlValue
-    fromSQL :: SqlValue -> a
+    toSql :: a -> SqlValue
+    fromSql :: SqlValue -> a
 
 data SqlValue = SqlString String 
               | SqlInt Int
+              | SqlInteger Integer
               | SqlChar Char
               | SqlBool Bool
+              | SqlDouble Double
+              | SqlRational Rational
               | SqlNull
      deriving (Eq, Show, Read)
+
+instance SqlType String where
+    toSql = SqlString
+    fromSql (SqlString x) = x
+    fromSql (SqlInt x) = show x
+    fromSql (SqlInteger x) = show x
+    fromSql (SqlChar x) = [x]
+    fromSql (SqlBool x) = show x
+    fromSql (SqlDouble x) = show x
+    fromSql (SqlRational x) = show x
+    fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to String"
+
+instance SqlType Int where
+    toSql = SqlInt
+    fromSql (SqlString x) = read x
+    fromSql (SqlInt x) = x
+    fromSql (SqlInteger x) = fromIntegral x
+    fromSql (SqlChar x) = ord x
+    fromSql (SqlBool x) = if x then 1 else 0
+    fromSql (SqlDouble x) = fromIntegral . truncate $ x
+    fromSql (SqlRational x) = fromIntegral . truncate $ x
+    fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Int"
+
+instance SqlType Integer where
+    toSql = SqlInteger
+    fromSql (SqlString x) = read x
+    fromSql (SqlInt x) = fromIntegral x
+    fromSql (SqlInteger x) = x
+    fromSql (SqlChar x) = fromIntegral (ord x)
+    fromSql (SqlBool x) = if x then 1 else 0
+    fromSql (SqlDouble x) = fromIntegral . truncate $ x
+    fromSql (SqlRational x) = fromIntegral . truncate $ x
+    fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Integer"
+
+instance SqlType Char where
+    toSql = SqlChar
+    fromSql (SqlString [x]) = x
+    fromSql (SqlString _) = error "fromSql: cannot convert SqlString to Char"
+    fromSql (SqlInt _) = error "fromSql: cannot convert SqlInt to Char"
+    fromSql (SqlInteger _) = error "fromSql: cannot convert SqlInt to Char"
+    fromSql (SqlChar x) = x
+    fromSql (SqlBool x) = if x then '1' else '0'
+    fromSql (SqlDouble _) = error "fromSql: cannot convert Doublt to Char"
+    fromSql (SqlRational _) = error "fromSql: cannot convert Rational to Char"
+    fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Char"
+
