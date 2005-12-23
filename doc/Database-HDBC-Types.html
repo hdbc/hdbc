@@ -1,0 +1,1562 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!--Rendered using the Haskell Html Library v0.2-->
+<HTML
+><HEAD
+><META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8"
+><TITLE
+>Database.HDBC.Types</TITLE
+><LINK HREF="haddock.css" REL="stylesheet" TYPE="text/css"
+><SCRIPT SRC="haddock.js" TYPE="text/javascript"
+></SCRIPT
+></HEAD
+><BODY
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="topbar"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD
+><IMG SRC="haskell_icon.gif" WIDTH="16" HEIGHT="16" ALT=" "
+></TD
+><TD CLASS="title"
+>Haskell Database Connectivity (HDBC)</TD
+><TD CLASS="topbut"
+><A HREF="index.html"
+>Contents</A
+></TD
+><TD CLASS="topbut"
+><A HREF="doc-index.html"
+>Index</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="modulebar"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD
+><FONT SIZE="6"
+>Database.HDBC.Types</FONT
+></TD
+><TD ALIGN="right"
+><TABLE CLASS="narrow" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="infohead"
+>Portability</TD
+><TD CLASS="infoval"
+>portable</TD
+></TR
+><TR
+><TD CLASS="infohead"
+>Stability</TD
+><TD CLASS="infoval"
+>provisional</TD
+></TR
+><TR
+><TD CLASS="infohead"
+>Maintainer</TD
+><TD CLASS="infoval"
+>John Goerzen &lt;jgoerzen@complete.org&gt;</TD
+></TR
+></TABLE
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Description</TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+>Types for HDBC.
+</P
+><P
+>Please note: this module is intended for authors of database driver libraries
+only.  Authors of applications using HDBC should use <TT
+><A HREF="Database.html#t%3AHDBC"
+>HDBC</A
+></TT
+>
+exclusively.
+</P
+><P
+>Written by John Goerzen, jgoerzen@complete.org
+</P
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Synopsis</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+> <A HREF="#t%3AConnection"
+>Connection</A
+>  = <A HREF="#v%3AConnection"
+>Connection</A
+> {<TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3Adisconnect"
+>disconnect</A
+> :: (IO ())</TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3Acommit"
+>commit</A
+> :: (IO ())</TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3Arollback"
+>rollback</A
+> :: (IO ())</TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3Arun"
+>run</A
+> :: (String -&gt; [<A HREF="Database-HDBC-Types.html#t%3ASqlValue"
+>SqlValue</A
+>] -&gt; IO Integer)</TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3Aprepare"
+>prepare</A
+> :: (String -&gt; IO <A HREF="Database-HDBC-Types.html#t%3AStatement"
+>Statement</A
+>)</TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3Aclone"
+>clone</A
+> :: (IO <A HREF="Database-HDBC-Types.html#t%3AConnection"
+>Connection</A
+>)</TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AhdbcDriverName"
+>hdbcDriverName</A
+> :: String</TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AhdbcClientVer"
+>hdbcClientVer</A
+> :: String</TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AproxiedClientName"
+>proxiedClientName</A
+> :: String</TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AproxiedClientVer"
+>proxiedClientVer</A
+> :: String</TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AdbServerVer"
+>dbServerVer</A
+> :: String</TD
+></TR
+></TABLE
+>}</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+> <A HREF="#t%3AStatement"
+>Statement</A
+>  = <A HREF="#v%3AStatement"
+>Statement</A
+> {<TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3Aexecute"
+>execute</A
+> :: ([<A HREF="Database-HDBC-Types.html#t%3ASqlValue"
+>SqlValue</A
+>] -&gt; IO Integer)</TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AexecuteMany"
+>executeMany</A
+> :: ([[<A HREF="Database-HDBC-Types.html#t%3ASqlValue"
+>SqlValue</A
+>]] -&gt; IO Integer)</TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3Afinish"
+>finish</A
+> :: (IO ())</TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AfetchRow"
+>fetchRow</A
+> :: (IO (Maybe [<A HREF="Database-HDBC-Types.html#t%3ASqlValue"
+>SqlValue</A
+>]))</TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AoriginalQuery"
+>originalQuery</A
+> :: String</TD
+></TR
+></TABLE
+>}</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+> <A HREF="#t%3ASqlError"
+>SqlError</A
+>  = <A HREF="#v%3ASqlError"
+>SqlError</A
+> {<TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AseState"
+>seState</A
+> :: String</TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AseNativeError"
+>seNativeError</A
+> :: Int</TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AseErrorMsg"
+>seErrorMsg</A
+> :: String</TD
+></TR
+></TABLE
+>}</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>class</SPAN
+> Show a =&gt; <A HREF="#t%3ASqlType"
+>SqlType</A
+> a  <SPAN CLASS="keyword"
+>where</SPAN
+></TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AtoSql"
+>toSql</A
+> :: a -&gt; <A HREF="Database-HDBC-Types.html#t%3ASqlValue"
+>SqlValue</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AfromSql"
+>fromSql</A
+> :: <A HREF="Database-HDBC-Types.html#t%3ASqlValue"
+>SqlValue</A
+> -&gt; a</TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AnToSql"
+>nToSql</A
+> :: Integral a =&gt; a -&gt; <A HREF="Database-HDBC-Types.html#t%3ASqlValue"
+>SqlValue</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AiToSql"
+>iToSql</A
+> :: Int -&gt; <A HREF="Database-HDBC-Types.html#t%3ASqlValue"
+>SqlValue</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+> <A HREF="#t%3ASqlValue"
+>SqlValue</A
+> </TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+>= <A HREF="#v%3ASqlString"
+>SqlString</A
+> String</TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ASqlWord32"
+>SqlWord32</A
+> Word32</TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ASqlWord64"
+>SqlWord64</A
+> Word64</TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ASqlInt32"
+>SqlInt32</A
+> Int32</TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ASqlInt64"
+>SqlInt64</A
+> Int64</TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ASqlInteger"
+>SqlInteger</A
+> Integer</TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ASqlChar"
+>SqlChar</A
+> Char</TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ASqlBool"
+>SqlBool</A
+> Bool</TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ASqlDouble"
+>SqlDouble</A
+> Double</TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ASqlRational"
+>SqlRational</A
+> Rational</TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ASqlEpochTime"
+>SqlEpochTime</A
+> Integer</TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ASqlTimeDiff"
+>SqlTimeDiff</A
+> Integer</TD
+></TR
+><TR
+><TD CLASS="decl"
+>| <A HREF="#v%3ASqlNull"
+>SqlNull</A
+></TD
+></TR
+></TABLE
+></TD
+></TR
+></TABLE
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+>Documentation</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+> <A NAME="t%3AConnection"
+></A
+><B
+>Connection</B
+> </TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="ndoc"
+><P
+>Main database handle object.
+</P
+><P
+>A <TT
+><A HREF="Database-HDBC-Types.html#t%3AConnection"
+>Connection</A
+></TT
+> object is created by specific functions in the module for an
+individual database.  That is, the connect function -- which creates
+this object -- is not standardized through the HDBC interface.
+</P
+><P
+>A connection is closed by a call to <TT
+><A HREF="Database-HDBC-Types.html#v%3Adisconnect"
+>disconnect</A
+></TT
+>.
+</P
+><P
+>A call to <TT
+><A HREF="Database-HDBC-Types.html#v%3Acommit"
+>commit</A
+></TT
+> is required to make sure that your changes get committed
+to the database.  In other words, HDBC has <EM
+>no support for autocommit</EM
+>, which
+we consider an outdated notion.
+</P
+></TD
+></TR
+><TR
+><TD CLASS="section4"
+>Constructors</TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="5" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v%3AConnection"
+></A
+><B
+>Connection</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="body" COLSPAN="2"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v%3Adisconnect"
+></A
+><B
+>disconnect</B
+> :: (IO ())</TD
+><TD CLASS="rdoc"
+><P
+>Disconnect from the remote database.
+</P
+><P
+>You do not need to explicitly close a Connection object, but you may do so if
+you so desire.  If you don't, the object will disconnect from the database
+in a sane way when it is garbage-collected.  However, a disconnection may
+raise an error, so you are encouraged to explicitly call <TT
+><A HREF="Database-HDBC-Types.html#v%3Adisconnect"
+>disconnect</A
+></TT
+>.  Also,
+garbage collection may not run when the program terminates, and some databases
+really like an explicit disconnect.
+</P
+><P
+>So, bottom line is, you're best off calling <TT
+><A HREF="Database-HDBC-Types.html#v%3Adisconnect"
+>disconnect</A
+></TT
+> directly, but the
+world won't end if you forget.
+</P
+><P
+>This function discards any data not committed already.  Database driver
+implementators should explicitly call <TT
+><A HREF="Database-HDBC-Types.html#v%3Arollback"
+>rollback</A
+></TT
+> if their databases don't
+do this automatically on disconnect.
+</P
+><P
+>Bad Things (TM) could happen if you call this while you have <TT
+><A HREF="Database-HDBC-Types.html#t%3AStatement"
+>Statement</A
+></TT
+>s 
+active.  In more precise language, the results in such situations are undefined
+and vary by database.  So don't do it.
+</P
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3Acommit"
+></A
+><B
+>commit</B
+> :: (IO ())</TD
+><TD CLASS="rdoc"
+><P
+>Commit any pending data to the database.
+</P
+><P
+>Required to make any changes take effect. 
+</P
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3Arollback"
+></A
+><B
+>rollback</B
+> :: (IO ())</TD
+><TD CLASS="rdoc"
+>Roll back to the state the database was in prior to the
+                   last <TT
+><A HREF="Database-HDBC-Types.html#v%3Acommit"
+>commit</A
+></TT
+> or <TT
+><A HREF="Database-HDBC-Types.html#v%3Arollback"
+>rollback</A
+></TT
+>. 
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3Arun"
+></A
+><B
+>run</B
+> :: (String -&gt; [<A HREF="Database-HDBC-Types.html#t%3ASqlValue"
+>SqlValue</A
+>] -&gt; IO Integer)</TD
+><TD CLASS="rdoc"
+>Execute a single SQL query.  Returns the number
+                   of rows modified.  The second parameter is a list
+                   of replacement values, if any. 
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3Aprepare"
+></A
+><B
+>prepare</B
+> :: (String -&gt; IO <A HREF="Database-HDBC-Types.html#t%3AStatement"
+>Statement</A
+>)</TD
+><TD CLASS="rdoc"
+><P
+>Prepares a statement for execution. 
+</P
+><P
+>Question marks in the statement will be replaced by
+                   positional parameters in a later call to sExecute.
+</P
+><P
+>Please note that, depending on the database
+                   and the driver, errors in your SQL may be raised
+                   either here or by sExecute.  Make sure you
+                   handle exceptions both places if necessary. 
+</P
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3Aclone"
+></A
+><B
+>clone</B
+> :: (IO <A HREF="Database-HDBC-Types.html#t%3AConnection"
+>Connection</A
+>)</TD
+><TD CLASS="rdoc"
+><P
+>Create a new <TT
+><A HREF="Database-HDBC-Types.html#t%3AConnection"
+>Connection</A
+></TT
+> object, pointed at the same
+                   server as this object is.  This will generally establish
+                   a separate physical connection.
+</P
+><P
+>When you wish to establish multiple connections to a single
+                   server, the correct way to do so is to establish the
+                   first connection with the driver-specific connection
+                   function, and then clone it for each additional connection.
+</P
+><P
+>This can be important when a database doesn't provide
+                   much thread support itself, and the HDBC driver module
+                   must serialize access to a particular database.
+</P
+><P
+>This can also be a handy utility function whenever you
+                   need a separate connection to whatever database you are
+                   connected to already. 
+</P
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3AhdbcDriverName"
+></A
+><B
+>hdbcDriverName</B
+> :: String</TD
+><TD CLASS="rdoc"
+>The name of the HDBC driver module for this connection.
+                   Ideally would be the same as the database name portion
+                   of the Cabal package name.  For instance, &quot;sqlite3&quot;
+                   or &quot;odbc&quot;.  This is the layer that is bound most
+                   tightly to HDBC. 
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3AhdbcClientVer"
+></A
+><B
+>hdbcClientVer</B
+> :: String</TD
+><TD CLASS="rdoc"
+>The version of the C (or whatever) client library
+                   that the HDBC driver module is bound to.  The meaning
+                   of this is driver-specific.  For an ODBC or similar
+                   proxying driver, this should be the version of the
+                   ODBC library, not the eventual DB client driver. 
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3AproxiedClientName"
+></A
+><B
+>proxiedClientName</B
+> :: String</TD
+><TD CLASS="rdoc"
+>In the case of a system such as ODBC, the name of
+                   the database client/server in use, if available.
+                   For others,
+                   identical to <TT
+><A HREF="Database-HDBC-Types.html#v%3AhdbcDriverName"
+>hdbcDriverName</A
+></TT
+>. 
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3AproxiedClientVer"
+></A
+><B
+>proxiedClientVer</B
+> :: String</TD
+><TD CLASS="rdoc"
+>In the case of a system such as ODBC, the version of
+                   the database client in use, if available.  For others,
+                   identical to <TT
+><A HREF="Database-HDBC-Types.html#v%3AhdbcClientVer"
+>hdbcClientVer</A
+></TT
+>. This is the next layer
+                   out past the HDBC driver. 
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3AdbServerVer"
+></A
+><B
+>dbServerVer</B
+> :: String</TD
+><TD CLASS="rdoc"
+>The version of the database server, if available. 
+</TD
+></TR
+></TABLE
+></TD
+></TR
+></TABLE
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+> <A NAME="t%3AStatement"
+></A
+><B
+>Statement</B
+> </TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="section4"
+>Constructors</TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="5" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v%3AStatement"
+></A
+><B
+>Statement</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="body" COLSPAN="2"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v%3Aexecute"
+></A
+><B
+>execute</B
+> :: ([<A HREF="Database-HDBC-Types.html#t%3ASqlValue"
+>SqlValue</A
+>] -&gt; IO Integer)</TD
+><TD CLASS="rdoc"
+><P
+>Execute the prepared statement, passing in the given positional
+        parameters (that should take the place of the question marks
+        in the call to <TT
+><A HREF="Database-HDBC-Types.html#v%3Aprepare"
+>prepare</A
+></TT
+>).  Note that not all databases may
+        be able to return a row count immediately; those that can't
+        will return -1.  Even those that can may be inaccurate.  Use
+        this value with a grain of salt.
+</P
+><P
+>This function should call finish() to finish the previous
+        execution, if necessary.
+</P
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3AexecuteMany"
+></A
+><B
+>executeMany</B
+> :: ([[<A HREF="Database-HDBC-Types.html#t%3ASqlValue"
+>SqlValue</A
+>]] -&gt; IO Integer)</TD
+><TD CLASS="rdoc"
+><P
+>Execute the query with many rows. 
+        The return value is the return value from the final row 
+        as if you had called sExecute on it.
+</P
+><P
+>Due to optimizations that are possible due to different
+        databases and driver designs, this can often be significantly
+        faster than using sExecute multiple times since queries
+        need to be compiled only once. 
+</P
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3Afinish"
+></A
+><B
+>finish</B
+> :: (IO ())</TD
+><TD CLASS="rdoc"
+>Abort a query in progress -- usually not needed. 
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3AfetchRow"
+></A
+><B
+>fetchRow</B
+> :: (IO (Maybe [<A HREF="Database-HDBC-Types.html#t%3ASqlValue"
+>SqlValue</A
+>]))</TD
+><TD CLASS="rdoc"
+>Fetches one row from the DB.  Returns Nothing if there
+        are no more rows.  Will automatically call <TT
+><A HREF="Database-HDBC-Types.html#v%3Afinish"
+>finish</A
+></TT
+> when
+        the last row is read. 
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3AoriginalQuery"
+></A
+><B
+>originalQuery</B
+> :: String</TD
+><TD CLASS="rdoc"
+>The original query that this <TT
+><A HREF="Database-HDBC-Types.html#t%3AStatement"
+>Statement</A
+></TT
+> was prepared
+          with. 
+</TD
+></TR
+></TABLE
+></TD
+></TR
+></TABLE
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+> <A NAME="t%3ASqlError"
+></A
+><B
+>SqlError</B
+> </TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="ndoc"
+><P
+>The main HDBC exception object.  As much information as possible
+is passed from the database through to the application through this object.
+</P
+><P
+>Errors generated in the Haskell layer will have seNativeError set to -1.
+</P
+></TD
+></TR
+><TR
+><TD CLASS="section4"
+>Constructors</TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="5" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v%3ASqlError"
+></A
+><B
+>SqlError</B
+></TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="body" COLSPAN="2"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v%3AseState"
+></A
+><B
+>seState</B
+> :: String</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3AseNativeError"
+></A
+><B
+>seNativeError</B
+> :: Int</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3AseErrorMsg"
+></A
+><B
+>seErrorMsg</B
+> :: String</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+></TABLE
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="section4"
+><IMG SRC="minus.gif" CLASS="coll" ONCLICK="toggle(this,'i:SqlError')" ALT="show/hide"
+> Instances</TD
+></TR
+><TR
+><TD CLASS="body"
+><DIV ID="i:SqlError" STYLE="display:block;"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+>Eq <A HREF="Database-HDBC-Types.html#t%3ASqlError"
+>SqlError</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>Read <A HREF="Database-HDBC-Types.html#t%3ASqlError"
+>SqlError</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>Show <A HREF="Database-HDBC-Types.html#t%3ASqlError"
+>SqlError</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>Typeable <A HREF="Database-HDBC-Types.html#t%3ASqlError"
+>SqlError</A
+></TD
+></TR
+></TABLE
+></DIV
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>class</SPAN
+> Show a =&gt; <A NAME="t%3ASqlType"
+></A
+><B
+>SqlType</B
+> a  <SPAN CLASS="keyword"
+>where</SPAN
+></TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="ndoc"
+><P
+>Conversions to and from <TT
+><A HREF="Database-HDBC-Types.html#t%3ASqlValue"
+>SqlValue</A
+></TT
+>s and standard Haskell types.
+</P
+><P
+>Conversions are powerful; for instance, you can call <TT
+><A HREF="Database-HDBC-Types.html#v%3AfromSql"
+>fromSql</A
+></TT
+> on a SqlInt32
+and get a String or a Double out of it.  This class attempts to Do
+The Right Thing whenever possible, and will raise an error when asked to
+do something incorrect.  In particular, when converting to any type
+except a Maybe, <TT
+><A HREF="Database-HDBC-Types.html#v%3ASqlNull"
+>SqlNull</A
+></TT
+> as the input will cause an error to be raised.
+</P
+><P
+>Here are some notes about conversion:
+</P
+><UL
+><LI
+> Fractions of a second are not preserved on time values
+</LI
+></UL
+><P
+>See also <TT
+><A HREF="Database-HDBC-Types.html#v%3AnToSql"
+>nToSql</A
+></TT
+>, <TT
+><A HREF="Database-HDBC-Types.html#v%3AiToSql"
+>iToSql</A
+></TT
+>.
+</P
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="section4"
+>Methods</TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><A NAME="v%3AtoSql"
+></A
+><B
+>toSql</B
+> :: a -&gt; <A HREF="Database-HDBC-Types.html#t%3ASqlValue"
+>SqlValue</A
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v%3AfromSql"
+></A
+><B
+>fromSql</B
+> :: <A HREF="Database-HDBC-Types.html#t%3ASqlValue"
+>SqlValue</A
+> -&gt; a</TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="section4"
+><IMG SRC="minus.gif" CLASS="coll" ONCLICK="toggle(this,'i:SqlType')" ALT="show/hide"
+> Instances</TD
+></TR
+><TR
+><TD CLASS="body"
+><DIV ID="i:SqlType" STYLE="display:block;"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><A HREF="Database-HDBC-Types.html#t%3ASqlType"
+>SqlType</A
+> CalendarTime</TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="Database-HDBC-Types.html#t%3ASqlType"
+>SqlType</A
+> Char</TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="Database-HDBC-Types.html#t%3ASqlType"
+>SqlType</A
+> ClockTime</TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="Database-HDBC-Types.html#t%3ASqlType"
+>SqlType</A
+> Double</TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="Database-HDBC-Types.html#t%3ASqlType"
+>SqlType</A
+> Int</TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="Database-HDBC-Types.html#t%3ASqlType"
+>SqlType</A
+> Int32</TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="Database-HDBC-Types.html#t%3ASqlType"
+>SqlType</A
+> Int64</TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="Database-HDBC-Types.html#t%3ASqlType"
+>SqlType</A
+> Integer</TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="Database-HDBC-Types.html#t%3ASqlType"
+>SqlType</A
+> Rational</TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="Database-HDBC-Types.html#t%3ASqlType"
+>SqlType</A
+> String</TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="Database-HDBC-Types.html#t%3ASqlType"
+>SqlType</A
+> TimeDiff</TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="Database-HDBC-Types.html#t%3ASqlType"
+>SqlType</A
+> Word32</TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="Database-HDBC-Types.html#t%3ASqlType"
+>SqlType</A
+> Word64</TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="Database-HDBC-Types.html#t%3ASqlType"
+>SqlType</A
+> a =&gt; <A HREF="Database-HDBC-Types.html#t%3ASqlType"
+>SqlType</A
+> (Maybe a)</TD
+></TR
+></TABLE
+></DIV
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v%3AnToSql"
+></A
+><B
+>nToSql</B
+> :: Integral a =&gt; a -&gt; <A HREF="Database-HDBC-Types.html#t%3ASqlValue"
+>SqlValue</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Converts any Integral type to a <TT
+><A HREF="Database-HDBC-Types.html#t%3ASqlValue"
+>SqlValue</A
+></TT
+> by using toInteger. 
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v%3AiToSql"
+></A
+><B
+>iToSql</B
+> :: Int -&gt; <A HREF="Database-HDBC-Types.html#t%3ASqlValue"
+>SqlValue</A
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>Convenience function for using numeric literals in your program. 
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><SPAN CLASS="keyword"
+>data</SPAN
+> <A NAME="t%3ASqlValue"
+></A
+><B
+>SqlValue</B
+> </TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="0" CELLPADDING="0"
+><TR
+><TD CLASS="ndoc"
+><P
+>The main type for expressing Haskell values to SQL databases.
+</P
+><P
+>This type is used to marshall Haskell data to and from database APIs.
+HDBC driver interfaces will do their best to use the most accurate and
+efficient way to send a particular value to the database server.
+</P
+><P
+>Values read back from the server are put in the most appropriate <TT
+><A HREF="Database-HDBC-Types.html#t%3ASqlValue"
+>SqlValue</A
+></TT
+>
+type.  <TT
+><A HREF="Database-HDBC-Types.html#v%3AfromSql"
+>fromSql</A
+></TT
+> can then be used to convert them into whatever type
+is needed locally in Haskell.
+</P
+><P
+>Most people will use <TT
+><A HREF="Database-HDBC-Types.html#v%3AtoSql"
+>toSql</A
+></TT
+> and <TT
+><A HREF="Database-HDBC-Types.html#v%3AfromSql"
+>fromSql</A
+></TT
+> instead of manipulating
+<TT
+><A HREF="Database-HDBC-Types.html#t%3ASqlValue"
+>SqlValue</A
+></TT
+>s directly.
+</P
+><P
+>The default representation of time values is an integer number of seconds.
+Databases such as PostgreSQL with builtin timestamp types can will see
+automatic conversion between these Haskell types to local types.  Other
+databases can just use an int or a string. 
+</P
+><P
+>This behavior also exists for other types.  For instance, many databases don't
+have a Rational type, so they'll just use Haskell's show function and
+store a Rational as a string.
+</P
+><P
+>Two SqlValues are considered to be equal if one of these hold (first one that
+is true holds; if none are true, they are not equal):
+ * Both are NULL
+ * Both represent the same type and the encapsulated values are equal
+ * The values of each, when converted to a string, are equal. 
+</P
+></TD
+></TR
+><TR
+><TD CLASS="section4"
+>Constructors</TD
+></TR
+><TR
+><TD CLASS="body"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="arg"
+><A NAME="v%3ASqlString"
+></A
+><B
+>SqlString</B
+> String</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3ASqlWord32"
+></A
+><B
+>SqlWord32</B
+> Word32</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3ASqlWord64"
+></A
+><B
+>SqlWord64</B
+> Word64</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3ASqlInt32"
+></A
+><B
+>SqlInt32</B
+> Int32</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3ASqlInt64"
+></A
+><B
+>SqlInt64</B
+> Int64</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3ASqlInteger"
+></A
+><B
+>SqlInteger</B
+> Integer</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3ASqlChar"
+></A
+><B
+>SqlChar</B
+> Char</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3ASqlBool"
+></A
+><B
+>SqlBool</B
+> Bool</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3ASqlDouble"
+></A
+><B
+>SqlDouble</B
+> Double</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3ASqlRational"
+></A
+><B
+>SqlRational</B
+> Rational</TD
+><TD CLASS="rdoc"
+></TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3ASqlEpochTime"
+></A
+><B
+>SqlEpochTime</B
+> Integer</TD
+><TD CLASS="rdoc"
+>Representation of ClockTime or CalendarTime
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3ASqlTimeDiff"
+></A
+><B
+>SqlTimeDiff</B
+> Integer</TD
+><TD CLASS="rdoc"
+>Representation of TimeDiff
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3ASqlNull"
+></A
+><B
+>SqlNull</B
+></TD
+><TD CLASS="rdoc"
+>NULL in SQL or Nothing in Haskell
+</TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="section4"
+><IMG SRC="minus.gif" CLASS="coll" ONCLICK="toggle(this,'i:SqlValue')" ALT="show/hide"
+> Instances</TD
+></TR
+><TR
+><TD CLASS="body"
+><DIV ID="i:SqlValue" STYLE="display:block;"
+><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+>Eq <A HREF="Database-HDBC-Types.html#t%3ASqlValue"
+>SqlValue</A
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>Show <A HREF="Database-HDBC-Types.html#t%3ASqlValue"
+>SqlValue</A
+></TD
+></TR
+></TABLE
+></DIV
+></TD
+></TR
+></TABLE
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="botbar"
+>Produced by <A HREF="http://www.haskell.org/haddock/"
+>Haddock</A
+> version 0.7</TD
+></TR
+></TABLE
+></BODY
+></HTML
+>
