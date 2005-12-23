@@ -95,17 +95,18 @@ and vary by database.  So don't do it.
                    last 'commit' or 'rollback'. -}
                 rollback :: IO (),
                 {- | Execute a single SQL query.  Returns the number
-                   of rows modified.  The second parameter is a list
+                   of rows affected (see 'execute' for details).
+                   The second parameter is a list
                    of replacement values, if any. -}
                 run :: String -> [SqlValue] -> IO Integer,
                 {- | Prepares a statement for execution. 
 
                    Question marks in the statement will be replaced by
-                   positional parameters in a later call to 'sExecute'.
+                   positional parameters in a later call to 'execute'.
 
                    Please note that, depending on the database
                    and the driver, errors in your SQL may be raised
-                   either here or by 'sExecute'.  Make sure you
+                   either here or by 'execute'.  Make sure you
                    handle exceptions both places if necessary. -}
                 prepare :: String -> IO Statement,
                 {- | Create a new 'Connection' object, pointed at the same
@@ -157,10 +158,13 @@ data Statement = Statement
     {
      {- | Execute the prepared statement, passing in the given positional
         parameters (that should take the place of the question marks
-        in the call to 'prepare').  Note that not all databases may
-        be able to return a row count immediately; those that can't
-        will return -1.  Even those that can may be inaccurate.  Use
-        this value with a grain of salt.
+        in the call to 'prepare').
+
+        For non-SELECT queries, the return value is the number of
+        rows affected, if known.  If no rows were affected, you get 0.
+        If the value is unknown, you get -1.
+
+        For SELECT queries, you will always get -1.
 
         This function should call finish() to finish the previous
         execution, if necessary.
@@ -169,13 +173,15 @@ data Statement = Statement
 
      {- | Execute the query with many rows. 
         The return value is the return value from the final row 
-        as if you had called 'sExecute' on it.
+        as if you had called 'execute' on it.
 
         Due to optimizations that are possible due to different
         databases and driver designs, this can often be significantly
-        faster than using 'sExecute' multiple times since queries
-        need to be compiled only once. -}
-     executeMany :: [[SqlValue]] -> IO Integer,
+        faster than using 'execute' multiple times since queries
+        need to be compiled only once.
+
+        This is most useful for non-SELECT statements. -}
+     executeMany :: [[SqlValue]] -> IO (),
                  
      {- | Abort a query in progress -- usually not needed. -}
      finish :: IO (),

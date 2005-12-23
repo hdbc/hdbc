@@ -78,7 +78,7 @@ sExecute sth lst = execute sth (map toSql lst)
 
 {- | Like 'executeMany', but take a list of Maybe Strings instead of
    'SqlValue's. -}
-sExecuteMany :: Statement -> [[Maybe String]] -> IO Integer
+sExecuteMany :: Statement -> [[Maybe String]] -> IO ()
 sExecuteMany sth lst = 
     executeMany sth (map (map toSql) lst)
 
