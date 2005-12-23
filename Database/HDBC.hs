@@ -55,8 +55,8 @@ module Database.HDBC
      commit, rollback, withTransaction,
 
      -- ** Inquiries
-     hdbcDriverName, hdbcClientVer, proxyDriverName,
-     proxyClientVer, dbServerVer,
+     hdbcDriverName, hdbcClientVer, proxiedClientName,
+     proxiedClientVer, dbServerVer,
 
 
      -- * Statements

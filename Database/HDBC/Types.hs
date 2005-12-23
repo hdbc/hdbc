@@ -142,12 +142,12 @@ and vary by database.  So don't do it.
                    the database client\/server in use, if available.
                    For others,
                    identical to 'hdbcDriverName'. -}
-                proxyDriverName :: String,
+                proxiedClientName :: String,
                 {- | In the case of a system such as ODBC, the version of
                    the database client in use, if available.  For others,
                    identical to 'hdbcClientVer'. This is the next layer
                    out past the HDBC driver. -}
-                proxyClientVer :: String,
+                proxiedClientVer :: String,
                 {- | The version of the database server, if available. -}
                 dbServerVer :: String
                    
