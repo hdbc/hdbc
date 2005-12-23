@@ -121,13 +121,13 @@ Features of HDBC include:
  * Lazy reading of the entire result set (think hGetContents, but
    for the results of SELECT) (see 'sFetchAllRows')
 
-Features on the TODO list which will appear shortly include:
-
  * Support for translation between Haskell and SQL types
 
- * Support for querying metadata (column names, types, etc.)
+ * Support for querying database server properties
 
- * Additional infrastructure for querying database server properties
+Features on the TODO list which will appear shortly include:
+
+ * Support for querying metadata (column names, types, etc.)
 
  * Add-on package to integrate with MissingH (filesystem in a
    database, backend for AnyDBM, etc.)
@@ -135,7 +135,7 @@ Features on the TODO list which will appear shortly include:
 
 {- $drivers
 
-Here is a list of known drivers as of December 21, 2005:
+Here is a list of known drivers as of December 22, 2005:
 
  [@Sqlite v3@] Use @darcs get --partial <http://darcs.complete.org/hsql-sqlite3>@
 
@@ -165,6 +165,8 @@ of transactions, an explanation of which is outside the scope of this manual.
 -}
 
 {- $threading
+
+FIXME: this is draft information
 
 Thread support in a generalized interface such as HDBC can be complicated
 because support for threading varies across database interfaces.
