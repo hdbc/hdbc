@@ -39,7 +39,7 @@ module Database.HDBC.Types
     (Connection(..),
      Statement(..),
      SqlError(..),
-     SqlType(..),
+     SqlType(..), nToSql, iToSql,
      SqlValue(..)
 
     )
@@ -124,7 +124,33 @@ and vary by database.  So don't do it.
                    This can also be a handy utility function whenever you
                    need a separate connection to whatever database you are
                    connected to already. -}
-                clone :: IO Connection
+                clone :: IO Connection,
+
+                {- | The name of the HDBC driver module for this connection.
+                   Ideally would be the same as the database name portion
+                   of the Cabal package name.  For instance, \"sqlite3\"
+                   or \"odbc\".  This is the layer that is bound most
+                   tightly to HDBC. -}
+                hdbcDriverName :: String,
+                {- | The version of the C (or whatever) client library
+                   that the HDBC driver module is bound to.  The meaning
+                   of this is driver-specific.  For an ODBC or similar
+                   proxying driver, this should be the version of the
+                   ODBC library, not the eventual DB client driver. -}
+                hdbcClientVer :: String,
+                {- | In the case of a system such as ODBC, the name of
+                   the database client\/server in use, if available.
+                   For others,
+                   identical to 'hdbcDriverName'. -}
+                proxyDriverName :: String,
+                {- | In the case of a system such as ODBC, the version of
+                   the database client in use, if available.  For others,
+                   identical to 'hdbcClientVer'. This is the next layer
+                   out past the HDBC driver. -}
+                proxyClientVer :: String,
+                {- | The version of the database server, if available. -}
+                dbServerVer :: String
+                   
                }
 
 data Statement = Statement
@@ -184,11 +210,21 @@ except a Maybe, 'SqlNull' as the input will cause an error to be raised.
 Here are some notes about conversion:
 
  * Fractions of a second are not preserved on time values
+
+See also 'nToSql', 'iToSql'.
 -}
 
 class (Show a) => SqlType a where
     toSql :: a -> SqlValue
     fromSql :: SqlValue -> a
+
+{- | Converts any Integral type to a 'SqlValue' by using toInteger. -}
+nToSql :: Integral a => a -> SqlValue
+nToSql n = SqlInteger (toInteger n)
+
+{- | Convenience function for using numeric literals in your program. -}
+iToSql :: Int -> SqlValue
+iToSql = toSql
 
 {- | The main type for expressing Haskell values to SQL databases.
 
@@ -210,7 +246,13 @@ databases can just use an int or a string.
 
 This behavior also exists for other types.  For instance, many databases don't
 have a Rational type, so they'll just use Haskell's show function and
-store a Rational as a string. -}
+store a Rational as a string.
+
+Two SqlValues are considered to be equal if one of these hold (first one that
+is true holds; if none are true, they are not equal):
+ * Both are NULL
+ * Both represent the same type and the encapsulated values are equal
+ * The values of each, when converted to a string, are equal. -}
 data SqlValue = SqlString String 
               | SqlWord32 Word32
               | SqlWord64 Word64
@@ -224,7 +266,23 @@ data SqlValue = SqlString String
               | SqlEpochTime Integer -- ^ Representation of ClockTime or CalendarTime
               | SqlTimeDiff Integer -- ^ Representation of TimeDiff
               | SqlNull         -- ^ NULL in SQL or Nothing in Haskell
-     deriving (Eq, Show)
+     deriving (Show)
+
+instance Eq SqlValue where
+    SqlString a == SqlString b = a == b
+    SqlWord32 a == SqlWord32 b = a == b
+    SqlWord64 a == SqlWord64 b = a == b
+    SqlInt32 a == SqlInt32 b = a == b
+    SqlInt64 a == SqlInt64 b = a == b
+    SqlInteger a == SqlInteger b = a == b
+    SqlChar a == SqlChar b = a == b
+    SqlBool a == SqlBool b = a == b
+    SqlDouble a == SqlDouble b = a == b
+    SqlRational a == SqlRational b = a == b
+    SqlEpochTime a == SqlEpochTime b = a == b
+    SqlTimeDiff a == SqlTimeDiff b = a == b
+    SqlNull == SqlNull = True
+    a == b = ((fromSql a)::String) == ((fromSql b)::String)
 
 instance SqlType String where
     toSql = SqlString

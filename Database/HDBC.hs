@@ -42,10 +42,11 @@ module Database.HDBC
      -- $drivers
 
      -- * Typing
-     SqlType(..), SqlValue(..),
+     SqlType(..), nToSql, iToSql,
+     SqlValue(..),
 
      -- * Database Connections
-     Connection,
+     Connection, disconnect, clone,
      -- ** Preparing Queries
      run, sRun, prepare,
 
@@ -53,8 +54,9 @@ module Database.HDBC
      -- $transactions
      commit, rollback, withTransaction,
 
-     -- ** Miscellaneous
-     disconnect, clone, 
+     -- ** Inquiries
+     hdbcDriverName, hdbcClientVer, proxyDriverName,
+     proxyClientVer, dbServerVer,
 
 
      -- * Statements

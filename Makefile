@@ -5,5 +5,7 @@ all:
 doc:
 	-rm -r doc
 	mkdir doc
-	haddock -h -o doc `find Database -name "*.hs"`
+	haddock -h -t 'Haskell Database Connectivity (HDBC)' \
+		-D doc/hdbc.interface \
+		-o doc `find Database -name "*.hs"`
 
