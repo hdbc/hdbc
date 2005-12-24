@@ -587,7 +587,7 @@
 >Statement</A
 > -&gt; [[<A HREF="Database-HDBC.html#t%3ASqlValue"
 >SqlValue</A
->]] -&gt; IO Integer</TD
+>]] -&gt; IO ()</TD
 ></TR
 ><TR
 ><TD CLASS="s8"
@@ -599,7 +599,7 @@
 >sExecuteMany</A
 > :: <A HREF="Database-HDBC.html#t%3AStatement"
 >Statement</A
-> -&gt; [[Maybe String]] -&gt; IO Integer</TD
+> -&gt; [[Maybe String]] -&gt; IO ()</TD
 ></TR
 ><TR
 ><TD CLASS="s8"
@@ -1614,7 +1614,12 @@ and vary by database.  So don't do it.
 ><TR
 ><TD CLASS="doc"
 >Execute a single SQL query.  Returns the number
-                   of rows modified.  The second parameter is a list
+                   of rows affected (see <TT
+><A HREF="Database-HDBC.html#v%3Aexecute"
+>execute</A
+></TT
+> for details).
+                   The second parameter is a list
                    of replacement values, if any. 
 </TD
 ></TR
@@ -1668,12 +1673,20 @@ and vary by database.  So don't do it.
 </P
 ><P
 >Question marks in the statement will be replaced by
-                   positional parameters in a later call to sExecute.
+                   positional parameters in a later call to <TT
+><A HREF="Database-HDBC.html#v%3Aexecute"
+>execute</A
+></TT
+>.
 </P
 ><P
 >Please note that, depending on the database
                    and the driver, errors in your SQL may be raised
-                   either here or by sExecute.  Make sure you
+                   either here or by <TT
+><A HREF="Database-HDBC.html#v%3Aexecute"
+>execute</A
+></TT
+>.  Make sure you
                    handle exceptions both places if necessary. 
 </P
 ></TD
@@ -2062,10 +2075,15 @@ on this behavior is solicited.
 ><A HREF="Database-HDBC.html#v%3Aprepare"
 >prepare</A
 ></TT
->).  Note that not all databases may
-        be able to return a row count immediately; those that can't
-        will return -1.  Even those that can may be inaccurate.  Use
-        this value with a grain of salt.
+>).
+</P
+><P
+>For non-SELECT queries, the return value is the number of
+        rows affected, if known.  If no rows were affected, you get 0.
+        If the value is unknown, you get -1.
+</P
+><P
+>For SELECT queries, you will always get -1.
 </P
 ><P
 >This function should call finish() to finish the previous
@@ -2115,20 +2133,31 @@ on this behavior is solicited.
 >Statement</A
 > -&gt; [[<A HREF="Database-HDBC.html#t%3ASqlValue"
 >SqlValue</A
->]] -&gt; IO Integer</TD
+>]] -&gt; IO ()</TD
 ></TR
 ><TR
 ><TD CLASS="doc"
 ><P
 >Execute the query with many rows. 
         The return value is the return value from the final row 
-        as if you had called sExecute on it.
+        as if you had called <TT
+><A HREF="Database-HDBC.html#v%3Aexecute"
+>execute</A
+></TT
+> on it.
 </P
 ><P
 >Due to optimizations that are possible due to different
         databases and driver designs, this can often be significantly
-        faster than using sExecute multiple times since queries
-        need to be compiled only once. 
+        faster than using <TT
+><A HREF="Database-HDBC.html#v%3Aexecute"
+>execute</A
+></TT
+> multiple times since queries
+        need to be compiled only once.
+</P
+><P
+>This is most useful for non-SELECT statements. 
 </P
 ></TD
 ></TR
@@ -2144,7 +2173,7 @@ on this behavior is solicited.
 >sExecuteMany</B
 > :: <A HREF="Database-HDBC.html#t%3AStatement"
 >Statement</A
-> -&gt; [[Maybe String]] -&gt; IO Integer</TD
+> -&gt; [[Maybe String]] -&gt; IO ()</TD
 ></TR
 ><TR
 ><TD CLASS="doc"
