@@ -445,6 +445,22 @@
 ></TR
 ><TR
 ><TD CLASS="decl"
+><A HREF="#v%3Aquery"
+>query</A
+> :: <A HREF="Database-HDBC.html#t%3AConnection"
+>Connection</A
+> -&gt; String -&gt; [<A HREF="Database-HDBC.html#t%3ASqlValue"
+>SqlValue</A
+>] -&gt; IO [[<A HREF="Database-HDBC.html#t%3ASqlValue"
+>SqlValue</A
+>]]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
 ><A HREF="#v%3Acommit"
 >commit</A
 > :: <A HREF="Database-HDBC.html#t%3AConnection"
@@ -621,6 +637,34 @@
 ></TR
 ><TR
 ><TD CLASS="decl"
+><A HREF="#v%3AfetchRowAL"
+>fetchRowAL</A
+> :: <A HREF="Database-HDBC.html#t%3AStatement"
+>Statement</A
+> -&gt; IO (Maybe [(String, <A HREF="Database-HDBC.html#t%3ASqlValue"
+>SqlValue</A
+>)])</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AfetchRowMap"
+>fetchRowMap</A
+> :: <A HREF="Database-HDBC.html#t%3AStatement"
+>Statement</A
+> -&gt; IO (Maybe (Map String <A HREF="Database-HDBC.html#t%3ASqlValue"
+>SqlValue</A
+>))</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
 ><A HREF="#v%3AsFetchRow"
 >sFetchRow</A
 > :: <A HREF="Database-HDBC.html#t%3AStatement"
@@ -647,11 +691,51 @@
 ></TR
 ><TR
 ><TD CLASS="decl"
+><A HREF="#v%3AfetchAllRowsAL"
+>fetchAllRowsAL</A
+> :: <A HREF="Database-HDBC.html#t%3AStatement"
+>Statement</A
+> -&gt; IO [[(String, <A HREF="Database-HDBC.html#t%3ASqlValue"
+>SqlValue</A
+>)]]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AfetchAllRowsMap"
+>fetchAllRowsMap</A
+> :: <A HREF="Database-HDBC.html#t%3AStatement"
+>Statement</A
+> -&gt; IO [Map String <A HREF="Database-HDBC.html#t%3ASqlValue"
+>SqlValue</A
+>]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
 ><A HREF="#v%3AsFetchAllRows"
 >sFetchAllRows</A
 > :: <A HREF="Database-HDBC.html#t%3AStatement"
 >Statement</A
 > -&gt; IO [[Maybe String]]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AgetColumnNames"
+>getColumnNames</A
+> :: <A HREF="Database-HDBC.html#t%3AStatement"
+>Statement</A
+> -&gt; IO [String]</TD
 ></TR
 ><TR
 ><TD CLASS="s8"
@@ -1696,6 +1780,34 @@ and vary by database.  So don't do it.
 ></TD
 ></TR
 ><TR
+><TD CLASS="decl"
+><A NAME="v%3Aquery"
+></A
+><B
+>query</B
+> :: <A HREF="Database-HDBC.html#t%3AConnection"
+>Connection</A
+> -&gt; String -&gt; [<A HREF="Database-HDBC.html#t%3ASqlValue"
+>SqlValue</A
+>] -&gt; IO [[<A HREF="Database-HDBC.html#t%3ASqlValue"
+>SqlValue</A
+>]]</TD
+></TR
+><TR
+><TD CLASS="doc"
+>A quick way to do a query.  Similar to preparing, executing, and
+then calling <TT
+><A HREF="Database-HDBC.html#v%3AfetchAllRows"
+>fetchAllRows</A
+></TT
+> on a statement. 
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
 ><TD CLASS="section2"
 ><A NAME="7"
 >Transaction Handling
@@ -2233,6 +2345,68 @@ on this behavior is solicited.
 ></TR
 ><TR
 ><TD CLASS="decl"
+><A NAME="v%3AfetchRowAL"
+></A
+><B
+>fetchRowAL</B
+> :: <A HREF="Database-HDBC.html#t%3AStatement"
+>Statement</A
+> -&gt; IO (Maybe [(String, <A HREF="Database-HDBC.html#t%3ASqlValue"
+>SqlValue</A
+>)])</TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+>Like <TT
+><A HREF="Database-HDBC.html#v%3AfetchRow"
+>fetchRow</A
+></TT
+>, but instead of returning a list, return an association
+list from column name to value.
+</P
+><P
+>The keys of the column names are lowercase versions of the data returned
+by <TT
+><A HREF="Database-HDBC.html#v%3AgetColumnNames"
+>getColumnNames</A
+></TT
+>.  Please heed the warnings there.  Additionally,
+results are undefined if multiple columns are returned with identical names.
+</P
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v%3AfetchRowMap"
+></A
+><B
+>fetchRowMap</B
+> :: <A HREF="Database-HDBC.html#t%3AStatement"
+>Statement</A
+> -&gt; IO (Maybe (Map String <A HREF="Database-HDBC.html#t%3ASqlValue"
+>SqlValue</A
+>))</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Similar to <TT
+><A HREF="Database-HDBC.html#v%3AfetchRowAL"
+>fetchRowAL</A
+></TT
+>, but return a Map instead of an association list.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
 ><A NAME="v%3AsFetchRow"
 ></A
 ><B
@@ -2323,6 +2497,67 @@ you want.
 ></TR
 ><TR
 ><TD CLASS="decl"
+><A NAME="v%3AfetchAllRowsAL"
+></A
+><B
+>fetchAllRowsAL</B
+> :: <A HREF="Database-HDBC.html#t%3AStatement"
+>Statement</A
+> -&gt; IO [[(String, <A HREF="Database-HDBC.html#t%3ASqlValue"
+>SqlValue</A
+>)]]</TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+>Like <TT
+><A HREF="Database-HDBC.html#v%3AfetchAllRows"
+>fetchAllRows</A
+></TT
+>, but instead of returning a list for each
+row, return an association list for each row, from column name to value.
+</P
+><P
+>See <TT
+><A HREF="Database-HDBC.html#v%3AfetchRowAL"
+>fetchRowAL</A
+></TT
+> for more details. 
+</P
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v%3AfetchAllRowsMap"
+></A
+><B
+>fetchAllRowsMap</B
+> :: <A HREF="Database-HDBC.html#t%3AStatement"
+>Statement</A
+> -&gt; IO [Map String <A HREF="Database-HDBC.html#t%3ASqlValue"
+>SqlValue</A
+>]</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Like <TT
+><A HREF="Database-HDBC.html#v%3AfetchAllRowsAL"
+>fetchAllRowsAL</A
+></TT
+>, but return a list of Maps instead of a list of
+association lists. 
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
 ><A NAME="v%3AsFetchAllRows"
 ></A
 ><B
@@ -2343,6 +2578,47 @@ you want.
 ></TT
 >s. 
 </TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v%3AgetColumnNames"
+></A
+><B
+>getColumnNames</B
+> :: <A HREF="Database-HDBC.html#t%3AStatement"
+>Statement</A
+> -&gt; IO [String]</TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+>Returns a list of the column names in the result.
+        For maximum portability, you should not assume that
+        information is available until after an <TT
+><A HREF="Database-HDBC.html#v%3Aexecute"
+>execute</A
+></TT
+> function
+        has been run.
+</P
+><P
+>Information is returned here directly as returned
+        by the underlying database layer.  Note that different
+        databases have different rules about capitalization
+        of return values and about representation of names
+        of columns that are not simple columns.  For this reason,
+        it is suggested that you treat this information for
+        display purposes only.  Failing that, you should convert
+        to lower (or upper) case, and use <TT
+>AS</TT
+> clauses for
+        anything other than simple columns.
+</P
+></TD
 ></TR
 ><TR
 ><TD CLASS="s15"

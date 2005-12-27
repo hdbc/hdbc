@@ -247,6 +247,12 @@ exclusively.
 ></TR
 ><TR
 ><TD CLASS="recfield"
+><A HREF="#v%3AgetColumnNames"
+>getColumnNames</A
+> :: (IO [String])</TD
+></TR
+><TR
+><TD CLASS="recfield"
 ><A HREF="#v%3AoriginalQuery"
 >originalQuery</A
 > :: String</TD
@@ -928,6 +934,39 @@ and vary by database.  So don't do it.
 > when
         the last row is read. 
 </TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3AgetColumnNames"
+></A
+><B
+>getColumnNames</B
+> :: (IO [String])</TD
+><TD CLASS="rdoc"
+><P
+>Returns a list of the column names in the result.
+        For maximum portability, you should not assume that
+        information is available until after an <TT
+><A HREF="Database-HDBC-Types.html#v%3Aexecute"
+>execute</A
+></TT
+> function
+        has been run.
+</P
+><P
+>Information is returned here directly as returned
+        by the underlying database layer.  Note that different
+        databases have different rules about capitalization
+        of return values and about representation of names
+        of columns that are not simple columns.  For this reason,
+        it is suggested that you treat this information for
+        display purposes only.  Failing that, you should convert
+        to lower (or upper) case, and use <TT
+>AS</TT
+> clauses for
+        anything other than simple columns.
+</P
+></TD
 ></TR
 ><TR
 ><TD CLASS="arg"
