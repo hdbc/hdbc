@@ -941,17 +941,12 @@ though its purpose is the same.
 ><LI
 > Support for querying database server properties
 </LI
-></UL
-><P
->Features on the TODO list which will appear shortly include:
-</P
-><UL
 ><LI
-> Support for querying metadata (column names, types, etc.)
+> Add-on package (hdbc-missingh) to integrate with MissingH,
+   providing a database backend for AnyDBM.
 </LI
 ><LI
-> Add-on package to integrate with MissingH (filesystem in a
-   database, backend for AnyDBM, etc.)
+> Support for querying metadata such as column names.
 </LI
 ></UL
 ></TD
@@ -974,7 +969,7 @@ though its purpose is the same.
 ><TR
 ><TD CLASS="doc"
 ><P
->Here is a list of known drivers as of December 22, 2005:
+>Here is a list of known drivers as of December 26, 2005:
 </P
 ><DL
 ><DT
@@ -982,13 +977,61 @@ though its purpose is the same.
 >Sqlite v3</TT
 ></DT
 ><DD
-> Use <TT
->darcs get --partial <A HREF="http://darcs.complete.org/hsql-sqlite3"
->http://darcs.complete.org/hsql-sqlite3</A
+> Available from <A HREF="http://quux.org/devel/hdbc"
+>http://quux.org/devel/hdbc</A
+>.  Or, to
+participate in development, use 
+<TT
+>darcs get --partial <A HREF="http://darcs.complete.org/hdbc-sqlite3"
+>http://darcs.complete.org/hdbc-sqlite3</A
+></TT
+>
+</DD
+><DT
+><TT
+>PostgreSQL</TT
+></DT
+><DD
+> Available from <A HREF="http://quux.org/devel/hdbc"
+>http://quux.org/devel/hdbc</A
+>.  Or, to
+participate in development, use
+<TT
+>darcs get --partial <A HREF="http://darcs.complete.org/hdbc-postgresql"
+>http://darcs.complete.org/hdbc-postgresql</A
 ></TT
 >
 </DD
 ></DL
+><P
+>In addition, there is one integration package: <EM
+>hdbc-missingh</EM
+>.  This
+integrates with the MissingH library <A HREF="http://quux.org/devel/missingh"
+>http://quux.org/devel/missingh</A
+>.
+Among other things, it lets any HDBC database act as a backend for the
+AnyDBM interface.  Available from <A HREF="http://quux.org/devel/hdbc"
+>http://quux.org/devel/hdbc</A
+>.  Or,
+to participate in development, use
+<TT
+>darcs get --partial <A HREF="http://darcs.complete.org/hdbc-missingh"
+>http://darcs.complete.org/hdbc-missingh</A
+></TT
+>
+</P
+><P
+>The latest version of HDBC itself is available from
+<A HREF="http://quux.org/devel/hdbc"
+>http://quux.org/devel/hdbc</A
+>.  Or, to participate in development, use
+<TT
+>darcs get --partial <A HREF="http://darcs.complete.org/hdbc"
+>http://darcs.complete.org/hdbc</A
+></TT
+>.
+</P
 ></TD
 ></TR
 ><TR
