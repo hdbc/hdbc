@@ -49,6 +49,7 @@ import Data.Char(ord)
 import Data.Word
 import Data.Int
 import System.Time
+import Data.Typeable
 
 {- | Main database handle object.
 
@@ -222,7 +223,13 @@ Errors generated in the Haskell layer will have seNativeError set to -1.
 data SqlError = SqlError {seState :: String,
                           seNativeError :: Int,
                           seErrorMsg :: String}
-                deriving (Eq, Show, Read, Typeable)
+                deriving (Eq, Show, Read)
+
+sqlErrorTc :: TyCon
+sqlErrorTc = mkTyCon "Database.HDBC.SqlError"
+
+instance Typeable SqlError where
+    typeOf _ = mkTyConApp sqlErrorTc []
 
 {- | Conversions to and from 'SqlValue's and standard Haskell types.
 
