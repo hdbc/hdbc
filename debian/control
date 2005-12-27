@@ -2,7 +2,7 @@ Source: hdbc
 Priority: optional
 Maintainer: John Goerzen <jgoerzen@complete.org>
 Build-Depends: debhelper (>= 4.0.0), ghc6 (>= 6.4.1), ghc6 (<< 6.4.1-999), haskell-devscripts (>= 0.5.6), cpphs, haddock
-Build-Depends-Indep: debhelper (>= 4.0.0), haddock, hugs (>= 98.200503.08), haskell-devscripts (>= 0.5.6)
+Build-Depends-Indep: debhelper (>= 4.0.0), haddock, hugs (>= 98.200503.08), haskell-devscripts (>= 0.5.6), ghc6 (>= 6.4.1)
 Standards-Version: 3.6.2
 Section: libs
 
