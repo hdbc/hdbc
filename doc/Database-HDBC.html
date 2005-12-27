@@ -164,6 +164,11 @@
 >Threading
 </A
 ></DT
+><DT
+><A HREF="#15"
+>Copyright and License
+</A
+></DT
 ></DL
 ></TD
 ></TR
@@ -438,22 +443,6 @@
 > -&gt; String -&gt; IO <A HREF="Database-HDBC.html#t%3AStatement"
 >Statement</A
 ></TD
-></TR
-><TR
-><TD CLASS="s8"
-></TD
-></TR
-><TR
-><TD CLASS="decl"
-><A HREF="#v%3Aquery"
->query</A
-> :: <A HREF="Database-HDBC.html#t%3AConnection"
->Connection</A
-> -&gt; String -&gt; [<A HREF="Database-HDBC.html#t%3ASqlValue"
->SqlValue</A
->] -&gt; IO [[<A HREF="Database-HDBC.html#t%3ASqlValue"
->SqlValue</A
->]]</TD
 ></TR
 ><TR
 ><TD CLASS="s8"
@@ -947,6 +936,14 @@ though its purpose is the same.
 </LI
 ><LI
 > Support for querying metadata such as column names.
+</LI
+></UL
+><P
+>Features on the TODO list which will appear shortly include:
+</P
+><UL
+><LI
+> Support for querying additional metadata (column types, etc.)
 </LI
 ></UL
 ></TD
@@ -1817,34 +1814,6 @@ and vary by database.  So don't do it.
                    handle exceptions both places if necessary. 
 </P
 ></TD
-></TR
-><TR
-><TD CLASS="s15"
-></TD
-></TR
-><TR
-><TD CLASS="decl"
-><A NAME="v%3Aquery"
-></A
-><B
->query</B
-> :: <A HREF="Database-HDBC.html#t%3AConnection"
->Connection</A
-> -&gt; String -&gt; [<A HREF="Database-HDBC.html#t%3ASqlValue"
->SqlValue</A
->] -&gt; IO [[<A HREF="Database-HDBC.html#t%3ASqlValue"
->SqlValue</A
->]]</TD
-></TR
-><TR
-><TD CLASS="doc"
->A quick way to do a query.  Similar to preparing, executing, and
-then calling <TT
-><A HREF="Database-HDBC.html#v%3AfetchAllRows"
->fetchAllRows</A
-></TT
-> on a statement. 
-</TD
 ></TR
 ><TR
 ><TD CLASS="s15"
@@ -3009,6 +2978,50 @@ the resource without wrapping it in any lock.
    driver for each specific database.
 </LI
 ></UL
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+><A NAME="15"
+>Copyright and License
+</A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+>Copyright (C) 2005 John Goerzen <A HREF="jgoerzen@complete.org"
+>jgoerzen@complete.org</A
+>
+</P
+><P
+>This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+</P
+><P
+>This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+</P
+><P
+>You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+</P
+><P
+>Please see COPYING in the source distribution for the full license.
+</P
 ></TD
 ></TR
 ><TR
