@@ -25,5 +25,13 @@ If you're on Windows, you can omit the leading "./".
 Documentation is in doc/ -- lots of information, including pointers to
 drivers, is in doc/Database-HDBC.html.
 
+USAGE
+-----
+
+To use with hugs, you'll want to use hugs -98.
+
+To use with GHC, you'll want to use -package HDBC in your programs.
+Or, with Cabal, use Build-Depends: HDBC.
+
 -- John Goerzen
    December 2005
