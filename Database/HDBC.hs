@@ -64,8 +64,8 @@ module Database.HDBC
      -- ** Execution
      execute, sExecute, executeMany, sExecuteMany,
      -- ** Fetching Results
-     fetchRow, fetchRowMap,
-     sFetchRow, fetchAllRows, fetchAllRowsMap,
+     fetchRow, fetchRowAL, fetchRowMap,
+     sFetchRow, fetchAllRows, fetchAllRowsAL, fetchAllRowsMap,
      sFetchAllRows, getColumnNames,
      -- ** Miscellaneous
      finish, originalQuery,
@@ -83,7 +83,8 @@ import Database.HDBC.Utils(catchSql, handleSql, sqlExceptions,
                            handleSqlError, withTransaction,
                            sFetchAllRows, fetchAllRows,
                            sRun, sExecute, sExecuteMany, sFetchRow,
-                           query, fetchRowMap, fetchAllRowsMap)
+                           query, fetchRowMap, fetchAllRowsMap,
+                           fetchRowAL, fetchAllRowsAL)
 import Database.HDBC.Types
 
 {- $introduction
