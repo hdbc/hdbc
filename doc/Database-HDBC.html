@@ -450,6 +450,22 @@
 ></TR
 ><TR
 ><TD CLASS="decl"
+><A HREF="#v%3AquickQuery"
+>quickQuery</A
+> :: <A HREF="Database-HDBC.html#t%3AConnection"
+>Connection</A
+> -&gt; String -&gt; [<A HREF="Database-HDBC.html#t%3ASqlValue"
+>SqlValue</A
+>] -&gt; IO [[<A HREF="Database-HDBC.html#t%3ASqlValue"
+>SqlValue</A
+>]]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
 ><A HREF="#v%3Acommit"
 >commit</A
 > :: <A HREF="Database-HDBC.html#t%3AConnection"
@@ -1814,6 +1830,34 @@ and vary by database.  So don't do it.
                    handle exceptions both places if necessary. 
 </P
 ></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v%3AquickQuery"
+></A
+><B
+>quickQuery</B
+> :: <A HREF="Database-HDBC.html#t%3AConnection"
+>Connection</A
+> -&gt; String -&gt; [<A HREF="Database-HDBC.html#t%3ASqlValue"
+>SqlValue</A
+>] -&gt; IO [[<A HREF="Database-HDBC.html#t%3ASqlValue"
+>SqlValue</A
+>]]</TD
+></TR
+><TR
+><TD CLASS="doc"
+>A quick way to do a query.  Similar to preparing, executing, and
+then calling <TT
+><A HREF="Database-HDBC.html#v%3AfetchAllRows"
+>fetchAllRows</A
+></TT
+> on a statement. 
+</TD
 ></TR
 ><TR
 ><TD CLASS="s15"
