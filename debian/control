@@ -1,20 +1,41 @@
 Source: hdbc
 Priority: optional
 Maintainer: John Goerzen <jgoerzen@complete.org>
-Build-Depends: debhelper (>= 4.0.0)
+Build-Depends: debhelper (>= 4.0.0), ghc6 (>= 6.4.1), ghc6 (<< 6.4.1-999), haskell-devscripts (>= 0.5.6), cpphs, haddock
+Build-Depends-Indep: debhelper (>= 4.0.0), haddock, hugs (>= 98.200503.08), haskell-devscripts (>= 0.5.6)
 Standards-Version: 3.6.2
 Section: libs
 
-Package: hdbc-dev
+Package: libghc6-hdbc-dev
 Section: libdevel
 Architecture: any
-Depends: hdbcBROKEN (= ${Source-Version})
-Description: <insert up to 60 chars description>
- <insert long description, indented with spaces>
+Depends: ${haskell:Depends}
+Suggests: libghc6-hdbc-postgresql-dev | libghc6-hdbc-sqlite3-dev, libghc6-hdbc-missingh-dev
+Description: Haskell Database Connectivity, GHC6 package
+ HDBC provides an abstraction layer between Haskell programs and SQL
+ relational databases. This lets you write database code once, in
+ Haskell, and have it work with any number of backend SQL databases
+ (MySQL, Oracle, PostgreSQL, ODBC-compliant databases, etc.)
+ .
+ HDBC is modeled loosely on Perl's DBI interface, though it has also been
+ influenced by Python's DB-API v2, JDBC in Java, and HSQL in Haskell.
+ .
+ To use HDBC, you'll need both this package, and a driver package such
+ as libghc6-hdbc-postgresql-dev.
 
-Package: hdbcBROKEN
+Package: libhugs-hdbc
 Section: libs
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: <insert up to 60 chars description>
- <insert long description, indented with spaces>
+Architecture: all
+Depends: ${haskell:Depends}
+Description: Haskell Database Connectivity, Hugs package
+ HDBC provides an abstraction layer between Haskell programs and SQL
+ relational databases. This lets you write database code once, in
+ Haskell, and have it work with any number of backend SQL databases
+ (MySQL, Oracle, PostgreSQL, ODBC-compliant databases, etc.)
+ .
+ HDBC is modeled loosely on Perl's DBI interface, though it has also been
+ influenced by Python's DB-API v2, JDBC in Java, and HSQL in Haskell.
+ .
+ To use HDBC, you'll need both this package, and a driver package such
+ as libhugs-hdbc-postgresql.
+
