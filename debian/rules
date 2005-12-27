@@ -53,7 +53,7 @@ clean:
 
 	# Add here commands to clean up after the build process.
 	#-$(MAKE) clean
-	./setup clean
+	-./setup clean
 	-rm -rf setup Setup.hi Setup.ho Setup.o .*config* dist
 
 	dh_clean 
@@ -86,7 +86,7 @@ binary-indep: build install-i
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs -i
-	dh_installdocs -i
+	dh_installdocs -i README.txt doc/*
 	dh_installexamples -i
 #	dh_install
 #	dh_installmenu
@@ -117,7 +117,7 @@ binary-arch: build install-a
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs -a
-	dh_installdocs -a
+	dh_installdocs -a README.txt doc/*
 	dh_installexamples -a
 #	dh_install
 #	dh_installmenu
