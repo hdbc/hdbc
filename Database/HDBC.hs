@@ -86,7 +86,7 @@ import Database.HDBC.Utils(catchSql, handleSql, sqlExceptions,
                            handleSqlError, withTransaction,
                            sFetchAllRows, fetchAllRows,
                            sRun, sExecute, sExecuteMany, sFetchRow,
-                           query, fetchRowMap, fetchAllRowsMap,
+                           quickQuery, fetchRowMap, fetchAllRowsMap,
                            fetchRowAL, fetchAllRowsAL)
 import Database.HDBC.Types
 
