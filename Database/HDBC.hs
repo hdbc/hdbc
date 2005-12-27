@@ -48,7 +48,7 @@ module Database.HDBC
      -- * Database Connections
      Connection, disconnect, clone,
      -- ** Preparing Queries
-     run, sRun, prepare,
+     run, sRun, prepare, query,
 
      -- ** Transaction Handling
      -- $transactions
@@ -64,7 +64,9 @@ module Database.HDBC
      -- ** Execution
      execute, sExecute, executeMany, sExecuteMany,
      -- ** Fetching Results
-     fetchRow, sFetchRow, fetchAllRows, sFetchAllRows,
+     fetchRow, fetchRowMap,
+     sFetchRow, fetchAllRows, fetchAllRowsMap,
+     sFetchAllRows, getColumnNames,
      -- ** Miscellaneous
      finish, originalQuery,
 
@@ -80,7 +82,8 @@ where
 import Database.HDBC.Utils(catchSql, handleSql, sqlExceptions,
                            handleSqlError, withTransaction,
                            sFetchAllRows, fetchAllRows,
-                           sRun, sExecute, sExecuteMany, sFetchRow)
+                           sRun, sExecute, sExecuteMany, sFetchRow,
+                           query, fetchRowMap, fetchAllRowsMap)
 import Database.HDBC.Types
 
 {- $introduction

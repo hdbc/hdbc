@@ -37,7 +37,9 @@ Written by John Goerzen, jgoerzen\@complete.org
 
 module Database.HDBC.Utils where
 import Database.HDBC.Types
+import qualified Data.Map as Map
 import Control.Exception
+import Data.Char
 import Data.Dynamic
 import System.IO.Unsafe
 
@@ -157,3 +159,43 @@ sFetchAllRows :: Statement -> IO [[Maybe String]]
 sFetchAllRows sth =
     do res <- fetchAllRows sth
        return $ map (map fromSql) res
+
+{- | Like 'fetchRow', but instead of returning a list, return a Map from column
+name to value.
+
+The keys of the column names are lowercase versions of the data returned
+by 'getColumnNames'.  Please heed the warnings there.  Additionally,
+results are undefined if multiple columns are returned with identical names.
+-}
+fetchRowMap :: Statement -> IO (Maybe (Map.Map String SqlValue))
+fetchRowMap sth =
+    do row <- fetchRow sth
+       case row of
+        Nothing -> return Nothing
+        Just r -> do names_raw <- getColumnNames sth
+                     let names = map (map toLower) names_raw
+                     let pairs = zip names r
+                     return $ Just $ foldl foldfunc Map.empty pairs
+    where foldfunc m (key, value) = Map.insert key value m
+
+{- | Like 'fetchAllRows', but instead of returning a list for each
+row, return a Map for each row, from column name to value.
+
+See 'fetchRowMap' for more details. -}
+fetchAllRowsMap :: Statement -> IO [Map.Map String SqlValue]
+fetchAllRowsMap sth =
+    do names_raw <- getColumnNames sth
+       let names = map (map toLower) names_raw
+       rows <- fetchAllRows sth
+       return $ map (procline names) rows
+    where procline names r =
+              foldl foldfunc Map.empty (zip names r)
+          foldfunc m (k, v) = Map.insert k v m
+
+{- | A quick way to do a query.  Similar to preparing, executing, and
+then calling 'fetchAllRows' on a statement. -}
+query :: Connection -> String -> [SqlValue] -> IO [[SqlValue]]
+query conn qrystr args =
+    do sth <- prepare conn qrystr
+       execute sth args
+       fetchAllRows sth

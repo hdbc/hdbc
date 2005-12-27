@@ -127,6 +127,7 @@ and vary by database.  So don't do it.
                    connected to already. -}
                 clone :: IO Connection,
 
+
                 {- | The name of the HDBC driver module for this connection.
                    Ideally would be the same as the database name portion
                    of the Cabal package name.  For instance, \"sqlite3\"
@@ -190,6 +191,25 @@ data Statement = Statement
         are no more rows.  Will automatically call 'finish' when
         the last row is read. -}
      fetchRow :: IO (Maybe [SqlValue]),
+
+     {- | Returns a list of the column names in the result.
+        For maximum portability, you should not assume that
+        information is available until after an 'execute' function
+        has been run.
+        
+        Information is returned here directly as returned
+        by the underlying database layer.  Note that different
+        databases have different rules about capitalization
+        of return values and about representation of names
+        of columns that are not simple columns.  For this reason,
+        it is suggested that you treat this information for
+        display purposes only.  Failing that, you should convert
+        to lower (or upper) case, and use @AS@ clauses for
+        anything other than simple columns.
+        -}
+     getColumnNames :: IO [String],
+
+
      {- | The original query that this 'Statement' was prepared
           with. -}
      originalQuery :: String
