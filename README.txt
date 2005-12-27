@@ -7,5 +7,23 @@ Haskell.
 Please see doc/Database-HDBC.html for an introduction to HDBC and its
 various features.
 
+INSTALLATION
+------------
+
+The steps to install are:
+
+1) ghc --make -o setup Setup.lhs
+
+2) ./setup configure
+
+3) ./setup build
+
+4) ./setup install   (as root)
+
+If you're on Windows, you can omit the leading "./".
+
+Documentation is in doc/ -- lots of information, including pointers to
+drivers, is in doc/Database-HDBC.html.
+
 -- John Goerzen
-   December 22, 2005
+   December 2005
