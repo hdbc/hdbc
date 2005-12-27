@@ -129,20 +129,35 @@ Features of HDBC include:
 
  * Support for querying database server properties
 
-Features on the TODO list which will appear shortly include:
+ * Add-on package (hdbc-missingh) to integrate with MissingH,
+   providing a database backend for AnyDBM.
 
- * Support for querying metadata (column names, types, etc.)
+ * Support for querying metadata such as column names.
 
- * Add-on package to integrate with MissingH (filesystem in a
-   database, backend for AnyDBM, etc.)
 -}
 
 {- $drivers
 
-Here is a list of known drivers as of December 22, 2005:
+Here is a list of known drivers as of December 26, 2005:
 
- [@Sqlite v3@] Use @darcs get --partial <http://darcs.complete.org/hsql-sqlite3>@
+[@Sqlite v3@] Available from <http://quux.org/devel/hdbc>.  Or, to
+participate in development, use 
+@darcs get --partial <http://darcs.complete.org/hdbc-sqlite3>@
 
+[@PostgreSQL@] Available from <http://quux.org/devel/hdbc>.  Or, to
+participate in development, use
+@darcs get --partial <http://darcs.complete.org/hdbc-postgresql>@
+
+In addition, there is one integration package: /hdbc-missingh/.  This
+integrates with the MissingH library <http://quux.org/devel/missingh>.
+Among other things, it lets any HDBC database act as a backend for the
+AnyDBM interface.  Available from <http://quux.org/devel/hdbc>.  Or,
+to participate in development, use
+@darcs get --partial <http://darcs.complete.org/hdbc-missingh>@
+
+The latest version of HDBC itself is available from
+<http://quux.org/devel/hdbc>.  Or, to participate in development, use
+@darcs get --partial <http://darcs.complete.org/hdbc>@.
 -}
 
 {- $transactions
