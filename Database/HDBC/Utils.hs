@@ -202,8 +202,8 @@ fetchAllRowsMap sth = fetchAllRowsAL sth >>= (return . map Map.fromList)
 
 {- | A quick way to do a query.  Similar to preparing, executing, and
 then calling 'fetchAllRows' on a statement. -}
-query :: Connection -> String -> [SqlValue] -> IO [[SqlValue]]
-query conn qrystr args =
+quickQuery :: Connection -> String -> [SqlValue] -> IO [[SqlValue]]
+quickQuery conn qrystr args =
     do sth <- prepare conn qrystr
        execute sth args
        fetchAllRows sth

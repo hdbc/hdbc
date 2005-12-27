@@ -48,7 +48,7 @@ module Database.HDBC
      -- * Database Connections
      Connection, disconnect, clone,
      -- ** Preparing Queries
-     run, sRun, prepare, query,
+     run, sRun, prepare, quickQuery,
 
      -- ** Transaction Handling
      -- $transactions
