@@ -45,7 +45,7 @@ module Database.HDBC.Types
 
 where
 import Data.Dynamic
-import Data.Char(ord)
+import Data.Char(ord,toUpper)
 import Data.Word
 import Data.Int
 import System.Time
@@ -428,6 +428,30 @@ instance SqlType Integer where
     fromSql (SqlEpochTime x) = x
     fromSql (SqlTimeDiff x) = x
     fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Integer"
+
+instance SqlType Bool where
+    toSql = SqlBool
+    fromSql (SqlString x) = 
+        case map toUpper x of
+                           "TRUE" -> True
+                           "FALSE" -> False
+                           _ -> error $ "fromSql: cannot convert SqlString " 
+                                        ++ show x ++ " to Bool"
+    fromSql (SqlInt32 x) = numToBool x
+    fromSql (SqlInt64 x) = numToBool x
+    fromSql (SqlWord32 x) = numToBool x
+    fromSql (SqlWord64 x) = numToBool x
+    fromSql (SqlInteger x) = numToBool x
+    fromSql (SqlChar x) = numToBool (ord x)
+    fromSql (SqlBool x) = x
+    fromSql (SqlDouble x) = numToBool x
+    fromSql (SqlRational x) = numToBool x
+    fromSql (SqlEpochTime x) = numToBool x
+    fromSql (SqlTimeDiff x) = numToBool x
+    fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Bool"
+
+numToBool :: Num a => a -> Bool
+numToBool x = x /= 0
 
 instance SqlType Char where
     toSql = SqlChar
