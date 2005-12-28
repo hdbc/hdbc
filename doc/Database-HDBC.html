@@ -564,6 +564,18 @@
 ></TR
 ><TR
 ><TD CLASS="decl"
+><A HREF="#v%3AgetTables"
+>getTables</A
+> :: <A HREF="Database-HDBC.html#t%3AConnection"
+>Connection</A
+> -&gt; IO [String]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
 ><SPAN CLASS="keyword"
 >data</SPAN
 > <A HREF="#t%3AStatement"
@@ -1177,6 +1189,12 @@ except a Maybe, <TT
 ><TD CLASS="decl"
 ><A HREF="Database-HDBC.html#t%3ASqlType"
 >SqlType</A
+> Bool</TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="Database-HDBC.html#t%3ASqlType"
+>SqlType</A
 > CalendarTime</TD
 ></TR
 ><TR
@@ -1754,7 +1772,7 @@ and vary by database.  So don't do it.
 ><TR
 ><TD CLASS="doc"
 >Execute a single SQL query.  Returns the number
-                   of rows affected (see <TT
+                   of rows modified (see <TT
 ><A HREF="Database-HDBC.html#v%3Aexecute"
 >execute</A
 ></TT
@@ -1917,6 +1935,38 @@ have to call <TT
 ><P
 >Database developers will also be experienced with the atomicity benefits
 of transactions, an explanation of which is outside the scope of this manual.
+</P
+><P
+>Errors occuring at the database level can leave a transaction in an
+indeterminate state, depending on the database.  Some databases will
+refuse all queries until the next <TT
+><A HREF="Database-HDBC.html#v%3Acommit"
+>commit</A
+></TT
+> or <TT
+><A HREF="Database-HDBC.html#v%3Arollback"
+>rollback</A
+></TT
+>.  The safe thing
+to do is to issue a <TT
+><A HREF="Database-HDBC.html#v%3Acommit"
+>commit</A
+></TT
+> or <TT
+><A HREF="Database-HDBC.html#v%3Arollback"
+>rollback</A
+></TT
+> after trapping any <TT
+><A HREF="Database-HDBC.html#t%3ASqlError"
+>SqlError</A
+></TT
+>.
+Alternatively, you could use <TT
+><A HREF="Database-HDBC.html#v%3AwithTransaction"
+>withTransaction</A
+></TT
+>, which will automatically
+handle this detail for you.
 </P
 ></TD
 ></TR
@@ -2181,6 +2231,36 @@ on this behavior is solicited.
 ></TD
 ></TR
 ><TR
+><TD CLASS="decl"
+><A NAME="v%3AgetTables"
+></A
+><B
+>getTables</B
+> :: <A HREF="Database-HDBC.html#t%3AConnection"
+>Connection</A
+> -&gt; IO [String]</TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+>The names of all tables accessible by the current
+                   connection, excluding special meta-tables (system tables).
+</P
+><P
+>You should expect this to be returned in the same manner
+                   as a result from <TT
+><A HREF="Database-HDBC.html#v%3AfetchAllRows"
+>fetchAllRows</A
+></TT
+>.
+</P
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
 ><TD CLASS="section1"
 ><A NAME="9"
 >Statements
@@ -2247,14 +2327,15 @@ on this behavior is solicited.
 </P
 ><P
 >For non-SELECT queries, the return value is the number of
-        rows affected, if known.  If no rows were affected, you get 0.
-        If the value is unknown, you get -1.
+        rows modified, if known.  If no rows were modified, you get 0.
+        If the value is unknown, you get -1.  All current HDBC drivers
+        support this function and should never return -1.
 </P
 ><P
->For SELECT queries, you will always get -1.
+>For SELECT queries, you will always get 0.
 </P
 ><P
->This function should call finish() to finish the previous
+>This function should automatically call finish() to finish the previous
         execution, if necessary.
 </P
 ></TD

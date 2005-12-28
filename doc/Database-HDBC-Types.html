@@ -199,6 +199,12 @@ exclusively.
 >dbServerVer</A
 > :: String</TD
 ></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AgetTables"
+>getTables</A
+> :: (IO [String])</TD
+></TR
 ></TABLE
 >}</TD
 ></TR
@@ -636,7 +642,7 @@ and vary by database.  So don't do it.
 >] -&gt; IO Integer)</TD
 ><TD CLASS="rdoc"
 >Execute a single SQL query.  Returns the number
-                   of rows affected (see <TT
+                   of rows modified (see <TT
 ><A HREF="Database-HDBC-Types.html#v%3Aexecute"
 >execute</A
 ></TT
@@ -792,6 +798,28 @@ and vary by database.  So don't do it.
 >The version of the database server, if available. 
 </TD
 ></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3AgetTables"
+></A
+><B
+>getTables</B
+> :: (IO [String])</TD
+><TD CLASS="rdoc"
+><P
+>The names of all tables accessible by the current
+                   connection, excluding special meta-tables (system tables).
+</P
+><P
+>You should expect this to be returned in the same manner
+                   as a result from <TT
+><A HREF="Database-HDBC.html#v%3AfetchAllRows"
+>fetchAllRows</A
+></TT
+>.
+</P
+></TD
+></TR
 ></TABLE
 ></TD
 ></TR
@@ -859,14 +887,15 @@ and vary by database.  So don't do it.
 </P
 ><P
 >For non-SELECT queries, the return value is the number of
-        rows affected, if known.  If no rows were affected, you get 0.
-        If the value is unknown, you get -1.
+        rows modified, if known.  If no rows were modified, you get 0.
+        If the value is unknown, you get -1.  All current HDBC drivers
+        support this function and should never return -1.
 </P
 ><P
->For SELECT queries, you will always get -1.
+>For SELECT queries, you will always get 0.
 </P
 ><P
->This function should call finish() to finish the previous
+>This function should automatically call finish() to finish the previous
         execution, if necessary.
 </P
 ></TD
@@ -1232,6 +1261,12 @@ except a Maybe, <TT
 ><TD CLASS="body"
 ><DIV ID="i:SqlType" STYLE="display:block;"
 ><TABLE CLASS="vanilla" CELLSPACING="1" CELLPADDING="0"
+><TR
+><TD CLASS="decl"
+><A HREF="Database-HDBC-Types.html#t%3ASqlType"
+>SqlType</A
+> Bool</TD
+></TR
 ><TR
 ><TD CLASS="decl"
 ><A HREF="Database-HDBC-Types.html#t%3ASqlType"
