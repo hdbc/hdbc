@@ -95,7 +95,7 @@ and vary by database.  So don't do it.
                    last 'commit' or 'rollback'. -}
                 rollback :: IO (),
                 {- | Execute a single SQL query.  Returns the number
-                   of rows affected (see 'execute' for details).
+                   of rows modified (see 'execute' for details).
                    The second parameter is a list
                    of replacement values, if any. -}
                 run :: String -> [SqlValue] -> IO Integer,
@@ -162,12 +162,13 @@ data Statement = Statement
         in the call to 'prepare').
 
         For non-SELECT queries, the return value is the number of
-        rows affected, if known.  If no rows were affected, you get 0.
-        If the value is unknown, you get -1.
+        rows modified, if known.  If no rows were modified, you get 0.
+        If the value is unknown, you get -1.  All current HDBC drivers
+        support this function and should never return -1.
 
-        For SELECT queries, you will always get -1.
+        For SELECT queries, you will always get 0.
 
-        This function should call finish() to finish the previous
+        This function should automatically call finish() to finish the previous
         execution, if necessary.
         -}
      execute :: [SqlValue] -> IO Integer,
