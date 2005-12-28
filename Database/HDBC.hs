@@ -187,6 +187,12 @@ have to call 'commit' after /every/ change, just after a batch of them.
 Database developers will also be experienced with the atomicity benefits
 of transactions, an explanation of which is outside the scope of this manual.
 
+Errors occuring at the database level can leave a transaction in an
+indeterminate state, depending on the database.  Some databases will
+refuse all queries until the next 'commit' or 'rollback'.  The safe thing
+to do is to issue a 'commit' or 'rollback' after trapping any 'SqlError'.
+Alternatively, you could use 'withTransaction', which will automatically
+handle this detail for you.
 -}
 
 {- $threading

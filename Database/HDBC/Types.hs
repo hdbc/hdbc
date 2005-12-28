@@ -151,7 +151,14 @@ and vary by database.  So don't do it.
                    out past the HDBC driver. -}
                 proxiedClientVer :: String,
                 {- | The version of the database server, if available. -}
-                dbServerVer :: String
+                dbServerVer :: String,
+                {- | The names of all tables accessible by the current
+                   connection, excluding special meta-tables (system tables).
+                   
+                   You should expect this to be returned in the same manner
+                   as a result from 'fetchAllRows'.
+                     -}
+                getTables :: IO [String]
                    
                }
 
