@@ -10,6 +10,8 @@ various features.
 INSTALLATION
 ------------
 
+You'll need either GHC 6.4.1 or above, or Hugs 2005xx or above.
+
 The steps to install are:
 
 1) ghc --make -o setup Setup.lhs
