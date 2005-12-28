@@ -170,11 +170,12 @@ The latest version of HDBC itself is available from
 
 This section concerns itself with writing (updating) a database.
 
-In HDBC, as with many RDBMS implementations, every write to the database occurs
-within a transaction.  No changes are visible until a commit operation
-occurs, in which case all changes since the transaction started are atomically
-committed.  Also, there is a rollback operation that can undo all changes
-since the transaction started.
+In HDBC, as with many RDBMS implementations, every write to the
+database occurs within a transaction.  No changes are visible (outside
+the current transaction) until a commit operation occurs, in which
+case all changes since the transaction started are atomically
+committed.  Also, there is a rollback operation that can undo all
+changes since the transaction started.
 
 HDBC does everything within a transaction.  A transaction is implicitly entered
 when a connection to a database is established, and a transaction is
@@ -183,6 +184,9 @@ implicitly entered after each call to 'commit' or 'rollback' as well.
 The practical effect of this is that you must call 'commit' after making
 changes to a database in order for those changes to become visible.  You don't
 have to call 'commit' after /every/ change, just after a batch of them.
+
+(Exceptions exist for databases that don't offer a high level of transaction
+isolation; but you should always play it safe and commit anyway.)
 
 Database developers will also be experienced with the atomicity benefits
 of transactions, an explanation of which is outside the scope of this manual.

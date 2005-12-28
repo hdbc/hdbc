@@ -157,6 +157,9 @@ and vary by database.  So don't do it.
                    
                    You should expect this to be returned in the same manner
                    as a result from 'Database.HDBC.fetchAllRows'.
+
+                   All results should be converted to lowercase for you
+                   before you see them.
                      -}
                 getTables :: IO [String]
                    
