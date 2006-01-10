@@ -154,6 +154,10 @@ participate in development, use
 participate in development, use
 @darcs get --partial <http://darcs.complete.org/hdbc-postgresql>@
 
+[@ODBC] Available from <http://quux.org/devel/hdbc>.  Or, to
+partitipace in development, use
+@darcs get --partial <http://darcs.complete.org/hdbc-odbc>@
+
 In addition, there is one integration package: /hdbc-missingh/.  This
 integrates with the MissingH library <http://quux.org/devel/missingh>.
 Among other things, it lets any HDBC database act as a backend for the
