@@ -49,7 +49,7 @@ import Data.Char(ord,toUpper)
 import Data.Word
 import Data.Int
 import System.Time
-import Data.Typeable
+import Database.HDBC.ColTypes
 
 {- | Main database handle object.
 
@@ -161,7 +161,19 @@ and vary by database.  So don't do it.
                    All results should be converted to lowercase for you
                    before you see them.
                      -}
-                getTables :: IO [String]
+                getTables :: IO [String],
+
+                {- | Obtain information about the columns in a specific
+                   table.  The String in the result
+                   set is the column name.
+
+                   You should expect this to be returned in the same manner
+                   as a result from 'Database.HDBC.fetchAllRows'.
+
+                   All results should be converted to lowercase for you
+                   before you see them.
+                   -}
+                describeTable :: String -> IO [(String, SqlColDesc)]
                    
                }
 
@@ -217,13 +229,30 @@ data Statement = Statement
         display purposes only.  Failing that, you should convert
         to lower (or upper) case, and use @AS@ clauses for
         anything other than simple columns.
+
+        A simple getColumnNames implementation could simply
+        apply @map fst@ to the return value of 'describeResult'.
         -}
      getColumnNames :: IO [String],
 
 
      {- | The original query that this 'Statement' was prepared
           with. -}
-     originalQuery :: String
+     originalQuery :: String,
+     {- | Obtain information about the columns in the result set.
+          Must be run only after 'execute'.  The String in the result
+          set is the column name.
+
+          You should expect this to be returned in the same manner
+          as a result from 'Database.HDBC.fetchAllRows'.
+
+          All results should be converted to lowercase for you
+          before you see them.
+
+          Please see caveats under 'getColumnNames' for information
+          on the column name field here.
+ -}
+     describeResult :: IO [(String, SqlColDesc)]
     }
 
 {- | The main HDBC exception object.  As much information as possible

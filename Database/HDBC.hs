@@ -54,10 +54,10 @@ module Database.HDBC
      -- $transactions
      commit, rollback, withTransaction,
 
-     -- ** Inquiries
+     -- ** Connection Inquiries
      hdbcDriverName, hdbcClientVer, proxiedClientName,
      proxiedClientVer, dbServerVer,
-     getTables,
+     getTables, describeTable,
 
      -- * Statements
      Statement,
@@ -67,6 +67,8 @@ module Database.HDBC
      fetchRow, fetchRowAL, fetchRowMap,
      sFetchRow, fetchAllRows, fetchAllRowsAL, fetchAllRowsMap,
      sFetchAllRows, getColumnNames,
+     -- ** Statement Inquires
+     describeResult,
      -- ** Miscellaneous
      finish, originalQuery,
 
