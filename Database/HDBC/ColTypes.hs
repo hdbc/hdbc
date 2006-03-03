@@ -90,7 +90,7 @@ data SqlTypeId =
     | SqlTypeDateT              -- ^ A date
     | SqlTypeTimeT              -- ^ A time
     | SqlTypeTimestampT         -- ^ Combined date and time
-    | SqlTypeUTCDateTimeT       -- ^ UTC date/time
+    | SqlTypeUTCDateTimeT       -- ^ UTC date\/time
     | SqlTypeUTCTimeT           -- ^ UTC time
     | SqlIntervalMonthT         -- ^ Difference in months
     | SqlIntervalYearT          -- ^ Difference in years

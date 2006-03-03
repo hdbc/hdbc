@@ -41,7 +41,7 @@ module Database.HDBC
      -- ** Available Drivers
      -- $drivers
 
-     -- * Typing
+     -- * Typing of transfer data
      SqlType(..), nToSql, iToSql,
      SqlValue(..),
 
@@ -154,7 +154,7 @@ participate in development, use
 participate in development, use
 @darcs get --partial <http://darcs.complete.org/hdbc-postgresql>@
 
-[@ODBC] Available from <http://quux.org/devel/hdbc>.  Or, to
+[@ODBC@] Available from <http://quux.org/devel/hdbc>.  Or, to
 partitipace in development, use
 @darcs get --partial <http://darcs.complete.org/hdbc-odbc>@
 
