@@ -48,11 +48,14 @@ The colSize field works like this:
 For character types, the maximum width of the column.  For numeric
 types, the total number of digits allowed.  See the ODBC manual for more.
 
- -}
+The colOctetLength field is defined for character and binary types, and
+gives the number of bytes the column requires, regardless of encoding.
+-}
 data ColDesc = 
    ColDesc {
             colType :: SqlTypeId   -- ^ Type of data stored here
            ,colSize :: Maybe Int   -- ^ The size of a column
+           ,colOctetLength :: Maybe Int -- ^ The maximum size in octets
            ,colDecDigits :: Maybe Int -- ^ Digits to the right of the period
            ,colNullable :: Maybe Bool -- ^ Whether NULL is acceptable
            }
