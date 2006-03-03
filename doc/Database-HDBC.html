@@ -103,7 +103,7 @@
 ></DD
 ><DT
 ><A HREF="#4"
->Typing
+>Typing of transfer data
 </A
 ></DT
 ><DT
@@ -161,11 +161,16 @@
 ></DT
 ><DT
 ><A HREF="#14"
->Threading
+>Column Types
 </A
 ></DT
 ><DT
 ><A HREF="#15"
+>Threading
+</A
+></DT
+><DT
+><A HREF="#16"
 >Copyright and License
 </A
 ></DT
@@ -858,6 +863,16 @@
 >handleSqlError</A
 > :: IO a -&gt; IO a</TD
 ></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>module <A HREF="Database-HDBC-ColTypes.html"
+>Database.HDBC.ColTypes</A
+></TD
+></TR
 ></TABLE
 ></TD
 ></TR
@@ -1027,6 +1042,21 @@ participate in development, use
 ></TT
 >
 </DD
+><DT
+><TT
+>ODBC</TT
+></DT
+><DD
+> Available from <A HREF="http://quux.org/devel/hdbc"
+>http://quux.org/devel/hdbc</A
+>.  Or, to
+partitipace in development, use
+<TT
+>darcs get --partial <A HREF="http://darcs.complete.org/hdbc-odbc"
+>http://darcs.complete.org/hdbc-odbc</A
+></TT
+>
+</DD
 ></DL
 ><P
 >In addition, there is one integration package: <EM
@@ -1066,7 +1096,7 @@ to participate in development, use
 ><TR
 ><TD CLASS="section1"
 ><A NAME="4"
->Typing
+>Typing of transfer data
 </A
 ></TD
 ></TR
@@ -1898,11 +1928,12 @@ then calling <TT
 >This section concerns itself with writing (updating) a database.
 </P
 ><P
->In HDBC, as with many RDBMS implementations, every write to the database occurs
-within a transaction.  No changes are visible until a commit operation
-occurs, in which case all changes since the transaction started are atomically
-committed.  Also, there is a rollback operation that can undo all changes
-since the transaction started.
+>In HDBC, as with many RDBMS implementations, every write to the
+database occurs within a transaction.  No changes are visible (outside
+the current transaction) until a commit operation occurs, in which
+case all changes since the transaction started are atomically
+committed.  Also, there is a rollback operation that can undo all
+changes since the transaction started.
 </P
 ><P
 >HDBC does everything within a transaction.  A transaction is implicitly entered
@@ -1931,6 +1962,10 @@ have to call <TT
 > after <EM
 >every</EM
 > change, just after a batch of them.
+</P
+><P
+>(Exceptions exist for databases that don't offer a high level of transaction
+isolation; but you should always play it safe and commit anyway.)
 </P
 ><P
 >Database developers will also be experienced with the atomicity benefits
@@ -2253,6 +2288,10 @@ on this behavior is solicited.
 >fetchAllRows</A
 ></TT
 >.
+</P
+><P
+>All results should be converted to lowercase for you
+                   before you see them.
 </P
 ></TD
 ></TR
@@ -3049,6 +3088,44 @@ wrapper around SQL calls.
 ><TR
 ><TD CLASS="section1"
 ><A NAME="14"
+>Column Types
+</A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="doc"
+>These are defined in <A HREF="Database-HDBC-ColTypes.html"
+>Database.HDBC.ColTypes</A
+> but are
+ available to programs importing <A HREF="Database-HDBC.html"
+>Database.HDBC</A
+> by default as well.
+ See <A HREF="Database-HDBC-ColTypes.html"
+>Database.HDBC.ColTypes</A
+> for documentation.
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+>module <A HREF="Database-HDBC-ColTypes.html"
+>Database.HDBC.ColTypes</A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section1"
+><A NAME="15"
 >Threading
 </A
 ></TD
@@ -3111,7 +3188,7 @@ the resource without wrapping it in any lock.
 ></TR
 ><TR
 ><TD CLASS="section1"
-><A NAME="15"
+><A NAME="16"
 >Copyright and License
 </A
 ></TD
