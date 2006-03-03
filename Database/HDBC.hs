@@ -1,5 +1,5 @@
 {-
-Copyright (C) 2005 John Goerzen <jgoerzen@complete.org>
+Copyright (C) 2005-2006 John Goerzen <jgoerzen@complete.org>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@ Copyright (C) 2005 John Goerzen <jgoerzen@complete.org>
 
 {- |
    Module     : Database.HDBC
-   Copyright  : Copyright (C) 2005 John Goerzen
+   Copyright  : Copyright (C) 2005-2006 John Goerzen
    License    : GNU LGPL, version 2.1 or above
 
    Maintainer : John Goerzen <jgoerzen@complete.org>
@@ -151,7 +151,7 @@ Features on the TODO list which will appear shortly include:
 
 {- $drivers
 
-Here is a list of known drivers as of December 26, 2005:
+Here is a list of known drivers as of March 2, 2005:
 
 [@Sqlite v3@] Available from <http://quux.org/devel/hdbc>.  Or, to
 participate in development, use 
@@ -245,7 +245,7 @@ However, there are some caveats to the above:
 -}
 
 {- $legal
-Copyright (C) 2005 John Goerzen <jgoerzen@complete.org>
+Copyright (C) 2005-2006 John Goerzen <jgoerzen@complete.org>
 
 This library is free software; you can redistribute it and\/or
 modify it under the terms of the GNU Lesser General Public
