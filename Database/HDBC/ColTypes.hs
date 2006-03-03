@@ -31,8 +31,9 @@ by a column.
 Written by John Goerzen, jgoerzen\@complete.org
 -}
 
-module Database.HDBC.ColTypes (ColDesc(..),
-                               SqlTypeId(..)
+module Database.HDBC.ColTypes (SqlColDesc(..),
+                               SqlTypeId(..),
+                               SqlInterval(..)
                               )
 
 where
@@ -51,19 +52,20 @@ types, the total number of digits allowed.  See the ODBC manual for more.
 The colOctetLength field is defined for character and binary types, and
 gives the number of bytes the column requires, regardless of encoding.
 -}
-data ColDesc = 
-   ColDesc {
-            colType :: SqlTypeId   -- ^ Type of data stored here
-           ,colSize :: Maybe Int   -- ^ The size of a column
-           ,colOctetLength :: Maybe Int -- ^ The maximum size in octets
-           ,colDecDigits :: Maybe Int -- ^ Digits to the right of the period
-           ,colNullable :: Maybe Bool -- ^ Whether NULL is acceptable
-           }
+data SqlColDesc = 
+   SqlColDesc {
+               colType :: SqlTypeId   -- ^ Type of data stored here
+              ,colSize :: Maybe Int   -- ^ The size of a column
+              ,colOctetLength :: Maybe Int -- ^ The maximum size in octets
+              ,colDecDigits :: Maybe Int -- ^ Digits to the right of the period
+              ,colNullable :: Maybe Bool -- ^ Whether NULL is acceptable
+              }
+   deriving (Eq, Read, Show, Typeable)
 
 {- | The type identifier for a given column. 
 
 This represents the type of data stored in the column in the underlying
-SQL engine.  It does not form the entire column type; see 'SqlColType' for
+SQL engine.  It does not form the entire column type; see 'SqlColDesc' for
 that.
 
 These types correspond mainly to those defined by ODBC. -}
@@ -87,12 +89,20 @@ data SqlTypeId =
     | SqlBinaryT                -- ^ Fixed-length binary data
     | SqlVarBinaryT             -- ^ Variable-length binary data
     | SqlLongVarBinaryT         -- ^ Variable-length binary data, max length implementation dependant
-    | SqlTypeDateT              -- ^ A date
-    | SqlTypeTimeT              -- ^ A time
-    | SqlTypeTimestampT         -- ^ Combined date and time
-    | SqlTypeUTCDateTimeT       -- ^ UTC date\/time
-    | SqlTypeUTCTimeT           -- ^ UTC time
-    | SqlIntervalMonthT         -- ^ Difference in months
+    | SqlDateT                  -- ^ A date
+    | SqlTimeT                  -- ^ A time
+    | SqlTimestampT             -- ^ Combined date and time
+    | SqlUTCDateTimeT           -- ^ UTC date\/time
+    | SqlUTCTimeT               -- ^ UTC time
+    | SqlIntervalT SqlInterval  -- ^ A time or date difference
+    | SqlGUIDT                  -- ^ Global unique identifier
+    | SqlUnknownT String        -- ^ A type not represented here; implementation-specific information in the String
+
+  deriving (Eq, Show, Read, Typeable)
+
+{- | The different types of intervals in SQL. -}
+data SqlInterval =
+      SqlIntervalMonthT         -- ^ Difference in months
     | SqlIntervalYearT          -- ^ Difference in years
     | SqlIntervalYearToMonthT   -- ^ Difference in years+months
     | SqlIntervalDayT           -- ^ Difference in days
@@ -105,7 +115,4 @@ data SqlTypeId =
     | SqlIntervalHourToMinuteT  -- ^ Difference in hours+minutes
     | SqlIntervalHourToSecondT  -- ^ Difference in hours+seconds
     | SqlIntervalMinuteToSecondT -- ^ Difference in minutes+seconds
-    | SqlGUIDT                  -- ^ Global unique identifier
-    | SqlUnknownT String        -- ^ A type not represented here; implementation-specific information in the String
-
-  deriving (Eq, Show, Read, Typeable)
+      deriving (Eq, Show, Read, Typeable)

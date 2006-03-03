@@ -72,7 +72,13 @@ module Database.HDBC
 
      -- * Exceptions
      SqlError(..),
-     catchSql, handleSql, sqlExceptions, handleSqlError
+     catchSql, handleSql, sqlExceptions, handleSqlError,
+
+     -- * Column Types
+     -- | These are defined in "Database.HDBC.ColTypes" but are
+     -- available to programs importing "Database.HDBC" by default as well.
+     -- See "Database.HDBC.ColTypes" for documentation.
+     module Database.HDBC.ColTypes
 
      -- * Threading
      -- $threading
@@ -89,6 +95,7 @@ import Database.HDBC.Utils(catchSql, handleSql, sqlExceptions,
                            quickQuery, fetchRowMap, fetchAllRowsMap,
                            fetchRowAL, fetchAllRowsAL)
 import Database.HDBC.Types
+import Database.HDBC.ColTypes
 
 {- $introduction
 
