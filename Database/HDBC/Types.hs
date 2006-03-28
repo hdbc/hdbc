@@ -154,7 +154,11 @@ and vary by database.  So don't do it.
                 dbServerVer :: String,
                 {- | Whether or not the current database supports transactions.
                    If False, then 'commit' and 'rollback' should be expected
-                   to raise errors. -}
+                   to raise errors.
+
+                   MySQL is the only commonly-used database that is known
+                   to not support transactions entirely.  Please see
+                   the MySQL notes in the ODBC driver for more information. -}
                 dbTransactionSupport :: Bool,
 
                 {- | The names of all tables accessible by the current

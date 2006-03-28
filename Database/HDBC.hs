@@ -153,7 +153,7 @@ Features on the TODO list which will appear shortly include:
 
 {- $drivers
 
-Here is a list of known drivers as of March 2, 2005:
+Here is a list of known drivers as of March 28, 2006:
 
 [@Sqlite v3@] Available from <http://quux.org/devel/hdbc>.  Or, to
 participate in development, use 
@@ -166,6 +166,9 @@ participate in development, use
 [@ODBC@] Available from <http://quux.org/devel/hdbc>.  Or, to
 partitipace in development, use
 @darcs get --partial <http://darcs.complete.org/hdbc-odbc>@
+
+[@MySQL@] MySQL users are encouraged to use the ODBC driver, which works
+and has been tested against MySQL on both Linux\/Unix and Windows platforms.
 
 In addition, there is one integration package: /hdbc-missingh/.  This
 integrates with the MissingH library <http://quux.org/devel/missingh>.
