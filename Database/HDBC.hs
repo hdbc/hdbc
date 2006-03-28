@@ -56,7 +56,7 @@ module Database.HDBC
 
      -- ** Connection Inquiries
      hdbcDriverName, hdbcClientVer, proxiedClientName,
-     proxiedClientVer, dbServerVer,
+     proxiedClientVer, dbServerVer, dbTransactionSupport,
      getTables, describeTable,
 
      -- * Statements

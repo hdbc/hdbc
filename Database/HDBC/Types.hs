@@ -152,6 +152,11 @@ and vary by database.  So don't do it.
                 proxiedClientVer :: String,
                 {- | The version of the database server, if available. -}
                 dbServerVer :: String,
+                {- | Whether or not the current database supports transactions.
+                   If False, then 'commit' and 'rollback' should be expected
+                   to raise errors. -}
+                dbTransactionSupport :: Bool,
+
                 {- | The names of all tables accessible by the current
                    connection, excluding special meta-tables (system tables).
                    
