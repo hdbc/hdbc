@@ -205,6 +205,14 @@ exclusively.
 >getTables</A
 > :: (IO [String])</TD
 ></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AdescribeTable"
+>describeTable</A
+> :: (String -&gt; IO [(String, <A HREF="Database-HDBC-ColTypes.html#t%3ASqlColDesc"
+>SqlColDesc</A
+>)])</TD
+></TR
 ></TABLE
 >}</TD
 ></TR
@@ -262,6 +270,14 @@ exclusively.
 ><A HREF="#v%3AoriginalQuery"
 >originalQuery</A
 > :: String</TD
+></TR
+><TR
+><TD CLASS="recfield"
+><A HREF="#v%3AdescribeResult"
+>describeResult</A
+> :: (IO [(String, <A HREF="Database-HDBC-ColTypes.html#t%3ASqlColDesc"
+>SqlColDesc</A
+>)])</TD
 ></TR
 ></TABLE
 >}</TD
@@ -824,6 +840,35 @@ and vary by database.  So don't do it.
 </P
 ></TD
 ></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3AdescribeTable"
+></A
+><B
+>describeTable</B
+> :: (String -&gt; IO [(String, <A HREF="Database-HDBC-ColTypes.html#t%3ASqlColDesc"
+>SqlColDesc</A
+>)])</TD
+><TD CLASS="rdoc"
+><P
+>Obtain information about the columns in a specific
+                   table.  The String in the result
+                   set is the column name.
+</P
+><P
+>You should expect this to be returned in the same manner
+                   as a result from <TT
+><A HREF="Database-HDBC.html#v%3AfetchAllRows"
+>fetchAllRows</A
+></TT
+>.
+</P
+><P
+>All results should be converted to lowercase for you
+                   before you see them.
+</P
+></TD
+></TR
 ></TABLE
 ></TD
 ></TR
@@ -999,6 +1044,16 @@ and vary by database.  So don't do it.
 > clauses for
         anything other than simple columns.
 </P
+><P
+>A simple getColumnNames implementation could simply
+        apply <TT
+>map fst</TT
+> to the return value of <TT
+><A HREF="Database-HDBC-Types.html#v%3AdescribeResult"
+>describeResult</A
+></TT
+>.
+</P
 ></TD
 ></TR
 ><TR
@@ -1016,6 +1071,47 @@ and vary by database.  So don't do it.
 > was prepared
           with. 
 </TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3AdescribeResult"
+></A
+><B
+>describeResult</B
+> :: (IO [(String, <A HREF="Database-HDBC-ColTypes.html#t%3ASqlColDesc"
+>SqlColDesc</A
+>)])</TD
+><TD CLASS="rdoc"
+><P
+>Obtain information about the columns in the result set.
+          Must be run only after <TT
+><A HREF="Database-HDBC-Types.html#v%3Aexecute"
+>execute</A
+></TT
+>.  The String in the result
+          set is the column name.
+</P
+><P
+>You should expect this to be returned in the same manner
+          as a result from <TT
+><A HREF="Database-HDBC.html#v%3AfetchAllRows"
+>fetchAllRows</A
+></TT
+>.
+</P
+><P
+>All results should be converted to lowercase for you
+          before you see them.
+</P
+><P
+>Please see caveats under <TT
+><A HREF="Database-HDBC-Types.html#v%3AgetColumnNames"
+>getColumnNames</A
+></TT
+> for information
+          on the column name field here.
+</P
+></TD
 ></TR
 ></TABLE
 ></TD

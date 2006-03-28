@@ -125,7 +125,7 @@
 ></DT
 ><DT
 ><A HREF="#8"
->Inquiries
+>Connection Inquiries
 </A
 ></DT
 ></DL
@@ -149,28 +149,33 @@
 ></DT
 ><DT
 ><A HREF="#12"
+>Statement Inquires
+</A
+></DT
+><DT
+><A HREF="#13"
 >Miscellaneous
 </A
 ></DT
 ></DL
 ></DD
 ><DT
-><A HREF="#13"
+><A HREF="#14"
 >Exceptions
 </A
 ></DT
 ><DT
-><A HREF="#14"
+><A HREF="#15"
 >Column Types
 </A
 ></DT
 ><DT
-><A HREF="#15"
+><A HREF="#16"
 >Threading
 </A
 ></DT
 ><DT
-><A HREF="#16"
+><A HREF="#17"
 >Copyright and License
 </A
 ></DT
@@ -581,6 +586,20 @@
 ></TR
 ><TR
 ><TD CLASS="decl"
+><A HREF="#v%3AdescribeTable"
+>describeTable</A
+> :: <A HREF="Database-HDBC.html#t%3AConnection"
+>Connection</A
+> -&gt; String -&gt; IO [(String, <A HREF="Database-HDBC-ColTypes.html#t%3ASqlColDesc"
+>SqlColDesc</A
+>)]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
 ><SPAN CLASS="keyword"
 >data</SPAN
 > <A HREF="#t%3AStatement"
@@ -758,6 +777,20 @@
 > :: <A HREF="Database-HDBC.html#t%3AStatement"
 >Statement</A
 > -&gt; IO [String]</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A HREF="#v%3AdescribeResult"
+>describeResult</A
+> :: <A HREF="Database-HDBC.html#t%3AStatement"
+>Statement</A
+> -&gt; IO [(String, <A HREF="Database-HDBC-ColTypes.html#t%3ASqlColDesc"
+>SqlColDesc</A
+>)]</TD
 ></TR
 ><TR
 ><TD CLASS="s8"
@@ -1009,7 +1042,7 @@ though its purpose is the same.
 ><TR
 ><TD CLASS="doc"
 ><P
->Here is a list of known drivers as of December 26, 2005:
+>Here is a list of known drivers as of March 2, 2005:
 </P
 ><DL
 ><DT
@@ -2140,7 +2173,7 @@ on this behavior is solicited.
 ><TR
 ><TD CLASS="section2"
 ><A NAME="8"
->Inquiries
+>Connection Inquiries
 </A
 ></TD
 ></TR
@@ -2280,6 +2313,43 @@ on this behavior is solicited.
 ><P
 >The names of all tables accessible by the current
                    connection, excluding special meta-tables (system tables).
+</P
+><P
+>You should expect this to be returned in the same manner
+                   as a result from <TT
+><A HREF="Database-HDBC.html#v%3AfetchAllRows"
+>fetchAllRows</A
+></TT
+>.
+</P
+><P
+>All results should be converted to lowercase for you
+                   before you see them.
+</P
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v%3AdescribeTable"
+></A
+><B
+>describeTable</B
+> :: <A HREF="Database-HDBC.html#t%3AConnection"
+>Connection</A
+> -&gt; String -&gt; IO [(String, <A HREF="Database-HDBC-ColTypes.html#t%3ASqlColDesc"
+>SqlColDesc</A
+>)]</TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+>Obtain information about the columns in a specific
+                   table.  The String in the result
+                   set is the column name.
 </P
 ><P
 >You should expect this to be returned in the same manner
@@ -2794,6 +2864,16 @@ association lists.
 > clauses for
         anything other than simple columns.
 </P
+><P
+>A simple getColumnNames implementation could simply
+        apply <TT
+>map fst</TT
+> to the return value of <TT
+><A HREF="Database-HDBC.html#v%3AdescribeResult"
+>describeResult</A
+></TT
+>.
+</P
 ></TD
 ></TR
 ><TR
@@ -2803,6 +2883,66 @@ association lists.
 ><TR
 ><TD CLASS="section2"
 ><A NAME="12"
+>Statement Inquires
+</A
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v%3AdescribeResult"
+></A
+><B
+>describeResult</B
+> :: <A HREF="Database-HDBC.html#t%3AStatement"
+>Statement</A
+> -&gt; IO [(String, <A HREF="Database-HDBC-ColTypes.html#t%3ASqlColDesc"
+>SqlColDesc</A
+>)]</TD
+></TR
+><TR
+><TD CLASS="doc"
+><P
+>Obtain information about the columns in the result set.
+          Must be run only after <TT
+><A HREF="Database-HDBC.html#v%3Aexecute"
+>execute</A
+></TT
+>.  The String in the result
+          set is the column name.
+</P
+><P
+>You should expect this to be returned in the same manner
+          as a result from <TT
+><A HREF="Database-HDBC.html#v%3AfetchAllRows"
+>fetchAllRows</A
+></TT
+>.
+</P
+><P
+>All results should be converted to lowercase for you
+          before you see them.
+</P
+><P
+>Please see caveats under <TT
+><A HREF="Database-HDBC.html#v%3AgetColumnNames"
+>getColumnNames</A
+></TT
+> for information
+          on the column name field here.
+</P
+></TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="section2"
+><A NAME="13"
 >Miscellaneous
 </A
 ></TD
@@ -2856,7 +2996,7 @@ association lists.
 ></TR
 ><TR
 ><TD CLASS="section1"
-><A NAME="13"
+><A NAME="14"
 >Exceptions
 </A
 ></TD
@@ -3087,7 +3227,7 @@ wrapper around SQL calls.
 ></TR
 ><TR
 ><TD CLASS="section1"
-><A NAME="14"
+><A NAME="15"
 >Column Types
 </A
 ></TD
@@ -3125,7 +3265,7 @@ wrapper around SQL calls.
 ></TR
 ><TR
 ><TD CLASS="section1"
-><A NAME="15"
+><A NAME="16"
 >Threading
 </A
 ></TD
@@ -3188,7 +3328,7 @@ the resource without wrapping it in any lock.
 ></TR
 ><TR
 ><TD CLASS="section1"
-><A NAME="16"
+><A NAME="17"
 >Copyright and License
 </A
 ></TD
@@ -3200,7 +3340,7 @@ the resource without wrapping it in any lock.
 ><TR
 ><TD CLASS="doc"
 ><P
->Copyright (C) 2005 John Goerzen <A HREF="jgoerzen@complete.org"
+>Copyright (C) 2005-2006 John Goerzen <A HREF="jgoerzen@complete.org"
 >jgoerzen@complete.org</A
 >
 </P
