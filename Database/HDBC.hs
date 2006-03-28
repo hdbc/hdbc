@@ -146,8 +146,6 @@ Features of HDBC include:
 
  * Support for querying metadata such as column names.
 
-Features on the TODO list which will appear shortly include:
-
  * Support for querying additional metadata (column types, etc.)
 -}
 
