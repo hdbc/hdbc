@@ -104,7 +104,13 @@ data SqlTypeId =
     | SqlGUIDT                  -- ^ Global unique identifier
     | SqlUnknownT String        -- ^ A type not represented here; implementation-specific information in the String
 
-  deriving (Eq, Show, Read, Typeable)
+  deriving (Eq, Show, Read)
+
+sqlTypeIdTc :: TyCon
+sqlTypeIdTc = mkTyCon "Database.HDBC.SqlTypeId"
+
+instance Typeable SqlTypeId where
+    typeOf _ = mkTyConApp sqlTypeIdTc []
 
 {- | The different types of intervals in SQL. -}
 data SqlInterval =
@@ -121,4 +127,10 @@ data SqlInterval =
     | SqlIntervalHourToMinuteT  -- ^ Difference in hours+minutes
     | SqlIntervalHourToSecondT  -- ^ Difference in hours+seconds
     | SqlIntervalMinuteToSecondT -- ^ Difference in minutes+seconds
-      deriving (Eq, Show, Read, Typeable)
+      deriving (Eq, Show, Read)
+
+sqlIntervalTc :: TyCon
+sqlIntervalTc = mkTyCon "Database.HDBC.SqlInterval"
+
+instance Typeable SqlInterval where
+    typeOf _ = mkTyConApp sqlIntervalTc []
