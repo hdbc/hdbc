@@ -201,6 +201,12 @@ exclusively.
 ></TR
 ><TR
 ><TD CLASS="recfield"
+><A HREF="#v%3AdbTransactionSupport"
+>dbTransactionSupport</A
+> :: Bool</TD
+></TR
+><TR
+><TD CLASS="recfield"
 ><A HREF="#v%3AgetTables"
 >getTables</A
 > :: (IO [String])</TD
@@ -812,6 +818,27 @@ and vary by database.  So don't do it.
 > :: String</TD
 ><TD CLASS="rdoc"
 >The version of the database server, if available. 
+</TD
+></TR
+><TR
+><TD CLASS="arg"
+><A NAME="v%3AdbTransactionSupport"
+></A
+><B
+>dbTransactionSupport</B
+> :: Bool</TD
+><TD CLASS="rdoc"
+>Whether or not the current database supports transactions.
+                   If False, then <TT
+><A HREF="Database-HDBC-Types.html#v%3Acommit"
+>commit</A
+></TT
+> and <TT
+><A HREF="Database-HDBC-Types.html#v%3Arollback"
+>rollback</A
+></TT
+> should be expected
+                   to raise errors. 
 </TD
 ></TR
 ><TR

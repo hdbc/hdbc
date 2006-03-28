@@ -574,6 +574,18 @@
 ></TR
 ><TR
 ><TD CLASS="decl"
+><A HREF="#v%3AdbTransactionSupport"
+>dbTransactionSupport</A
+> :: <A HREF="Database-HDBC.html#t%3AConnection"
+>Connection</A
+> -&gt; Bool</TD
+></TR
+><TR
+><TD CLASS="s8"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
 ><A HREF="#v%3AgetTables"
 >getTables</A
 > :: <A HREF="Database-HDBC.html#t%3AConnection"
@@ -2292,6 +2304,35 @@ on this behavior is solicited.
 ><TR
 ><TD CLASS="doc"
 >The version of the database server, if available. 
+</TD
+></TR
+><TR
+><TD CLASS="s15"
+></TD
+></TR
+><TR
+><TD CLASS="decl"
+><A NAME="v%3AdbTransactionSupport"
+></A
+><B
+>dbTransactionSupport</B
+> :: <A HREF="Database-HDBC.html#t%3AConnection"
+>Connection</A
+> -&gt; Bool</TD
+></TR
+><TR
+><TD CLASS="doc"
+>Whether or not the current database supports transactions.
+                   If False, then <TT
+><A HREF="Database-HDBC.html#v%3Acommit"
+>commit</A
+></TT
+> and <TT
+><A HREF="Database-HDBC.html#v%3Arollback"
+>rollback</A
+></TT
+> should be expected
+                   to raise errors. 
 </TD
 ></TR
 ><TR
