@@ -828,6 +828,7 @@ and vary by database.  So don't do it.
 >dbTransactionSupport</B
 > :: Bool</TD
 ><TD CLASS="rdoc"
+><P
 >Whether or not the current database supports transactions.
                    If False, then <TT
 ><A HREF="Database-HDBC-Types.html#v%3Acommit"
@@ -838,8 +839,14 @@ and vary by database.  So don't do it.
 >rollback</A
 ></TT
 > should be expected
-                   to raise errors. 
-</TD
+                   to raise errors.
+</P
+><P
+>MySQL is the only commonly-used database that is known
+                   to not support transactions entirely.  Please see
+                   the MySQL notes in the ODBC driver for more information. 
+</P
+></TD
 ></TR
 ><TR
 ><TD CLASS="arg"

@@ -1054,7 +1054,7 @@ though its purpose is the same.
 ><TR
 ><TD CLASS="doc"
 ><P
->Here is a list of known drivers as of March 2, 2005:
+>Here is a list of known drivers as of March 28, 2006:
 </P
 ><DL
 ><DT
@@ -1101,6 +1101,14 @@ partitipace in development, use
 >http://darcs.complete.org/hdbc-odbc</A
 ></TT
 >
+</DD
+><DT
+><TT
+>MySQL</TT
+></DT
+><DD
+> MySQL users are encouraged to use the ODBC driver, which works
+and has been tested against MySQL on both Linux/Unix and Windows platforms.
 </DD
 ></DL
 ><P
@@ -2322,6 +2330,7 @@ on this behavior is solicited.
 ></TR
 ><TR
 ><TD CLASS="doc"
+><P
 >Whether or not the current database supports transactions.
                    If False, then <TT
 ><A HREF="Database-HDBC.html#v%3Acommit"
@@ -2332,8 +2341,14 @@ on this behavior is solicited.
 >rollback</A
 ></TT
 > should be expected
-                   to raise errors. 
-</TD
+                   to raise errors.
+</P
+><P
+>MySQL is the only commonly-used database that is known
+                   to not support transactions entirely.  Please see
+                   the MySQL notes in the ODBC driver for more information. 
+</P
+></TD
 ></TR
 ><TR
 ><TD CLASS="s15"
