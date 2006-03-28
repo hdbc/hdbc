@@ -60,7 +60,13 @@ data SqlColDesc =
               ,colDecDigits :: Maybe Int -- ^ Digits to the right of the period
               ,colNullable :: Maybe Bool -- ^ Whether NULL is acceptable
               }
-   deriving (Eq, Read, Show, Typeable)
+   deriving (Eq, Read, Show)
+
+sqlColDescTc :: TyCon
+sqlColDescTc = mkTyCon "Database.HDBC.SqlColDesc"
+
+instance Typeable SqlColDesc where
+    typeOf _ = mkTyConApp sqlColDescTc []
 
 {- | The type identifier for a given column. 
 
