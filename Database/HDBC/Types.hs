@@ -383,7 +383,7 @@ instance SqlType String where
 
 instance SqlType Int where
     toSql x = SqlInt32 (fromIntegral x)
-    fromSql (SqlString x) = read x
+    fromSql (SqlString x) = read' x
     fromSql (SqlInt32 x) = fromIntegral x
     fromSql (SqlInt64 x) = fromIntegral x
     fromSql (SqlWord32 x) = fromIntegral x
@@ -399,7 +399,7 @@ instance SqlType Int where
 
 instance SqlType Int32 where
     toSql = SqlInt32
-    fromSql (SqlString x) = read x
+    fromSql (SqlString x) = read' x
     fromSql (SqlInt32 x) = x
     fromSql (SqlInt64 x) = fromIntegral x
     fromSql (SqlWord32 x) = fromIntegral x
@@ -415,7 +415,7 @@ instance SqlType Int32 where
 
 instance SqlType Int64 where
     toSql = SqlInt64
-    fromSql (SqlString x) = read x
+    fromSql (SqlString x) = read' x
     fromSql (SqlInt32 x) = fromIntegral x
     fromSql (SqlInt64 x) = x
     fromSql (SqlWord32 x) = fromIntegral x
@@ -431,7 +431,7 @@ instance SqlType Int64 where
 
 instance SqlType Word32 where
     toSql = SqlWord32
-    fromSql (SqlString x) = read x
+    fromSql (SqlString x) = read' x
     fromSql (SqlInt32 x) = fromIntegral x
     fromSql (SqlInt64 x) = fromIntegral x
     fromSql (SqlWord32 x) = x
@@ -447,7 +447,7 @@ instance SqlType Word32 where
 
 instance SqlType Word64 where
     toSql = SqlWord64
-    fromSql (SqlString x) = read x
+    fromSql (SqlString x) = read' x
     fromSql (SqlInt32 x) = fromIntegral x
     fromSql (SqlInt64 x) = fromIntegral x
     fromSql (SqlWord32 x) = fromIntegral x
@@ -463,7 +463,7 @@ instance SqlType Word64 where
 
 instance SqlType Integer where
     toSql = SqlInteger
-    fromSql (SqlString x) = read x
+    fromSql (SqlString x) = read' x
     fromSql (SqlInt32 x) = fromIntegral x
     fromSql (SqlInt64 x) = fromIntegral x
     fromSql (SqlWord32 x) = fromIntegral x
@@ -520,7 +520,7 @@ instance SqlType Char where
 
 instance SqlType Double where
     toSql = SqlDouble
-    fromSql (SqlString x) = read x
+    fromSql (SqlString x) = read' x
     fromSql (SqlInt32 x) = fromIntegral x
     fromSql (SqlInt64 x) = fromIntegral x
     fromSql (SqlWord32 x) = fromIntegral x
@@ -536,7 +536,7 @@ instance SqlType Double where
 
 instance SqlType Rational where
     toSql = SqlRational
-    fromSql (SqlString x) = read x
+    fromSql (SqlString x) = read' x
     fromSql (SqlInt32 x) = fromIntegral x
     fromSql (SqlInt64 x) = fromIntegral x
     fromSql (SqlWord32 x) = fromIntegral x
@@ -552,7 +552,7 @@ instance SqlType Rational where
 
 instance SqlType ClockTime where
     toSql (TOD x _) = SqlEpochTime x
-    fromSql (SqlString x) = TOD (read x) 0
+    fromSql (SqlString x) = TOD (read' x) 0
     fromSql (SqlInt32 x) = TOD (fromIntegral x) 0
     fromSql (SqlInt64 x) = TOD (fromIntegral x) 0
     fromSql (SqlWord32 x) = TOD (fromIntegral x) 0
@@ -568,7 +568,7 @@ instance SqlType ClockTime where
 
 instance SqlType TimeDiff where
     toSql x = SqlTimeDiff (timeDiffToSecs x)
-    fromSql (SqlString x) = secs2td (read x)
+    fromSql (SqlString x) = secs2td (read' x)
     fromSql (SqlInt32 x) = secs2td (fromIntegral x)
     fromSql (SqlInt64 x) = secs2td (fromIntegral x)
     fromSql (SqlWord32 x) = secs2td (fromIntegral x)
@@ -594,6 +594,17 @@ instance (SqlType a) => SqlType (Maybe a) where
 
 secs2td :: Integer -> TimeDiff
 secs2td x = diffClockTimes (TOD x 0) (TOD 0 0)
+
+
+-- | Read a value from a string, and give an informative message
+--   if it fails.
+read' :: (Typeable a,Read a) => String -> a
+read' s = ret
+  where ret = case reads s of
+                  [(x,"")] -> x
+                  _ -> error $ "fromSql: Cannot read " ++ show s 
+                               ++ " as " ++ t ++ "."
+        t = show (typeOf ret)
 
 --------------
 -- The following function copied from MissingH.Time.hs
