@@ -1,3 +1,11 @@
+hdbc (0.99.3) unstable; urgency=low
+
+  * [bringert] Better error messages when fromSql encounters
+    data it doesn't understand
+  * Rebuilt for GHC 6.4.2
+
+ -- John Goerzen <jgoerzen@complete.org>  Wed, 28 Jun 2006 15:00:09 -0500
+
 hdbc (0.99.2) unstable; urgency=low
 
   * New call dbTransactionSupport
