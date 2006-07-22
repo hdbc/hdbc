@@ -482,7 +482,9 @@ instance SqlType Bool where
     fromSql (SqlString x) = 
         case map toUpper x of
                            "TRUE" -> True
+                           "T" -> True
                            "FALSE" -> False
+                           "F" -> False
                            _ -> error $ "fromSql: cannot convert SqlString " 
                                         ++ show x ++ " to Bool"
     fromSql (SqlInt32 x) = numToBool x
