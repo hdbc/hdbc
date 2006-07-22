@@ -1,3 +1,10 @@
+hdbc (1.0.1) unstable; urgency=low
+
+  * Now accept T and F for True and False from the underlying database
+    layer -- compatibility with PostgreSQL
+
+ -- John Goerzen <jgoerzen@complete.org>  Sat, 22 Jul 2006 07:11:08 -0500
+
 hdbc (1.0.0) unstable; urgency=low
 
   * Blessing this version as 1.0.0.  Whee!
