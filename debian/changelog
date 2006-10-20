@@ -1,3 +1,9 @@
+hdbc (1.0.1.2) unstable; urgency=low
+
+  * Updated for GHC 6.6.  Closes: #393805.
+
+ -- John Goerzen <jgoerzen@complete.org>  Thu, 19 Oct 2006 05:12:31 -0500
+
 hdbc (1.0.1.1) unstable; urgency=low
 
   * Rebuild with non-broken tar.
