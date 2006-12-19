@@ -363,6 +363,8 @@ instance Eq SqlValue where
     SqlEpochTime a == SqlEpochTime b = a == b
     SqlTimeDiff a == SqlTimeDiff b = a == b
     SqlNull == SqlNull = True
+    SqlNull == _ = False
+    _ == SqlNull = False
     a == b = ((fromSql a)::String) == ((fromSql b)::String)
 
 instance SqlType String where
