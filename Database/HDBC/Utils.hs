@@ -68,7 +68,7 @@ handleSqlError action =
     where handler e = fail ("SQL error: " ++ show e)
 
 {- | Like 'run', but take a list of Maybe Strings instead of 'SqlValue's. -}
-sRun :: Connection -> String -> [Maybe String] -> IO Integer
+sRun :: IConnection conn => conn -> String -> [Maybe String] -> IO Integer
 sRun conn qry lst =
     run conn qry (map toSql lst)
 
@@ -98,7 +98,7 @@ sFetchRow sth =
 This function, therefore, encapsulates the logical property that a transaction
 is all about: all or nothing.
 
-The 'Connection' object passed in is passed directly to the specified
+The 'IConnection' object passed in is passed directly to the specified
 function as a convenience.
 
 This function traps /all/ uncaught exceptions, not just SqlErrors.  Therefore,
@@ -116,7 +116,7 @@ reported since the original exception will be propogated back.  (You'd probably
 like to know about the root cause for all of this anyway.)  Feedback
 on this behavior is solicited.
 -}
-withTransaction :: Connection -> (Connection -> IO a) -> IO a
+withTransaction :: IConnection conn => conn -> (conn -> IO a) -> IO a
 withTransaction conn func =
     do r <- try (func conn)
        case r of
@@ -202,7 +202,7 @@ fetchAllRowsMap sth = fetchAllRowsAL sth >>= (return . map Map.fromList)
 
 {- | A quick way to do a query.  Similar to preparing, executing, and
 then calling 'fetchAllRows' on a statement. -}
-quickQuery :: Connection -> String -> [SqlValue] -> IO [[SqlValue]]
+quickQuery :: IConnection conn => conn -> String -> [SqlValue] -> IO [[SqlValue]]
 quickQuery conn qrystr args =
     do sth <- prepare conn qrystr
        execute sth args

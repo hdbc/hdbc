@@ -5,7 +5,7 @@ Maintainer: John Goerzen <jgoerzen@complete.org>
 Stability: Alpha
 Copyright: Copyright (c) 2005-2006 John Goerzen
 Exposed-Modules: Database.HDBC, Database.HDBC.Types, Database.HDBC.DriverUtils,
-  Database.HDBC.ColTypes
+  Database.HDBC.ColTypes, Database.HDBC.Statement
 Other-Modules: Database.HDBC.Utils
 --Extensions: ExistentialQuantification, AllowOverlappingInstances,
 --    AllowUndecidableInstances

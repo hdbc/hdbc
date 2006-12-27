@@ -1,4 +1,4 @@
-#!/usr/bin/env runhugs
+#!/usr/bin/env runhaskell
 
 > import Distribution.Simple
 

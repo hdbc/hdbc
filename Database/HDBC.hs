@@ -46,7 +46,8 @@ module Database.HDBC
      SqlValue(..),
 
      -- * Database Connections
-     Connection, disconnect, clone,
+     IConnection,
+     disconnect, clone,
      -- ** Preparing Queries
      run, sRun, prepare, quickQuery,
 
