@@ -7,7 +7,7 @@ The original source can always be found at:
 The Darcs repository for this program can be accessed with:
    darcs get --partial http://darcs.complete.org/hdbc
 
-Copyright (C) 2005-2006 John Goerzen <jgoerzen@complete.org>
+Copyright (C) 2005-2007 John Goerzen <jgoerzen@complete.org>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public

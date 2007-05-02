@@ -1,3 +1,11 @@
+hdbc (1.1.0.0) unstable; urgency=low
+
+  * New API thanks to Peter Thiemann.
+  * Fixed fromSql thanks to patch from Marco Tulio Gontijo e Silva.
+    Closes: #399858.
+
+ -- John Goerzen <jgoerzen@complete.org>  Wed, 02 May 2007 05:21:38 -0500
+
 hdbc (1.0.1.2) unstable; urgency=low
 
   * Updated for GHC 6.6.  Closes: #393805.
