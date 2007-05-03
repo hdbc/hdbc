@@ -1,5 +1,5 @@
 {-
-Copyright (C) 2005 John Goerzen <jgoerzen@complete.org>
+Copyright (C) 2005-2007 John Goerzen <jgoerzen@complete.org>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@ Copyright (C) 2005 John Goerzen <jgoerzen@complete.org>
 
 {- |
    Module     : Database.HDBC.Types
-   Copyright  : Copyright (C) 2005 John Goerzen
+   Copyright  : Copyright (C) 2005-2007 John Goerzen
    License    : GNU LGPL, version 2.1 or above
 
    Maintainer : John Goerzen <jgoerzen@complete.org>
@@ -48,7 +48,7 @@ import Database.HDBC.ColTypes
 
 {- | Main database handle object.
 
-A 'Connection' object is created by specific functions in the module for an
+An 'IConnection' object is created by specific functions in the module for an
 individual database.  That is, the connect function -- which creates
 this object -- is not standardized through the HDBC interface.
 
@@ -61,7 +61,7 @@ we consider an outdated notion.
 class IConnection conn where
                 {- | Disconnect from the remote database.
 
-You do not need to explicitly close a Connection object, but you may do so if
+You do not need to explicitly close an IConnection object, but you may do so if
 you so desire.  If you don't, the object will disconnect from the database
 in a sane way when it is garbage-collected.  However, a disconnection may
 raise an error, so you are encouraged to explicitly call 'disconnect'.  Also,
