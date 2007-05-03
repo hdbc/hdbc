@@ -154,30 +154,30 @@ Features of HDBC include:
 
 Here is a list of known drivers as of March 28, 2006:
 
-[@Sqlite v3@] Available from <http://quux.org/devel/hdbc>.  Or, to
+[@Sqlite v3@] Available from <http://software.complete.org/hdbc-sqlite3>.  Or, to
 participate in development, use 
 @darcs get --partial <http://darcs.complete.org/hdbc-sqlite3>@
 
-[@PostgreSQL@] Available from <http://quux.org/devel/hdbc>.  Or, to
+[@PostgreSQL@] Available from <http://software.complete.org/hdbc-postgresql>.  Or, to
 participate in development, use
 @darcs get --partial <http://darcs.complete.org/hdbc-postgresql>@
 
-[@ODBC@] Available from <http://quux.org/devel/hdbc>.  Or, to
+[@ODBC@] Available from <http://software.complete.org/hdbc-odbc>.  Or, to
 partitipace in development, use
 @darcs get --partial <http://darcs.complete.org/hdbc-odbc>@
 
 [@MySQL@] MySQL users are encouraged to use the ODBC driver, which works
 and has been tested against MySQL on both Linux\/Unix and Windows platforms.
 
-In addition, there is one integration package: /hdbc-missingh/.  This
-integrates with the MissingH library <http://quux.org/devel/missingh>.
-Among other things, it lets any HDBC database act as a backend for the
-AnyDBM interface.  Available from <http://quux.org/devel/hdbc>.  Or,
+In addition, there is one integration package: /hdbc-anydbm/.  This
+integrates with the AnyDBM library <http://software.complete.org/anydbm>.
+It lets any HDBC database act as a backend for the
+AnyDBM interface.  Available from <http://software.complete.org/hdbc-anydbm>.  Or,
 to participate in development, use
-@darcs get --partial <http://darcs.complete.org/hdbc-missingh>@
+@darcs get --partial <http://darcs.complete.org/hdbc-anydbm>@
 
 The latest version of HDBC itself is available from
-<http://quux.org/devel/hdbc>.  Or, to participate in development, use
+<http://software.complete.org/hdbc>.  Or, to participate in development, use
 @darcs get --partial <http://darcs.complete.org/hdbc>@.
 -}
 
@@ -249,7 +249,7 @@ However, there are some caveats to the above:
 -}
 
 {- $legal
-Copyright (C) 2005-2006 John Goerzen <jgoerzen@complete.org>
+Copyright (C) 2005-2007 John Goerzen <jgoerzen@complete.org>
 
 This library is free software; you can redistribute it and\/or
 modify it under the terms of the GNU Lesser General Public
