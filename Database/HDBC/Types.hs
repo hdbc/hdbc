@@ -39,7 +39,9 @@ module Database.HDBC.Types
     Statement(..),
     SqlError(..),
     SqlType(..), nToSql, iToSql,
-    SqlValue(..)
+    SqlValue(..),
+    ConnWrapper,
+    withWConn
     )
 
 where
@@ -177,4 +179,23 @@ and vary by database.  So don't do it.
                    before you see them.
                    -}
                 describeTable :: conn -> String -> IO [(String, SqlColDesc)]
+
+{- | Sometimes, it is annoying to use typeclasses with Haskell's type system.
+In those situations, you can use a ConnWrapper.  You can create one with:
+
+>let wrapped = ConnWrapper iconn
+
+Then, use 'withWConn' as a convenient way to use.
+-}
+data ConnWrapper = forall conn. IConnection conn => ConnWrapper conn
+
+{- | Unwrap a 'ConnWrapper' and pass the embedded 'IConnection' to
+a function.  Example:
+
+>withWConn wrapped run $ "SELECT * from foo where bar = 1" []
+-}
+withWConn :: forall b. ConnWrapper -> (forall conn. IConnection conn => conn -> b) -> b
+withWConn conn f =
+    case conn of
+         ConnWrapper x -> f x
 
