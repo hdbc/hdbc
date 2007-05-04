@@ -19,7 +19,7 @@ Copyright (C) 2005-2006 John Goerzen <jgoerzen@complete.org>
 
 {- |
    Module     : Database.HDBC
-   Copyright  : Copyright (C) 2005-2006 John Goerzen
+   Copyright  : Copyright (C) 2005-2007 John Goerzen
    License    : GNU LGPL, version 2.1 or above
 
    Maintainer : John Goerzen <jgoerzen@complete.org>
@@ -48,6 +48,8 @@ module Database.HDBC
      -- * Database Connections
      IConnection,
      disconnect, clone,
+     -- ** Wrapped Connections
+     ConnWrapper, withWConn,
      -- ** Preparing Queries
      run, sRun, prepare, quickQuery,
 

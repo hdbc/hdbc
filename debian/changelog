@@ -1,3 +1,9 @@
+hdbc (1.1.2.0) unstable; urgency=low
+
+  * Fix export of wrapped connections.
+
+ -- John Goerzen <jgoerzen@complete.org>  Thu, 03 May 2007 04:28:20 -0500
+
 hdbc (1.1.1.0) unstable; urgency=low
 
   * New connection wrapping features.
