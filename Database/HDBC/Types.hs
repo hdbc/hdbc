@@ -185,7 +185,11 @@ In those situations, you can use a ConnWrapper.  You can create one with:
 
 >let wrapped = ConnWrapper iconn
 
-Then, use 'withWConn' as a convenient way to use.
+You can then use this directly, since a ConnWrapper is also an
+'IConnection'.  However, you will not be able to use private database
+functions on it.
+
+Or, you can use 'withWConn'.
 -}
 data ConnWrapper = forall conn. IConnection conn => ConnWrapper conn
 
