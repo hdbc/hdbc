@@ -1,3 +1,9 @@
+hdbc (1.1.1.0) unstable; urgency=low
+
+  * New connection wrapping features.
+
+ -- John Goerzen <jgoerzen@complete.org>  Thu, 03 May 2007 04:10:54 -0500
+
 hdbc (1.1.0.0) unstable; urgency=low
 
   * New API thanks to Peter Thiemann.
