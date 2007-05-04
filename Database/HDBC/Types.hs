@@ -199,3 +199,19 @@ withWConn conn f =
     case conn of
          ConnWrapper x -> f x
 
+instance IConnection ConnWrapper where
+    disconnect w = withWConn w disconnect
+    commit w = withWConn w commit
+    rollback w = withWConn w rollback
+    run w = withWConn w run
+    prepare w = withWConn w prepare
+    clone w = withWConn w (\dbh -> clone dbh >>= return . ConnWrapper)
+    hdbcDriverName w = withWConn w hdbcDriverName
+    hdbcClientVer w = withWConn w hdbcClientVer
+    proxiedClientName w = withWConn w proxiedClientName
+    proxiedClientVer w = withWConn w proxiedClientVer
+    dbServerVer w = withWConn w dbServerVer
+    dbTransactionSupport w = withWConn w dbTransactionSupport
+    getTables w = withWConn w getTables
+    describeTable w = withWConn w describeTable
+
