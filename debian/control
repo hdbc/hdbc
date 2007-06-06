@@ -1,7 +1,7 @@
 Source: hdbc
 Priority: optional
 Maintainer: John Goerzen <jgoerzen@complete.org>
-Build-Depends: debhelper (>= 4.0.0), ghc6 (>= 6.6), ghc6 (<< 6.6-999), haskell-devscripts (>= 0.5.6), cpphs, haddock
+Build-Depends: debhelper (>= 4.0.0), ghc6 (>= 6.6.1), ghc6 (<< 6.6.1-999), haskell-devscripts (>= 0.5.6), cpphs, haddock, libghc6-mtl-dev
 Build-Depends-Indep: debhelper (>= 4.0.0), haddock, hugs (>= 98.200503.08), haskell-devscripts (>= 0.5.6), ghc6 (>= 6.6), cpphs
 Standards-Version: 3.6.2
 Section: libs
@@ -9,7 +9,7 @@ Section: libs
 Package: libghc6-hdbc-dev
 Section: libdevel
 Architecture: any
-Depends: ${haskell:Depends}
+Depends: ${haskell:Depends}, libghc6-mtl-dev
 Suggests: libghc6-hdbc-postgresql-dev | libghc6-hdbc-sqlite3-dev, libghc6-hdbc-missingh-dev
 Description: Haskell Database Connectivity, GHC6 package
  HDBC provides an abstraction layer between Haskell programs and SQL
