@@ -1,3 +1,9 @@
+hdbc (1.1.2.2) unstable; urgency=low
+
+  * Build doc all the time.  Closes: #427977.
+
+ -- John Goerzen <jgoerzen@complete.org>  Fri, 15 Jun 2007 05:24:17 -0500
+
 hdbc (1.1.2.1) unstable; urgency=low
 
   * Update for newer GHC 6.6.1.  Closes: #422290, #426127.
