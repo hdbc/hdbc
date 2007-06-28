@@ -8,6 +8,7 @@ module Database.HDBC.Statement
 
 where
 import Data.Dynamic
+import qualified Data.ByteString as B
 import Data.Char(ord,toUpper)
 import Data.Word
 import Data.Int
@@ -163,6 +164,7 @@ is true holds; if none are true, they are not equal):
  * Both represent the same type and the encapsulated values are equal
  * The values of each, when converted to a string, are equal. -}
 data SqlValue = SqlString String 
+              | SqlByteString B.ByteString
               | SqlWord32 Word32
               | SqlWord64 Word64
               | SqlInt32 Int32
@@ -179,6 +181,7 @@ data SqlValue = SqlString String
 
 instance Eq SqlValue where
     SqlString a == SqlString b = a == b
+    SqlByteString a == SqlByteString b = a == b
     SqlWord32 a == SqlWord32 b = a == b
     SqlWord64 a == SqlWord64 b = a == b
     SqlInt32 a == SqlInt32 b = a == b
@@ -198,6 +201,7 @@ instance Eq SqlValue where
 instance SqlType String where
     toSql = SqlString
     fromSql (SqlString x) = x
+    fromSql (SqlByteString x) = byteString2String x
     fromSql (SqlInt32 x) = show x
     fromSql (SqlInt64 x) = show x
     fromSql (SqlWord32 x) = show x
@@ -211,9 +215,19 @@ instance SqlType String where
     fromSql (SqlTimeDiff x) = show x
     fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to String"
 
+instance SqlType B.ByteString where
+    toSql = SqlByteString
+    fromSql (SqlByteString x) = x
+    fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to ByteString"
+    fromSql x = (string2ByteString . fromSql) x
+
+string2ByteString :: String -> B.ByteString
+string2ByteString = B.pack . map (toEnum . fromEnum)
+
 instance SqlType Int where
     toSql x = SqlInt32 (fromIntegral x)
     fromSql (SqlString x) = read' x
+    fromSql (SqlByteString x) = (read' . byteString2String) x
     fromSql (SqlInt32 x) = fromIntegral x
     fromSql (SqlInt64 x) = fromIntegral x
     fromSql (SqlWord32 x) = fromIntegral x
@@ -230,6 +244,7 @@ instance SqlType Int where
 instance SqlType Int32 where
     toSql = SqlInt32
     fromSql (SqlString x) = read' x
+    fromSql (SqlByteString x) = (read' . byteString2String) x
     fromSql (SqlInt32 x) = x
     fromSql (SqlInt64 x) = fromIntegral x
     fromSql (SqlWord32 x) = fromIntegral x
@@ -246,6 +261,7 @@ instance SqlType Int32 where
 instance SqlType Int64 where
     toSql = SqlInt64
     fromSql (SqlString x) = read' x
+    fromSql (SqlByteString x) = (read' . byteString2String) x
     fromSql (SqlInt32 x) = fromIntegral x
     fromSql (SqlInt64 x) = x
     fromSql (SqlWord32 x) = fromIntegral x
@@ -262,6 +278,7 @@ instance SqlType Int64 where
 instance SqlType Word32 where
     toSql = SqlWord32
     fromSql (SqlString x) = read' x
+    fromSql (SqlByteString x) = (read' . byteString2String) x
     fromSql (SqlInt32 x) = fromIntegral x
     fromSql (SqlInt64 x) = fromIntegral x
     fromSql (SqlWord32 x) = x
@@ -278,6 +295,7 @@ instance SqlType Word32 where
 instance SqlType Word64 where
     toSql = SqlWord64
     fromSql (SqlString x) = read' x
+    fromSql (SqlByteString x) = (read' . byteString2String) x
     fromSql (SqlInt32 x) = fromIntegral x
     fromSql (SqlInt64 x) = fromIntegral x
     fromSql (SqlWord32 x) = fromIntegral x
@@ -294,6 +312,7 @@ instance SqlType Word64 where
 instance SqlType Integer where
     toSql = SqlInteger
     fromSql (SqlString x) = read' x
+    fromSql (SqlByteString x) = (read' . byteString2String) x
     fromSql (SqlInt32 x) = fromIntegral x
     fromSql (SqlInt64 x) = fromIntegral x
     fromSql (SqlWord32 x) = fromIntegral x
@@ -317,6 +336,7 @@ instance SqlType Bool where
                            "F" -> False
                            _ -> error $ "fromSql: cannot convert SqlString " 
                                         ++ show x ++ " to Bool"
+    fromSql (SqlByteString x) = (fromSql . SqlString . byteString2String) x
     fromSql (SqlInt32 x) = numToBool x
     fromSql (SqlInt64 x) = numToBool x
     fromSql (SqlWord32 x) = numToBool x
@@ -336,6 +356,7 @@ numToBool x = x /= 0
 instance SqlType Char where
     toSql = SqlChar
     fromSql (SqlString [x]) = x
+    fromSql (SqlByteString x) = (head . byteString2String) x
     fromSql (SqlString _) = error "fromSql: cannot convert SqlString to Char"
     fromSql (SqlInt32 _) = error "fromSql: cannot convert SqlInt32 to Char"
     fromSql (SqlInt64 _) = error "fromSql: cannot convert SqlInt64 to Char"
@@ -353,6 +374,7 @@ instance SqlType Char where
 instance SqlType Double where
     toSql = SqlDouble
     fromSql (SqlString x) = read' x
+    fromSql (SqlByteString x) = (read' . byteString2String) x
     fromSql (SqlInt32 x) = fromIntegral x
     fromSql (SqlInt64 x) = fromIntegral x
     fromSql (SqlWord32 x) = fromIntegral x
@@ -369,6 +391,7 @@ instance SqlType Double where
 instance SqlType Rational where
     toSql = SqlRational
     fromSql (SqlString x) = read' x
+    fromSql (SqlByteString x) = (read' . byteString2String) x
     fromSql (SqlInt32 x) = fromIntegral x
     fromSql (SqlInt64 x) = fromIntegral x
     fromSql (SqlWord32 x) = fromIntegral x
@@ -385,6 +408,7 @@ instance SqlType Rational where
 instance SqlType ClockTime where
     toSql (TOD x _) = SqlEpochTime x
     fromSql (SqlString x) = TOD (read' x) 0
+    fromSql (SqlByteString x) = TOD ((read' . byteString2String) x) 0
     fromSql (SqlInt32 x) = TOD (fromIntegral x) 0
     fromSql (SqlInt64 x) = TOD (fromIntegral x) 0
     fromSql (SqlWord32 x) = TOD (fromIntegral x) 0
@@ -401,6 +425,7 @@ instance SqlType ClockTime where
 instance SqlType TimeDiff where
     toSql x = SqlTimeDiff (timeDiffToSecs x)
     fromSql (SqlString x) = secs2td (read' x)
+    fromSql (SqlByteString x) = secs2td ((read' . byteString2String) x)
     fromSql (SqlInt32 x) = secs2td (fromIntegral x)
     fromSql (SqlInt64 x) = secs2td (fromIntegral x)
     fromSql (SqlWord32 x) = secs2td (fromIntegral x)
@@ -423,6 +448,9 @@ instance (SqlType a) => SqlType (Maybe a) where
     toSql (Just a) = toSql a
     fromSql SqlNull = Nothing
     fromSql x = Just (fromSql x)
+
+byteString2String :: B.ByteString -> String
+byteString2String = map (toEnum . fromEnum) . B.unpack
 
 secs2td :: Integer -> TimeDiff
 secs2td x = diffClockTimes (TOD x 0) (TOD 0 0)
