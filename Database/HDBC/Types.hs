@@ -80,6 +80,7 @@ do this automatically on disconnect.
 Bad Things (TM) could happen if you call this while you have 'Statement's 
 active.  In more precise language, the results in such situations are undefined
 and vary by database.  So don't do it.
+
 -}
                 disconnect :: conn -> IO ()
                 {- | Commit any pending data to the database.

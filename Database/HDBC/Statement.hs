@@ -149,25 +149,10 @@ is needed locally in Haskell.
 Most people will use 'toSql' and 'fromSql' instead of manipulating
 'SqlValue's directly.
 
-Time values are handled like this:
-
- * 'toSql' on a CalendarTime will yield an 'SqlTimestamp'
- * 'toSql' on a ClockTime will yield an 'SqlEpochTime'
-
-When 'fromSql' is called in a context where a String is expected, you will get:
-
- * A String representation of an Integer for 'SqlEpochTime'
- * A String representation using "%Y-%m-%d %H:%M:%S %z" for 'SqlTimestamp' values
- * A String representation of either the time or the date part, without timezone information, for 'SqlTime' and 'SqlDate' values
-
-'SqlTime' and 'SqlDate' values cannot be created using 'toSql'.  When
-transmitted to the underlying database, the system will only reference
-the appropriate parts of the underlying CalendarTime for these types of values.
-
+The default representation of time values is an integer number of seconds.
 Databases such as PostgreSQL with builtin timestamp types can will see
-automatic conversion between these HDBC date\/time types to local types.
-Databases such as Sqlite which lack specific date and time types will simply
-store the default 'fromSql' String representations for the different types.
+automatic conversion between these Haskell types to local types.  Other
+databases can just use an int or a string. 
 
 This behavior also exists for other types.  For instance, many databases don't
 have a Rational type, so they'll just use Haskell's show function and
@@ -175,11 +160,8 @@ store a Rational as a string.
 
 Two SqlValues are considered to be equal if one of these hold (first one that
 is true holds; if none are true, they are not equal):
-
  * Both are NULL
-
  * Both represent the same type and the encapsulated values are equal
-
  * The values of each, when converted to a string, are equal. -}
 data SqlValue = SqlString String 
               | SqlByteString B.ByteString
@@ -192,10 +174,7 @@ data SqlValue = SqlString String
               | SqlBool Bool
               | SqlDouble Double
               | SqlRational Rational
-              | SqlEpochTime Integer -- ^ Representation of a time\/date stamp in seconds since epoch, similar to ClockTime.  Can be converted from ClockTime or CalendarTime.
-              | SqlDate CalendarTime -- ^ Representation of a standalone date
-              | SqlTime CalendarTime -- ^ Representation of a standalong time
-              | SqlTimeStamp CalendarTime -- ^ Representation of a combined date and time
+              | SqlEpochTime Integer -- ^ Representation of ClockTime or CalendarTime
               | SqlTimeDiff Integer -- ^ Representation of TimeDiff
               | SqlNull         -- ^ NULL in SQL or Nothing in Haskell
      deriving (Show)
