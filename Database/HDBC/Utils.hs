@@ -144,6 +144,9 @@ you want.
 But then, similar caveats apply with hGetContents.
 
 Bottom line: this is a very convenient abstraction; use it wisely.
+
+Use 'fetchAllRows\'' if you need something that is strict, without
+all these caveats.
 -}
 fetchAllRows :: Statement -> IO [[SqlValue]]
 fetchAllRows sth = unsafeInterleaveIO $
@@ -153,11 +156,32 @@ fetchAllRows sth = unsafeInterleaveIO $
          Just x -> do remainder <- fetchAllRows sth
                       return (x : remainder)
 
+evalAll :: [[a]] -> IO Integer
+evalAll inp =
+    do let r1 = mapM (evaluate . genericLength) inp
+       evaluate (sum r1)
+
+{- | Strict version of 'fetchAllRows'.  Does not have the side-effects
+of 'fetchAllRows', but forces the entire result set to be buffered
+in memory. -}
+fetchAllRows' :: Statement -> IO [[SqlVvalue]]
+fetchAllRows' sth =
+    do res <- fetchAllRows sth
+       evalAll res
+       return res
+
 {- | Like 'fetchAllRows', but return Maybe Strings instead of 'SqlValue's. -}
 sFetchAllRows :: Statement -> IO [[Maybe String]]
 sFetchAllRows sth =
     do res <- fetchAllRows sth
        return $ map (map fromSql) res
+
+{- | Strict version of 'sFetchAllRows'. -}
+sFetchAllRows' :: Statement -> IO [[Maybe String]]
+sFetchAllRows' sth =
+    do res <- sFetchAllRows sth
+       evalAll res
+       return res
 
 {- | Like 'fetchRow', but instead of returning a list, return an association
 list from column name to value.
@@ -175,6 +199,13 @@ fetchRowAL sth =
                      let names = map (map toLower) names_raw
                      return $ Just $ zip names r
 
+{- | Strict version of 'fetchRowAL' -}
+fetchRowAL' :: Statement -> IO (Maybe [(String, SqlValue)])
+fetchRowAL' sth =
+    do res <- fetchRowAL sth
+       evalAll res
+       return res
+
 {- | Similar to 'fetchRowAL', but return a Map instead of an association list.
 -}
 fetchRowMap :: Statement -> IO (Maybe (Map.Map String SqlValue))
@@ -183,6 +214,13 @@ fetchRowMap sth =
        case r of
               Nothing -> return Nothing
               Just x -> return $ Just $ Map.fromList x
+
+{- | Strict version of 'fetchRowMap' -}
+fetchRowMap' :: Statement -> IO (Maybe (Map.Map String SqlValue))
+fetchRowMap' sth = 
+    do res <- fetchRowMap sth
+       evalAll res
+       return res
 
 {- | Like 'fetchAllRows', but instead of returning a list for each
 row, return an association list for each row, from column name to value.
@@ -195,15 +233,37 @@ fetchAllRowsAL sth =
        rows <- fetchAllRows sth
        return $ map (zip names) rows
 
+{- | Strict version of 'fetchAllRowsAL' -}
+fetchAllRowsAL' :: Statement -> IO [[(String, SqlValue)]]
+fetchAllRowsAL' sth =
+    do res <- fetchAllRowsAL sth
+       evalAll res
+       return res
+
 {- | Like 'fetchAllRowsAL', but return a list of Maps instead of a list of
 association lists. -}
 fetchAllRowsMap :: Statement -> IO [Map.Map String SqlValue]
 fetchAllRowsMap sth = fetchAllRowsAL sth >>= (return . map Map.fromList)
 
+{- | Strict version of 'fetchAllRowsMap' -}
+fetchAllRowsMap' :: Statement -> IO [Map.Map String SqlValue]
+fetchAllRowsMap' sth = 
+    do res <- fetchAllRowsMap sth
+       evalAll res
+       return res
+
 {- | A quick way to do a query.  Similar to preparing, executing, and
-then calling 'fetchAllRows' on a statement. -}
+then calling 'fetchAllRows' on a statement. See also 'quickQuery\'' -}
 quickQuery :: IConnection conn => conn -> String -> [SqlValue] -> IO [[SqlValue]]
 quickQuery conn qrystr args =
     do sth <- prepare conn qrystr
        execute sth args
        fetchAllRows sth
+
+{- | Strict version of 'quickQuery'. -}
+quickQuery' :: IConnection conn => conn -> String -> [SqlValue] -> IO [[SqlValue]]
+quickQuery' conn qrystr args =
+    do res <- quickQuery conn qrystr args
+       evalAll res
+       return res
+
