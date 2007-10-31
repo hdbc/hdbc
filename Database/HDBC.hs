@@ -67,9 +67,10 @@ module Database.HDBC
      -- ** Execution
      execute, sExecute, executeMany, sExecuteMany,
      -- ** Fetching Results
-     fetchRow, fetchRowAL, fetchRowMap,
-     sFetchRow, fetchAllRows, fetchAllRowsAL, fetchAllRowsMap,
-     sFetchAllRows, getColumnNames,
+     fetchRow, fetchRowAL, fetchRowMap, sFetchRow, 
+     fetchAllRows, fetchAllRows', fetchAllRowsAL, fetchAllRowsAL',
+     fetchAllRowsMap, fetchAllRowsMap', sFetchAllRows, sFetchAllRows',
+     getColumnNames,
      -- ** Statement Inquires
      describeResult,
      -- ** Miscellaneous
