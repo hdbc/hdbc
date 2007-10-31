@@ -51,7 +51,7 @@ module Database.HDBC
      -- ** Wrapped Connections
      ConnWrapper, withWConn,
      -- ** Preparing Queries
-     run, sRun, prepare, quickQuery,
+     run, sRun, prepare, quickQuery', quickQuery,
 
      -- ** Transaction Handling
      -- $transactions
@@ -97,9 +97,12 @@ where
 import Database.HDBC.Utils(catchSql, handleSql, sqlExceptions,
                            handleSqlError, withTransaction,
                            sFetchAllRows, fetchAllRows,
+                           sFetchAllRows', fetchAllRows',
                            sRun, sExecute, sExecuteMany, sFetchRow,
                            quickQuery, fetchRowMap, fetchAllRowsMap,
-                           fetchRowAL, fetchAllRowsAL)
+                           quickQuery', fetchAllRowsMap',
+                           fetchRowAL, fetchAllRowsAL,
+                           fetchAllRowsAL')
 import Database.HDBC.Types
 import Database.HDBC.ColTypes
 
