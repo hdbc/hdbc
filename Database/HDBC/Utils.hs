@@ -41,6 +41,7 @@ import Control.Exception
 import Data.Char
 import Data.Dynamic
 import System.IO.Unsafe
+import Data.List(genericLength)
 
 {- | Execute the given IO action.
 
@@ -164,7 +165,7 @@ evalAll inp =
 {- | Strict version of 'fetchAllRows'.  Does not have the side-effects
 of 'fetchAllRows', but forces the entire result set to be buffered
 in memory. -}
-fetchAllRows' :: Statement -> IO [[SqlVvalue]]
+fetchAllRows' :: Statement -> IO [[SqlValue]]
 fetchAllRows' sth =
     do res <- fetchAllRows sth
        evalAll res
