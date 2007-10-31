@@ -161,7 +161,7 @@ and vary by database.  So don't do it.
                    connection, excluding special meta-tables (system tables).
                    
                    You should expect this to be returned in the same manner
-                   as a result from 'Database.HDBC.fetchAllRows\''.
+                   as a result from 'Database.HDBC.fetchAllRows''.
 
                    All results should be converted to lowercase for you
                    before you see them.
@@ -173,7 +173,7 @@ and vary by database.  So don't do it.
                    set is the column name.
 
                    You should expect this to be returned in the same manner
-                   as a result from 'Database.HDBC.fetchAllRows\''.
+                   as a result from 'Database.HDBC.fetchAllRows''.
 
                    All results should be converted to lowercase for you
                    before you see them.

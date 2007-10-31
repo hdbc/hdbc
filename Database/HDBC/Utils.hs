@@ -146,7 +146,7 @@ But then, similar caveats apply with hGetContents.
 
 Bottom line: this is a very convenient abstraction; use it wisely.
 
-Use 'fetchAllRows\'' if you need something that is strict, without
+Use 'fetchAllRows'' if you need something that is strict, without
 all these caveats.
 -}
 fetchAllRows :: Statement -> IO [[SqlValue]]
@@ -258,7 +258,7 @@ fetchAllRowsMap' sth =
        return res
 
 {- | A quick way to do a query.  Similar to preparing, executing, and
-then calling 'fetchAllRows' on a statement. See also 'quickQuery\'' -}
+then calling 'fetchAllRows' on a statement. See also 'quickQuery'' -}
 quickQuery :: IConnection conn => conn -> String -> [SqlValue] -> IO [[SqlValue]]
 quickQuery conn qrystr args =
     do sth <- prepare conn qrystr
