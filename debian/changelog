@@ -1,9 +1,14 @@
 hdbc (1.1.3.0) unstable; urgency=low
 
   * New release of HDBC.
-  * Added strict versions of row functions.
-  * Changed getTables and similar functions to be listed as strict
-    in the docs.
+  * [API] Added strict versions of fetchAll* and related functions.
+    Specific new functions are: quickQuery', fetchAllRows',
+    fetchAllRowsAL', fetchAllRowsMAP', sFetchAllRows'.  This does
+    not impact database drivers.  No user impact.
+  * [API] Changed spec to make the following functions strict
+    in their result: describeResult, getTables, describeTable.
+    No code change in HDBC.  Potential code change in backends.
+    No anticipated user impact.
   * Add SqlByteString constructor to SqlValue.  Patch from
     Toby Allsopp.
 
