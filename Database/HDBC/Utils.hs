@@ -159,7 +159,7 @@ fetchAllRows sth = unsafeInterleaveIO $
 
 evalAll :: [[a]] -> IO Integer
 evalAll inp =
-    do let r1 = mapM (evaluate . genericLength) inp
+    do r1 <- mapM (evaluate . genericLength) inp
        evaluate (sum r1)
 
 {- | Strict version of 'fetchAllRows'.  Does not have the side-effects
@@ -204,7 +204,9 @@ fetchRowAL sth =
 fetchRowAL' :: Statement -> IO (Maybe [(String, SqlValue)])
 fetchRowAL' sth =
     do res <- fetchRowAL sth
-       evalAll res
+       case res of
+            Nothing -> return 0
+            Just x -> evaluate ((genericLength x)::Integer)
        return res
 
 {- | Similar to 'fetchRowAL', but return a Map instead of an association list.
@@ -220,7 +222,9 @@ fetchRowMap sth =
 fetchRowMap' :: Statement -> IO (Maybe (Map.Map String SqlValue))
 fetchRowMap' sth = 
     do res <- fetchRowMap sth
-       evalAll res
+       case res of
+            Nothing -> return 0
+            Just x -> evaluate ((genericLength (Map.toList x))::Integer)
        return res
 
 {- | Like 'fetchAllRows', but instead of returning a list for each
@@ -250,7 +254,7 @@ fetchAllRowsMap sth = fetchAllRowsAL sth >>= (return . map Map.fromList)
 fetchAllRowsMap' :: Statement -> IO [Map.Map String SqlValue]
 fetchAllRowsMap' sth = 
     do res <- fetchAllRowsMap sth
-       evalAll res
+       evaluate ((genericLength res)::Integer)
        return res
 
 {- | A quick way to do a query.  Similar to preparing, executing, and
