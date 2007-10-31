@@ -82,7 +82,7 @@ data Statement = Statement
           set is the column name.
 
           You should expect this to be returned in the same manner
-          as a result from 'Database.HDBC.fetchAllRows'.
+          as a result from 'Database.HDBC.fetchAllRows''.
 
           All results should be converted to lowercase for you
           before you see them.
