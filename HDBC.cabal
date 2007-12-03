@@ -14,12 +14,23 @@ Description: HDBC provides an abstraction layer between Haskell programs and SQL
  Haskell, and have it work with any number of backend SQL databases
  (MySQL, Oracle, PostgreSQL, ODBC-compliant databases, etc.)
 Stability: Stable
-Exposed-Modules: Database.HDBC, Database.HDBC.Types, Database.HDBC.DriverUtils,
-  Database.HDBC.ColTypes, Database.HDBC.Statement
-Other-Modules: Database.HDBC.Utils
---Extensions: ExistentialQuantification, AllowOverlappingInstances,
---    AllowUndecidableInstances
-Extensions: ExistentialQuantification
-Build-Depends: base, mtl
-GHC-Options: -O2 -Wall
 
+Cabal-Version: >=1.2
+
+flag splitBase
+  description: Choose the new smaller, split-up base package.
+library
+  if flag(splitBase)
+    Build-Depends: base>=3, old-time, bytestring, containers
+  else
+    Build-Depends: base<3
+  Build-Depends: mtl
+
+  GHC-Options: -O2 -Wall -fglasgow-exts
+
+  Exposed-Modules: Database.HDBC, Database.HDBC.Types, Database.HDBC.DriverUtils,
+    Database.HDBC.ColTypes, Database.HDBC.Statement
+  Other-Modules: Database.HDBC.Utils
+  --Extensions: ExistentialQuantification, AllowOverlappingInstances,
+  --    AllowUndecidableInstances
+  Extensions: ExistentialQuantification
