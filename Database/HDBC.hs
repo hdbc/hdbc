@@ -49,7 +49,7 @@ module Database.HDBC
      IConnection,
      disconnect, clone,
      -- ** Wrapped Connections
-     ConnWrapper, withWConn,
+     ConnWrapper(..), withWConn,
      -- ** Preparing Queries
      run, sRun, prepare, quickQuery', quickQuery,
 
