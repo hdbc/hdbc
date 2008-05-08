@@ -14,6 +14,7 @@ Description: HDBC provides an abstraction layer between Haskell programs and SQL
  Haskell, and have it work with any number of backend SQL databases
  (MySQL, Oracle, PostgreSQL, ODBC-compliant databases, etc.)
 Stability: Stable
+Build-Type: Simple
 
 Cabal-Version: >=1.2
 
