@@ -334,6 +334,8 @@ instance SqlType Bool where
                            "T" -> True
                            "FALSE" -> False
                            "F" -> False
+                           "0" -> False
+                           "1" -> True
                            _ -> error $ "fromSql: cannot convert SqlString " 
                                         ++ show x ++ " to Bool"
     fromSql (SqlByteString x) = (fromSql . SqlString . byteString2String) x
