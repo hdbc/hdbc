@@ -23,6 +23,15 @@ Description: Haskell Database Connectivity, GHC6 package
  To use HDBC, you'll need both this package, and a driver package such
  as libghc6-hdbc-postgresql-dev.
 
+Package: libghc6-hdbc-prof
+Section: libdevel
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libghc6-hdbc-dev, ghc6-prof (>= 6.8.2), ghc6-prof (<< 6.8.2+)
+Description: Haskell Database Connectivity, GHC6 profiling data
+ HDBC provides an abstraction layer between Haskell programs and SQL
+ relational databases. This package provides profiling information for using
+ HDBC with GHC6.
+
 Package: libhugs-hdbc
 Section: libs
 Architecture: all
