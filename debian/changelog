@@ -1,3 +1,10 @@
+hdbc (1.1.6.0) unstable; urgency=low
+
+  * Applied GHC 6.10 compatibility patch from Brian Bloniarz
+  * Accept '0' and '1' as Bools
+
+ -- John Goerzen <jgoerzen@complete.org>  Tue, 30 Dec 2008 08:49:28 -0600
+
 hdbc (1.1.5.0) unstable; urgency=low
 
   * Added missing ConnWrapper(..) to exports.
