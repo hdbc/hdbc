@@ -69,6 +69,7 @@ install-a: build
 	# Add here commands to install the package into debian/tmp
 	#$(MAKE) install DESTDIR=$(CURDIR)/debian/tmp
 	dh_haskell -a
+	dh_haskell_depends -a
 
 install-i: build
 	dh_testdir

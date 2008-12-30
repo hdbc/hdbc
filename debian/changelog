@@ -1,3 +1,9 @@
+hdbc (1.1.6.1) unstable; urgency=low
+
+  * Added dh_haskell_depends.
+
+ -- John Goerzen <jgoerzen@complete.org>  Tue, 30 Dec 2008 08:58:48 -0600
+
 hdbc (1.1.6.0) unstable; urgency=low
 
   * Applied GHC 6.10 compatibility patch from Brian Bloniarz
