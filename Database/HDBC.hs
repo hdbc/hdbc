@@ -19,7 +19,7 @@ Copyright (C) 2005-2006 John Goerzen <jgoerzen@complete.org>
 
 {- |
    Module     : Database.HDBC
-   Copyright  : Copyright (C) 2005-2007 John Goerzen
+   Copyright  : Copyright (C) 2005-2009 John Goerzen
    License    : GNU LGPL, version 2.1 or above
 
    Maintainer : John Goerzen <jgoerzen@complete.org>
@@ -255,7 +255,7 @@ However, there are some caveats to the above:
 -}
 
 {- $legal
-Copyright (C) 2005-2007 John Goerzen <jgoerzen@complete.org>
+Copyright (C) 2005-2009 John Goerzen <jgoerzen@complete.org>
 
 This library is free software; you can redistribute it and\/or
 modify it under the terms of the GNU Lesser General Public
