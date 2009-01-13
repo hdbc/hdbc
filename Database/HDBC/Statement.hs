@@ -12,7 +12,10 @@ import qualified Data.ByteString as B
 import Data.Char(ord,toUpper)
 import Data.Word
 import Data.Int
-import System.Time
+import qualified System.Time as ST
+import qualified Data.Time as DT
+import qualified Data.Time.Clock.POSIX as DTP
+import qualified Data.Time.LocalTime as DTL
 import Database.HDBC.ColTypes
 
 data Statement = Statement
@@ -407,24 +410,49 @@ instance SqlType Rational where
     fromSql (SqlTimeDiff x) = fromIntegral x
     fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Double"
 
-instance SqlType ClockTime where
-    toSql (TOD x _) = SqlEpochTime x
-    fromSql (SqlString x) = TOD (read' x) 0
-    fromSql (SqlByteString x) = TOD ((read' . byteString2String) x) 0
-    fromSql (SqlInt32 x) = TOD (fromIntegral x) 0
-    fromSql (SqlInt64 x) = TOD (fromIntegral x) 0
-    fromSql (SqlWord32 x) = TOD (fromIntegral x) 0
-    fromSql (SqlWord64 x) = TOD (fromIntegral x) 0
-    fromSql (SqlInteger x) = TOD x 0
+instance SqlType ST.ClockTime where
+    toSql (ST.TOD x _) = SqlEpochTime x
+    fromSql (SqlString x) = ST.TOD (read' x) 0
+    fromSql (SqlByteString x) = ST.TOD ((read' . byteString2String) x) 0
+    fromSql (SqlInt32 x) = ST.TOD (fromIntegral x) 0
+    fromSql (SqlInt64 x) = ST.TOD (fromIntegral x) 0
+    fromSql (SqlWord32 x) = ST.TOD (fromIntegral x) 0
+    fromSql (SqlWord64 x) = ST.TOD (fromIntegral x) 0
+    fromSql (SqlInteger x) = ST.TOD x 0
     fromSql (SqlChar _) = error "fromSql: cannot convert SqlChar to ClockTime"
     fromSql (SqlBool _) = error "fromSql: cannot convert SqlBool to ClockTime"
-    fromSql (SqlDouble x) = TOD (truncate x) 0
-    fromSql (SqlRational x) = TOD (truncate x) 0
-    fromSql (SqlEpochTime x) = TOD x 0
+    fromSql (SqlDouble x) = ST.TOD (truncate x) 0
+    fromSql (SqlRational x) = ST.TOD (truncate x) 0
+    fromSql (SqlEpochTime x) = ST.TOD x 0
     fromSql (SqlTimeDiff _) = error "fromSql: cannot convert SqlTimeDiff to ClockTime"
     fromSql SqlNull = error "fromSql: cannot convert SqlNull to ClockTime"
 
-instance SqlType TimeDiff where
+instance SqlType DTP.POSIXTime where
+    toSql x = SqlEpochTime (floor x)
+    fromSql (SqlString x) = fromInteger (read' x)
+    fromSql (SqlByteString x) = fromInteger ((read' . byteString2String) x)
+    fromSql (SqlInt32 x) = fromIntegral x
+    fromSql (SqlInt64 x) = fromIntegral x
+    fromSql (SqlWord32 x) = fromIntegral x
+    fromSql (SqlWord64 x) = fromIntegral x
+    fromSql (SqlInteger x) = fromIntegral x
+    fromSql (SqlChar _) = error "fromSql: cannot convert SqlChar to POSIXTime"
+    fromSql (SqlBool _) = error "fromSql: cannot convert SqlBool to POSIXTime"
+    fromSql (SqlDouble x) = fromIntegral ((truncate x)::Integer)
+    fromSql (SqlRational x) = fromIntegral ((truncate x)::Integer)
+    fromSql (SqlEpochTime x) = fromIntegral x
+    fromSql (SqlTimeDiff _) = error "fromSql: cannot convert SqlTimeDiff to POSIXTime"
+    fromSql SqlNull = error "fromSql: cannot convert SqlNull to POSIXTime"
+
+instance SqlType DT.UTCTime where
+    toSql x = toSql (DTP.utcTimeToPOSIXSeconds x)
+    fromSql x = DTP.posixSecondsToUTCTime (fromSql x)
+
+instance SqlType DT.ZonedTime where
+    toSql x = toSql (DT.zonedTimeToUTC x)
+    fromSql x = DT.utcToZonedTime DT.utc (fromSql x)
+
+instance SqlType ST.TimeDiff where
     toSql x = SqlTimeDiff (timeDiffToSecs x)
     fromSql (SqlString x) = secs2td (read' x)
     fromSql (SqlByteString x) = secs2td ((read' . byteString2String) x)
@@ -441,9 +469,9 @@ instance SqlType TimeDiff where
     fromSql (SqlTimeDiff x) = secs2td x
     fromSql SqlNull = error "fromSql: cannot convert SqlNull to TimeDiff"
 
-instance SqlType CalendarTime where
-    toSql x = toSql (toClockTime x)
-    fromSql = toUTCTime . fromSql
+instance SqlType ST.CalendarTime where
+    toSql x = toSql (ST.toClockTime x)
+    fromSql = ST.toUTCTime . fromSql
 
 instance (SqlType a) => SqlType (Maybe a) where
     toSql Nothing = SqlNull
@@ -454,8 +482,8 @@ instance (SqlType a) => SqlType (Maybe a) where
 byteString2String :: B.ByteString -> String
 byteString2String = map (toEnum . fromEnum) . B.unpack
 
-secs2td :: Integer -> TimeDiff
-secs2td x = diffClockTimes (TOD x 0) (TOD 0 0)
+secs2td :: Integer -> ST.TimeDiff
+secs2td x = ST.diffClockTimes (ST.TOD x 0) (ST.TOD 0 0)
 
 
 -- | Read a value from a string, and give an informative message
@@ -474,11 +502,11 @@ read' s = ret
 {- | Converts the given timeDiff to the number of seconds it represents.
 
 Uses the same algorithm as normalizeTimeDiff in GHC. -}
-timeDiffToSecs :: TimeDiff -> Integer
+timeDiffToSecs :: ST.TimeDiff -> Integer
 timeDiffToSecs td =
-    (fromIntegral $ tdSec td) +
-    60 * ((fromIntegral $ tdMin td) +
-          60 * ((fromIntegral $ tdHour td) +
-                24 * ((fromIntegral $ tdDay td) +
-                      30 * ((fromIntegral $ tdMonth td) +
-                            365 * (fromIntegral $ tdYear td)))))
+    (fromIntegral $ ST.tdSec td) +
+    60 * ((fromIntegral $ ST.tdMin td) +
+          60 * ((fromIntegral $ ST.tdHour td) +
+                24 * ((fromIntegral $ ST.tdDay td) +
+                      30 * ((fromIntegral $ ST.tdMonth td) +
+                            365 * (fromIntegral $ ST.tdYear td)))))
