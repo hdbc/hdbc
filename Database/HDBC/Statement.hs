@@ -469,6 +469,23 @@ instance SqlType ST.TimeDiff where
     fromSql (SqlTimeDiff x) = secs2td x
     fromSql SqlNull = error "fromSql: cannot convert SqlNull to TimeDiff"
 
+instance SqlType DT.DiffTime where
+    toSql x = SqlTimeDiff (floor . toRational $ x)
+    fromSql (SqlString x) = fromInteger (read' x)
+    fromSql (SqlByteString x) = fromInteger ((read' . byteString2String) x)
+    fromSql (SqlInt32 x) = fromIntegral x
+    fromSql (SqlInt64 x) = fromIntegral x
+    fromSql (SqlWord32 x) = fromIntegral x
+    fromSql (SqlWord64 x) = fromIntegral x
+    fromSql (SqlInteger x) = fromIntegral x
+    fromSql (SqlChar _) = error "fromSql: cannot convert SqlChar to DiffTime"
+    fromSql (SqlBool _) = error "fromSql: cannot convert SqlBool to DiffTime"
+    fromSql (SqlDouble x) = fromIntegral ((truncate x)::Integer)
+    fromSql (SqlRational x) = fromIntegral ((truncate x)::Integer)
+    fromSql (SqlEpochTime _) = error "fromSql: cannot convert SqlEpochTime to DiffTime"
+    fromSql (SqlTimeDiff x) = fromIntegral x
+    fromSql SqlNull = error "fromSql: cannot convert SqlNull to DiffTime"
+
 instance SqlType ST.CalendarTime where
     toSql x = toSql (ST.toClockTime x)
     fromSql = ST.toUTCTime . fromSql
