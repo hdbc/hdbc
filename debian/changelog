@@ -1,8 +1,15 @@
 hdbc (1.1.7.0) unstable; urgency=low
 
+  * UNRELEASED
   * New release.  Now supports new Data.Time.* types.
 
  -- John Goerzen <jgoerzen@complete.org>  Tue, 13 Jan 2009 15:04:27 -0600
+
+hdbc (1.1.6.2) unstable; urgency=high
+
+  * Rebuild for new GHC.
+
+ -- John Goerzen <jgoerzen@complete.org>  Mon, 19 Jan 2009 16:07:43 -0600
 
 hdbc (1.1.6.1) unstable; urgency=low
 
