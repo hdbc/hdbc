@@ -181,9 +181,9 @@ data SqlValue = SqlString String
               | SqlDouble Double
               | SqlRational Rational
               | SqlLocalTimeOfDay TimeOfDay -- ^ Local HH:MM:SS w/o timezone
-              | SqlLocalTime LocalTime      -- ^ Local M/D/Y HH:MM:SS w/o timezone
-              | SqlLocalDate Day            -- ^ Local date w/o timezone
-              | SqlZonedTime ZonedTime      -- ^ Local M/D/Y HH:MM:SS w/timezone
+              | SqlLocalTime LocalTime      -- ^ Local YYYY-MM-DD HH:MM:SS w/o timezone
+              | SqlLocalDate Day            -- ^ Local YYYY-MM-DD w/o timezone
+              | SqlZonedTime ZonedTime      -- ^ Local M/D/Y HH:MM:SS -HHMM
               | SqlUTCTime UTCTime          -- ^ UTC time
               | SqlPOSIXTime POSIXTime      -- ^ Time as seconds since 1/1/1970 UTC
               | SqlDiffTime NominalDiffTime -- ^ Calendar diff between seconds.  Must be constructed manually.
@@ -232,7 +232,12 @@ instance SqlType String where
     fromSql (SqlDouble x) = show x
     fromSql (SqlRational x) = show x
     fromSql (SqlLocalTimeOfDay x) = formatTime defaultTimeLocale "%T" x
-    fromSql (SqlLocalTime x) = formatTime defaultTimeLocale 
+    fromSql (SqlLocalTime x) = formatTime defaultTimeLocale
+                               (iso8601DateFormat (Just "%T")) x
+    fromSql (SqlLocalDate x) = formatTime defaultTimeLocale
+                               (iso8601DateFormat Nothing) x
+    fromSql (SqlZonedTime x) = formatTime defaultTimeLocale
+                               (iso8601DateFormat (Just "%T %z"))
     fromSql (SqlEpochTime x) = show x
     fromSql (SqlTimeDiff x) = show x
     fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to String"
