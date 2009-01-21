@@ -1,6 +1,7 @@
+{-# LANGUAGE CPP #-}
 -- #hide
 {-
-Copyright (C) 2005 John Goerzen <jgoerzen@complete.org>
+Copyright (C) 2005-2009 John Goerzen <jgoerzen@complete.org>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -19,7 +20,7 @@ Copyright (C) 2005 John Goerzen <jgoerzen@complete.org>
 
 {- |
    Module     : Database.HDBC.Utils
-   Copyright  : Copyright (C) 2005 John Goerzen
+   Copyright  : Copyright (C) 2005-2009 John Goerzen
    License    : GNU LGPL, version 2.1 or above
 
    Maintainer : John Goerzen <jgoerzen@complete.org>
@@ -39,9 +40,33 @@ import Database.HDBC.Types
 import qualified Data.Map as Map
 import Control.Exception
 import Data.Char
-import Data.Dynamic
 import System.IO.Unsafe
 import Data.List(genericLength)
+
+-- import Data.Dynamic below for GHC < 6.10
+
+#if __GLASGOW_HASKELL__ >= 610
+{- | Execute the given IO action.
+
+If it raises a 'SqlError', then execute the supplied handler and return its
+return value.  Otherwise, proceed as normal. -}
+catchSql :: IO a -> (SqlError -> IO a) -> IO a
+catchSql action handler = 
+    catchJust sqlExceptions action handler
+    where selector :: SqlError -> Maybe SqlError
+          selector e = Just e
+
+{- | Like 'catchSql', with the order of arguments reversed. -}
+handleSql :: (SqlError -> IO a) -> IO a -> IO a
+handleSql h f = catchSql f h
+
+{- | Given an Exception, return Just SqlError if it was an SqlError, or Nothing
+otherwise. Useful with functions like catchJust. -}
+sqlExceptions :: SqlError -> Maybe SqlError
+sqlExceptions e = Just e
+
+#else
+import Data.Dynamic
 
 {- | Execute the given IO action.
 
@@ -58,6 +83,7 @@ handleSql h f = catchDyn f h
 otherwise. Useful with functions like catchJust. -}
 sqlExceptions :: Exception -> Maybe SqlError
 sqlExceptions e = dynExceptions e >>= fromDynamic
+#endif
 
 {- | Catches 'SqlError's, and re-raises them as IO errors with fail.
 Useful if you don't care to catch SQL errors, but want to see a sane
