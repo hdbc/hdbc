@@ -89,7 +89,7 @@ binary-indep: build install-i
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs -i
-	dh_installdocs -i README.txt doc/*
+	dh_installdocs -i README.txt
 	dh_installexamples -i
 #	dh_install
 #	dh_installmenu
@@ -104,7 +104,7 @@ binary-indep: build install-i
 	dh_installman -i
 	dh_link -i
 	dh_strip -i
-	dh_compress -i
+	dh_compress -i -X.haddock
 	dh_fixperms -i
 #	dh_perl
 #	dh_python
@@ -120,7 +120,7 @@ binary-arch: build install-a
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs -a
-	dh_installdocs -a README.txt doc/*
+	dh_installdocs -a README.txt 
 	dh_installexamples -a
 #	dh_install
 #	dh_installmenu
@@ -135,7 +135,7 @@ binary-arch: build install-a
 	dh_installman -a
 	dh_link -a
 	dh_strip -a
-	dh_compress -a
+	dh_compress -a -X.haddock
 	dh_fixperms -a
 #	dh_perl
 #	dh_python
