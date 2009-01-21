@@ -165,7 +165,10 @@ Two SqlValues are considered to be equal if one of these hold (first one that
 is true holds; if none are true, they are not equal):
  * Both are NULL
  * Both represent the same type and the encapsulated values are equal
- * The values of each, when converted to a string, are equal. -}
+ * The values of each, when converted to a string, are equal.
+
+Note that a 'NominalDiffTime' is converted to a 'SqlPOSIXTime' by 'toSQL'; you
+must construct 'SqlDiffTime' manually. -}
 data SqlValue = SqlString String 
               | SqlByteString B.ByteString
               | SqlWord32 Word32
@@ -177,8 +180,15 @@ data SqlValue = SqlString String
               | SqlBool Bool
               | SqlDouble Double
               | SqlRational Rational
-              | SqlEpochTime Integer -- ^ Representation of ClockTime or CalendarTime
-              | SqlTimeDiff Integer -- ^ Representation of TimeDiff
+              | SqlLocalTimeOfDay TimeOfDay -- ^ Local HH:MM:SS w/o timezone
+              | SqlLocalTime LocalTime      -- ^ Local M/D/Y HH:MM:SS w/o timezone
+              | SqlLocalDate Day            -- ^ Local date w/o timezone
+              | SqlZonedTime ZonedTime      -- ^ Local M/D/Y HH:MM:SS w/timezone
+              | SqlUTCTime UTCTime          -- ^ UTC time
+              | SqlPOSIXTime POSIXTime      -- ^ Time as seconds since 1/1/1970 UTC
+              | SqlDiffTime NominalDiffTime -- ^ Calendar diff between seconds.  Must be constructed manually.
+              | SqlEpochTime Integer      -- ^ DEPRECATED Representation of ClockTime or CalendarTime.  Use SqlPOSIXTime instead.
+              | SqlTimeDiff Integer -- ^ DEPRECATED Representation of TimeDiff.  Use SqlDiffTime instead.
               | SqlNull         -- ^ NULL in SQL or Nothing in Haskell
      deriving (Show)
 
@@ -194,6 +204,13 @@ instance Eq SqlValue where
     SqlBool a == SqlBool b = a == b
     SqlDouble a == SqlDouble b = a == b
     SqlRational a == SqlRational b = a == b
+    SqlLocalTimeOfDay a == SqlLocalTimeOfDay b = a == b
+    SqlLocalTime a == SqlLocalTime b = a == b
+    SqlLocalDate a == SqlLocalDate b = a == b
+    SqlZonedTime a == SqlZonedTime b = a == b
+    SqlUTCTime a == SqlUTCTime b = a == b
+    SqlPOSIXTime a == SqlPOSIXTime b = a == b
+    SqlDiffTime a == SqlDiffTime b = a == b
     SqlEpochTime a == SqlEpochTime b = a == b
     SqlTimeDiff a == SqlTimeDiff b = a == b
     SqlNull == SqlNull = True
@@ -214,6 +231,8 @@ instance SqlType String where
     fromSql (SqlBool x) = show x
     fromSql (SqlDouble x) = show x
     fromSql (SqlRational x) = show x
+    fromSql (SqlLocalTimeOfDay x) = formatTime defaultTimeLocale "%T" x
+    fromSql (SqlLocalTime x) = formatTime defaultTimeLocale 
     fromSql (SqlEpochTime x) = show x
     fromSql (SqlTimeDiff x) = show x
     fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to String"
