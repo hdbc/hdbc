@@ -34,4 +34,4 @@ library
   Other-Modules: Database.HDBC.Utils
   --Extensions: ExistentialQuantification, AllowOverlappingInstances,
   --    AllowUndecidableInstances
-  Extensions: ExistentialQuantification
+  Extensions: ExistentialQuantification, CPP
