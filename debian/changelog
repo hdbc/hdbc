@@ -1,6 +1,9 @@
-hdbc (1.1.7.0) unstable; urgency=low
+hdbc (1.2.0-1) experimental; urgency=low
 
   * New release.  Now supports new Data.Time.* types.
+  * Noting addition of profiling libraries.  Closes: #473520, #509848.
+  * No longer a Debian-native package due to problems with dh_haskell_depends.
+  * Adding doc package.
 
  -- John Goerzen <jgoerzen@complete.org>  Tue, 13 Jan 2009 15:04:27 -0600
 
