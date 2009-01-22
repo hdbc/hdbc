@@ -57,21 +57,22 @@ is needed locally in Haskell.
 Most people will use 'toSql' and 'fromSql' instead of manipulating
 'SqlValue's directly.
 
-HDBC database backends are expected to marshal date/time data back and
+HDBC database backends are expected to marshal date and time data back and
 forth using the appropriate representation for the underlying database engine.
 Databases such as PostgreSQL with builtin date and time types should see automatic
 conversion between these Haskell types to database types.  Other databases will be
 presented with an integer or a string.  Care should be taken to use the same type on
 the Haskell side as you use on the database side.  For instance, if your database
-type lacks timezone information, you ought not to use 'ZonedTime', but instead
-'LocalTime' or 'UTCTime'.  Database type systems are not always as rich as Haskell.
-For instance, for data stored in a TIMESTAMP
-WITHOUT TIME ZONE column, HDBC may not be able to tell if it is intended as 'UTCTime'
-or 'LocalTime' data, and will happily convert it to both, upon your request.  It is
+type lacks timezone information, you ought not to use ZonedTime, but
+instead LocalTime or UTCTime.  Database type systems are not always as rich
+as Haskell.  For instance, for data stored in a TIMESTAMP
+WITHOUT TIME ZONE column, HDBC may not be able to tell if it is intended
+as UTCTime or LocalTime data, and will happily convert it to both, 
+upon your request.  It is
 your responsibility to ensure that you treat timezone issues with due care.
 
-This behavior also exists for other types.  For instance, many databases don't
-have a Rational type, so they'll just use Haskell's show function and
+This behavior also exists for other types.  For instance, many databases do not
+have a Rational type, so they will just use the show function and
 store a Rational as a string.
 
 The conversion between Haskell types and database types is complex,
