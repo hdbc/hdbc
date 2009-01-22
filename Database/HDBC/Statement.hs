@@ -640,7 +640,7 @@ instance SqlType UTCTime where
     fromSql SqlNull = error "fromSql: cannot convert SqlNull to UTCTime"
 
 instance SqlType ST.TimeDiff where
-    toSql x = SqlTimeDiff (timeDiffToSecs x)
+    toSql x = SqlDiffTime . fromIntegral . timeDiffToSecs $ x
     fromSql (SqlString x) = secs2td (read' x)
     fromSql (SqlByteString x) = secs2td ((read' . byteString2String) x)
     fromSql (SqlInt32 x) = secs2td (fromIntegral x)
