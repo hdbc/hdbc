@@ -273,8 +273,8 @@ instance SqlType String where
                                (iso8601DateFormat (Just "%T %z")) x
     fromSql (SqlUTCTime x) = formatTime defaultTimeLocale
                                (iso8601DateFormat (Just "%T")) x
-    fromSql (SqlDiffTime x) = show . truncate $ x
-    fromSql (SqlPOSIXTime x) = show . truncate $ x
+    fromSql (SqlDiffTime x) = show ((truncate x)::Integer)
+    fromSql (SqlPOSIXTime x) = show ((truncate x)::Integer)
     fromSql (SqlEpochTime x) = show x
     fromSql (SqlTimeDiff x) = show x
     fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to String"
@@ -301,11 +301,11 @@ instance SqlType Int where
     fromSql (SqlBool x) = if x then 1 else 0
     fromSql (SqlDouble x) = truncate $ x
     fromSql (SqlRational x) = truncate $ x
-    fromSql y@(SqlLocalDate x) = fromIntegral ((fromSql y)::Integer)
-    fromSql y@(SqlLocalTimeOfDay x) = fromIntegral ((fromSql y)::Integer)
-    fromSql y@(SqlLocalTime x) = fromIntegral ((fromSql y)::Integer)
-    fromSql y@(SqlZonedTime x) = fromIntegral ((fromSql y)::Integer)
-    fromSql y@(SqlUTCTime x) = fromIntegral ((fromSql y)::Integer)
+    fromSql y@(SqlLocalDate _) = fromIntegral ((fromSql y)::Integer)
+    fromSql y@(SqlLocalTimeOfDay _) = fromIntegral ((fromSql y)::Integer)
+    fromSql y@(SqlLocalTime _) = fromIntegral ((fromSql y)::Integer)
+    fromSql y@(SqlZonedTime _) = fromIntegral ((fromSql y)::Integer)
+    fromSql y@(SqlUTCTime _) = fromIntegral ((fromSql y)::Integer)
     fromSql (SqlDiffTime x) = truncate x
     fromSql (SqlPOSIXTime x) = truncate x
     fromSql (SqlEpochTime x) = fromIntegral x
@@ -325,11 +325,11 @@ instance SqlType Int32 where
     fromSql (SqlBool x) = if x then 1 else 0
     fromSql (SqlDouble x) = truncate $ x
     fromSql (SqlRational x) = truncate $ x
-    fromSql y@(SqlLocalDate x) = fromIntegral ((fromSql y)::Integer)
-    fromSql y@(SqlLocalTimeOfDay x) = fromIntegral ((fromSql y)::Integer)
-    fromSql y@(SqlLocalTime x) = fromIntegral ((fromSql y)::Integer)
-    fromSql y@(SqlZonedTime x) = fromIntegral ((fromSql y)::Integer)
-    fromSql y@(SqlUTCTime x) = fromIntegral ((fromSql y)::Integer)
+    fromSql y@(SqlLocalDate _) = fromIntegral ((fromSql y)::Integer)
+    fromSql y@(SqlLocalTimeOfDay _) = fromIntegral ((fromSql y)::Integer)
+    fromSql y@(SqlLocalTime _) = fromIntegral ((fromSql y)::Integer)
+    fromSql y@(SqlZonedTime _) = fromIntegral ((fromSql y)::Integer)
+    fromSql y@(SqlUTCTime _) = fromIntegral ((fromSql y)::Integer)
     fromSql (SqlDiffTime x) = truncate x
     fromSql (SqlPOSIXTime x) = truncate x
     fromSql (SqlEpochTime x) = fromIntegral x
@@ -349,11 +349,11 @@ instance SqlType Int64 where
     fromSql (SqlBool x) = if x then 1 else 0
     fromSql (SqlDouble x) = truncate $ x
     fromSql (SqlRational x) = truncate $ x
-    fromSql y@(SqlLocalDate x) = fromIntegral ((fromSql y)::Integer)
-    fromSql y@(SqlLocalTimeOfDay x) = fromIntegral ((fromSql y)::Integer)
-    fromSql y@(SqlLocalTime x) = fromIntegral ((fromSql y)::Integer)
-    fromSql y@(SqlZonedTime x) = fromIntegral ((fromSql y)::Integer)
-    fromSql y@(SqlUTCTime x) = fromIntegral ((fromSql y)::Integer)
+    fromSql y@(SqlLocalDate _) = fromIntegral ((fromSql y)::Integer)
+    fromSql y@(SqlLocalTimeOfDay _) = fromIntegral ((fromSql y)::Integer)
+    fromSql y@(SqlLocalTime _) = fromIntegral ((fromSql y)::Integer)
+    fromSql y@(SqlZonedTime _) = fromIntegral ((fromSql y)::Integer)
+    fromSql y@(SqlUTCTime _) = fromIntegral ((fromSql y)::Integer)
     fromSql (SqlDiffTime x) = truncate x
     fromSql (SqlPOSIXTime x) = truncate x
     fromSql (SqlEpochTime x) = fromIntegral x
@@ -373,11 +373,11 @@ instance SqlType Word32 where
     fromSql (SqlBool x) = if x then 1 else 0
     fromSql (SqlDouble x) = truncate $ x
     fromSql (SqlRational x) = truncate $ x
-    fromSql y@(SqlLocalDate x) = fromIntegral ((fromSql y)::Integer)
-    fromSql y@(SqlLocalTimeOfDay x) = fromIntegral ((fromSql y)::Integer)
-    fromSql y@(SqlLocalTime x) = fromIntegral ((fromSql y)::Integer)
-    fromSql y@(SqlZonedTime x) = fromIntegral ((fromSql y)::Integer)
-    fromSql y@(SqlUTCTime x) = fromIntegral ((fromSql y)::Integer)
+    fromSql y@(SqlLocalDate _) = fromIntegral ((fromSql y)::Integer)
+    fromSql y@(SqlLocalTimeOfDay _) = fromIntegral ((fromSql y)::Integer)
+    fromSql y@(SqlLocalTime _) = fromIntegral ((fromSql y)::Integer)
+    fromSql y@(SqlZonedTime _) = fromIntegral ((fromSql y)::Integer)
+    fromSql y@(SqlUTCTime _) = fromIntegral ((fromSql y)::Integer)
     fromSql (SqlDiffTime x) = truncate x
     fromSql (SqlPOSIXTime x) = truncate x
     fromSql (SqlEpochTime x) = fromIntegral x
@@ -397,11 +397,11 @@ instance SqlType Word64 where
     fromSql (SqlBool x) = if x then 1 else 0
     fromSql (SqlDouble x) = truncate $ x
     fromSql (SqlRational x) = truncate $ x
-    fromSql y@(SqlLocalDate x) = fromIntegral ((fromSql y)::Integer)
-    fromSql y@(SqlLocalTimeOfDay x) = fromIntegral ((fromSql y)::Integer)
-    fromSql y@(SqlLocalTime x) = fromIntegral ((fromSql y)::Integer)
-    fromSql y@(SqlZonedTime x) = fromIntegral ((fromSql y)::Integer)
-    fromSql y@(SqlUTCTime x) = fromIntegral ((fromSql y)::Integer)
+    fromSql y@(SqlLocalDate _) = fromIntegral ((fromSql y)::Integer)
+    fromSql y@(SqlLocalTimeOfDay _) = fromIntegral ((fromSql y)::Integer)
+    fromSql y@(SqlLocalTime _) = fromIntegral ((fromSql y)::Integer)
+    fromSql y@(SqlZonedTime _) = fromIntegral ((fromSql y)::Integer)
+    fromSql y@(SqlUTCTime _) = fromIntegral ((fromSql y)::Integer)
     fromSql (SqlDiffTime x) = truncate x
     fromSql (SqlPOSIXTime x) = truncate x
     fromSql (SqlEpochTime x) = fromIntegral x
@@ -423,7 +423,7 @@ instance SqlType Integer where
     fromSql (SqlRational x) = truncate $ x
     fromSql (SqlLocalDate x) = toModifiedJulianDay x
     fromSql (SqlLocalTimeOfDay x) = fromIntegral . fromEnum . timeOfDayToTime $ x
-    fromSql (SqlLocalTime x) = error "fromSql: Impossible to convert SqlLocalTime (LocalTime) to a numeric type."
+    fromSql (SqlLocalTime _) = error "fromSql: Impossible to convert SqlLocalTime (LocalTime) to a numeric type."
     fromSql (SqlZonedTime x) = truncate . utcTimeToPOSIXSeconds . zonedTimeToUTC $ x
     fromSql (SqlUTCTime x) = truncate . utcTimeToPOSIXSeconds $ x
     fromSql (SqlDiffTime x) = truncate x
@@ -554,7 +554,7 @@ instance SqlType Day where
     fromSql (SqlChar _) = error "fromSql: cannot convert SqlChar to Day"
     fromSql (SqlBool _) = error "fromSql: cannot convert SqlBool to Day"
     fromSql (SqlDouble x) = ModifiedJulianDay {toModifiedJulianDay = truncate x}
-    fromSql (SqlRational x) = ModifiedJulianDay {toModifiedJulianDay = truncate . fromRational $ x}
+    fromSql (SqlRational x) = fromSql . SqlDouble . fromRational $ x
     fromSql (SqlLocalDate x) = x
     fromSql (SqlLocalTimeOfDay _) = error "x"
     fromSql (SqlLocalTime x) = localDay x
