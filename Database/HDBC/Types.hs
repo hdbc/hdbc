@@ -46,6 +46,7 @@ module Database.HDBC.Types
 
 where
 import Database.HDBC.Statement
+import Database.HDBC.SqlValue
 import Database.HDBC.ColTypes
 
 {- | Main database handle object.
