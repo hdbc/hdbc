@@ -664,7 +664,7 @@ instance SqlType ST.TimeDiff where
     fromSql SqlNull = error "fromSql: cannot convert SqlNull to TimeDiff"
 
 instance SqlType DiffTime where
-    toSql x = SqlTimeDiff (floor . toRational $ x)
+    toSql x = SqlDiffTime . fromRational . toRational $ x
     fromSql (SqlString x) = fromInteger (read' x)
     fromSql (SqlByteString x) = fromInteger ((read' . byteString2String) x)
     fromSql (SqlInt32 x) = fromIntegral x
@@ -676,6 +676,13 @@ instance SqlType DiffTime where
     fromSql (SqlBool _) = error "fromSql: cannot convert SqlBool to DiffTime"
     fromSql (SqlDouble x) = fromIntegral ((truncate x)::Integer)
     fromSql (SqlRational x) = fromIntegral ((truncate x)::Integer)
+    fromSql (SqlLocalDate _) = error "fromSql: cannot convert SqlLocalDate to DiffTime"
+    fromSql (SqlLocalTimeOfDay _) = error "fromSql: cannot convert SqlLocalTimeOfDay to DiffTime"
+    fromSql (SqlLocalTime _) = error "fromSql: cannot convert SqlLocalTime to DiffTime"
+    fromSql (SqlZonedTime _) = error "fromSql: cannot convert SqlZonedTime to DiffTime"
+    fromSql (SqlUTCTime _) = error "fromSql: cannot convert SqlUTCTime to DiffTime"
+    fromSql (SqlDiffTime x) = fromRational . toRational $ x
+    fromSql (SqlPOSIXTime _) = error "fromSql: cannot convert SqlPOSIXTime to DiffTime"
     fromSql (SqlEpochTime _) = error "fromSql: cannot convert SqlEpochTime to DiffTime"
     fromSql (SqlTimeDiff x) = fromIntegral x
     fromSql SqlNull = error "fromSql: cannot convert SqlNull to DiffTime"
