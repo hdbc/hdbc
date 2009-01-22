@@ -1,6 +1,6 @@
 module Database.HDBC.SqlValue
     (
-    SqlType(..), nToSql, iToSql,
+    SqlType(..), nToSql, iToSql, posixToSql,
     fromSql,
     FromSqlResult,
     SqlValue(..),
@@ -38,6 +38,7 @@ sqlValueErrorPretty sv =
     "fromSql: could not convert " ++ sqlSourceValue sv ++ " to " ++
     sqlDestType sv ++ ": " ++ sqlValueErrorMsg sv
 
+{- | The result of 'safeFromSql'. -}
 type FromSqlResult a = Either SqlValueError a
 
 quickErrorMsg :: SqlType a => SqlValue -> String -> FromSqlResult a
@@ -63,7 +64,7 @@ Here are some notes about conversion:
 
  * Fractions of a second are not preserved on time values
 
-See also 'nToSql', 'iToSql'.
+See also 'nToSql', 'iToSql', 'posixToSql'.
 -}
 class (Show a) => SqlType a where
     {- | Convert a value to an 'SqlValue' -}
@@ -71,16 +72,16 @@ class (Show a) => SqlType a where
 
     {- | Convert from an 'SqlValue' to a Haskell value.
 
-         Most people use 'fromSql' instead. -}
+         Most people use the simpler 'fromSql' instead. -}
     safeFromSql :: SqlValue -> FromSqlResult a
 
-    {- | The name for this type, primarily for use in generating 'SqlValueError'
+    {- | The name for this type, primarily for internal use in generating 'SqlValueError'
        in an automated fashion.  This function is used because not all types
        we deal with are instances of Data.Typeable. -}
     sqlTypeName :: a -> String
 
 {- | Convert from an SqlValue to a Haskell value.  Any problem is indicated
-by calling 'error'. -}
+by calling 'error', after pretty-printing the error from 'safeFromSql'. -}
 fromSql :: (SqlType a) => SqlValue -> a
 fromSql sv = 
     case safeFromSql sv of
@@ -94,6 +95,11 @@ nToSql n = SqlInteger (toInteger n)
 {- | Convenience function for using numeric literals in your program. -}
 iToSql :: Int -> SqlValue
 iToSql = toSql
+
+{- | Convenience function for converting 'POSIXTime' to a 'SqlValue', because
+'toSql' cannot do the correct thing in this instance. -}
+posixToSql :: POSIXTime -> SqlValue
+posixToSql x = SqlPOSIXTime x
 
 {- | The main type for expressing Haskell values to SQL databases.
 
@@ -134,15 +140,18 @@ Haskell type to a String, and passing that to the database.
 Two SqlValues are considered to be equal if one of these hold.  The
 first comparison that can be made is controlling; if none of these
 comparisons can be made, then they are not equal:
+
  * Both are NULL
+
  * Both represent the same type and the encapsulated values are considered equal
    by applying (==) to them
+
  * The values of each, when converted to a string, are equal.
 
 Note that a 'NominalDiffTime' or 'POSIXTime' is converted to 'SqlDiffTime' by
-'toSQL'.  HDBC cannot differentiate between 'NominalDiffTime' and 'POSIXTime'
+'toSql'.  HDBC cannot differentiate between 'NominalDiffTime' and 'POSIXTime'
 since they are the same underlying type.  You must construct 'SqlPOSIXTime'
-manually, or use 'SqlUTCTime'.
+manually or via 'posixToSql', or use 'SqlUTCTime'.
 
 'SqlEpochTime' and 'SqlTimeDiff' are no longer created automatically by any
 'toSql' or 'fromSql' functions.  They may still be manually constructed, but are
@@ -174,7 +183,7 @@ data SqlValue = SqlString String
               | SqlZonedTime ZonedTime      -- ^ Local YYYY-MM-DD HH:MM:SS -HHMM.  Considered equal if both convert to the same UTC time.
               | SqlUTCTime UTCTime          -- ^ UTC YYYY-MM-DD HH:MM:SS
               | SqlDiffTime NominalDiffTime -- ^ Calendar diff between seconds.  Rendered as Integer when converted to String, but greater precision may be preserved for other types or to underlying database.
-              | SqlPOSIXTime POSIXTime      -- ^ Time as seconds since 1/1/1970 UTC.  Integer rendering as for 'SqlDiffTime'.
+              | SqlPOSIXTime POSIXTime      -- ^ Time as seconds since midnight Jan 1 1970 UTC.  Integer rendering as for 'SqlDiffTime'.
               | SqlEpochTime Integer      -- ^ DEPRECATED Representation of ClockTime or CalendarTime.  Use SqlPOSIXTime instead.
               | SqlTimeDiff Integer -- ^ DEPRECATED Representation of TimeDiff.  Use SqlDiffTime instead.
               | SqlNull         -- ^ NULL in SQL or Nothing in Haskell
