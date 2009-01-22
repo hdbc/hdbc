@@ -44,7 +44,7 @@ quickErrorMsg :: SqlType a => SqlValue -> String -> FromSqlResult a
 quickErrorMsg sv msg = if True then Left ret else Right fake
     where ret = SqlValueError {sqlSourceValue = show sv,
                                sqlDestType = t,
-                               sqlValueErrorMsg = "msg"}
+                               sqlValueErrorMsg = msg}
           fake = fromSql (SqlString "fake")
           t = sqlTypeName fake
 
@@ -373,6 +373,7 @@ instance SqlType Word64 where
     safeFromSql y@(SqlNull) = quickError y
 
 instance SqlType Integer where
+    sqlTypeName _ = "Integer"
     toSql = SqlInteger
     safeFromSql (SqlString x) = read' x
     safeFromSql (SqlByteString x) = (read' . byteString2String) x
@@ -559,7 +560,7 @@ instance SqlType TimeOfDay where
     safeFromSql (SqlInteger x) = return . timeToTimeOfDay . fromInteger $ x
     safeFromSql y@(SqlChar _) = quickError y
     safeFromSql y@(SqlBool _) = quickError y
-    safeFromSql y@(SqlDouble x) = 
+    safeFromSql (SqlDouble x) = 
         return . timeToTimeOfDay . fromIntegral $ ((truncate x)::Integer)
     safeFromSql (SqlRational x) = safeFromSql . SqlDouble . fromRational $ x
     safeFromSql y@(SqlLocalDate _) = quickError y
@@ -758,6 +759,7 @@ instance SqlType ST.CalendarTime where
     safeFromSql y = safeFromSql y >>= return . ST.toUTCTime
 
 instance (SqlType a) => SqlType (Maybe a) where
+    sqlTypeName x = "Maybe " ++ sqlTypeName x
     toSql Nothing = SqlNull
     toSql (Just a) = toSql a
     safeFromSql SqlNull = return Nothing
