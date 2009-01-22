@@ -652,6 +652,13 @@ instance SqlType ST.TimeDiff where
     fromSql (SqlBool _) = error "fromSql: cannot convert SqlBool to TimeDiff"
     fromSql (SqlDouble x) = secs2td (truncate x)
     fromSql (SqlRational x) = secs2td (truncate x)
+    fromSql (SqlLocalDate _) = error "fromSql: cannot convert SqlLocalDate to TimeDiff"
+    fromSql (SqlLocalTimeOfDay _) = error "fromSql: cannot convert SqlLocalTimeOfDay to TimeDiff"
+    fromSql (SqlLocalTime _) = error "fromSql: cannot convert SqlLocalTime to TimeDiff"
+    fromSql (SqlZonedTime _) = error "fromSql: cannot convert SqlZonedTime to TimeDiff"
+    fromSql (SqlUTCTime _) = error "fromSql: cannot convert SqlUTCTime to TimeDiff"
+    fromSql (SqlPOSIXTime _) = error "fromSql: cannot convert SqlPOSIXTime to TimeDiff"
+    fromSql (SqlDiffTime x) = secs2td (truncate x)
     fromSql (SqlEpochTime _) = error "fromSql: cannot convert SqlEpochTime to TimeDiff"
     fromSql (SqlTimeDiff x) = secs2td x
     fromSql SqlNull = error "fromSql: cannot convert SqlNull to TimeDiff"
