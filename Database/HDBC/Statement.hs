@@ -591,6 +591,30 @@ instance SqlType NominalDiffTime where
     fromSql (SqlTimeDiff x) = fromIntegral x
     fromSql SqlNull = error "fromSql: cannot convert SqlNull to NominalDiffTime"
 
+instance SqlType ZonedTime where
+    toSql x = SqlZonedTime x
+    fromSql (SqlString x) = parseTime' "ZonedTime" (iso8601DateFormat (Just "%T %z")) x
+    fromSql (SqlByteString x) = fromSql (SqlString (byteString2String x))
+    fromSql (SqlInt32 x) = fromSql (SqlInteger (fromIntegral x))
+    fromSql (SqlInt64 x) = fromSql (SqlInteger (fromIntegral x))
+    fromSql (SqlWord32 x) = fromSql (SqlInteger (fromIntegral x))
+    fromSql (SqlWord64 x) = fromSql (SqlInteger (fromIntegral x))
+    fromSql y@(SqlInteger _) = utcToZonedTime utc (fromSql y)
+    fromSql (SqlChar _) = error "fromSql: cannot convert SqlChar to ZonedTime"
+    fromSql (SqlBool _) = error "fromSql: cannot convert SqlBool to ZonedTime"
+    fromSql y@(SqlDouble _) = utcToZonedTime utc (fromSql y)
+    fromSql y@(SqlRational _) = utcToZonedTime utc (fromSql y)
+    fromSql (SqlLocalDate _) = error "fromSql: cannot convert SqlLocalDate to ZonedTime"
+    fromSql (SqlLocalTime _) = error "fromSql: cannot convert SqlLocalTime to ZonedTime"
+    fromSql (SqlLocalTimeOfDay _) = error "fromSql: cannot convert SqlLocalTimeOfDay to ZonedTime"
+    fromSql (SqlZonedTime x) = x
+    fromSql (SqlUTCTime x) = utcToZonedTime utc x
+    fromSql (SqlDiffTime _) = error "fromSql: cannot convert SqlDiffTime to ZonedTime"
+    fromSql y@(SqlPOSIXTime _) = utcToZonedTime utc (fromSql y)
+    fromSql y@(SqlEpochTime _) = utcToZonedTime utc (fromSql y)
+    fromSql (SqlTimeDiff _) = error "fromSql: cannot convert SqlTimeDiff to ZonedTime"
+    fromSql SqlNull = error "fromSql: cannot convert SqlNull to ZonedTime"
+
 instance SqlType UTCTime where
     toSql = SqlUTCTime
     fromSql (SqlString x) = parseTime' "UTCTime" (iso8601DateFormat (Just "%T")) x
@@ -614,10 +638,6 @@ instance SqlType UTCTime where
     fromSql y@(SqlEpochTime _) = posixSecondsToUTCTime . fromSql $ y
     fromSql (SqlTimeDiff _) = error "fromSql: cannot convert SqlTimeDiff to UTCTime; did you mean SqlPOSIXTime?"
     fromSql SqlNull = error "fromSql: cannot convert SqlNull to UTCTime"
-
-instance SqlType ZonedTime where
-    toSql x = toSql (zonedTimeToUTC x)
-    fromSql x = utcToZonedTime utc (fromSql x)
 
 instance SqlType ST.TimeDiff where
     toSql x = SqlTimeDiff (timeDiffToSecs x)
