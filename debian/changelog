@@ -1,4 +1,4 @@
-hdbc (1.2.0-1) experimental; urgency=low
+hdbc (2.0.0-1) experimental; urgency=low
 
   * New release:
     + Native support for the new exception handling in GHC 6.10, wich CPP
