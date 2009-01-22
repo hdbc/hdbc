@@ -569,8 +569,25 @@ instance SqlType Day where
 instance SqlType TimeOfDay where
     toSql = SqlLocalTimeOfDay
     fromSql (SqlString x) = parseTime' "TimeOfDay" "%T" x
-    --- FIXME: WRITE
+    fromSql (SqlInt32 x) = timeToTimeOfDay . fromIntegral $ x
+    fromSql (SqlInt64 x) = timeToTimeOfDay . fromIntegral $ x
+    fromSql (SqlWord32 x) = timeToTimeOfDay . fromIntegral $ x
+    fromSql (SqlWord64 x) = timeToTimeOfDay . fromIntegral $ x
     fromSql (SqlInteger x) = timeToTimeOfDay . fromInteger $ x
+    fromSql (SqlChar _) = error "fromSql: cannot convert SqlChar to TimeOfDay"
+    fromSql (SqlBool _) = error "fromSql: cannot convert SqlBool to TimeOfDay"
+    fromSql (SqlDouble x) = timeToTimeOfDay . fromIntegral . truncate $ x
+    fromSql (SqlRational x) = timeToTimeOfDay . fromIntegral . truncate . fromRational $ x
+    fromSql (SqlLocalDate _) = error "fromSql: cannot convert SqlLocalDate to TimeOfDay"
+    fromSql (SqlLocalTimeOfDay x) = x
+    fromSql (SqlLocalTime x) = localTimeOfDay x
+    fromSql (SqlZonedTime x) = localTimeOfDay . zonedTimeToLocalTime $ x
+    fromSql y@(SqlUTCTime _) = localTimeOfDay . zonedTimeToLocalTime . fromSql $ y
+    fromSql (SqlDiffTime _) = error "fromSql: cannot convert SqlDiffTime to TimeOfDay"
+    fromSql y@(SqlPOSIXTime _) = localTimeOfDay . zonedTimeToLocalTime . fromSql $ y
+    fromSql y@(SqlEpochTime _) = localTimeOfDay . zonedTimeToLocalTime . fromSql $ y
+    fromSql (SqlTimeDiff _) = error "fromSql: cannot convert SqlTimeDiff to TimeOfDay"
+    fromSql SqlNull = error "fromSql: cannot convert SqlNull to Day"
 
 instance SqlType LocalTime where
     toSql = SqlLocalTime
