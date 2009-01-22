@@ -767,6 +767,22 @@ instance SqlType ST.CalendarTime where
     toSql x = toSql . calendarTimeToZonedTime $ x
     safeFromSql y = safeFromSql y >>= return . ST.toUTCTime
 
+-- FIXME: finish this
+zonedTimeToCalenderTime zt =
+    ST.CalendarTime {
+            ST.ctYear = fromIntegral year,
+            ST.ctMonth = toEnum (month - 1),
+            ST.ctDay = day,
+            ST.ctHour = todHour ltod,
+            ST.ctMin = todMon ltod,
+            ST.ctSec = secs,
+            ST.ctPicosec = fromRational $ ((todSec ltod) - (fromIntegral secs)) * 1000000000000,
+            ST.ct
+          }
+    where (year, month, day) = toGregorian . localDay . zonedTimeToLocalTime $ zt
+          ltod = localTimeOfDay . zonedTimeToLocalTime $ zt
+          secs = (fromIntegral . todSec $ ltod)::Int
+
 calendarTimeToZonedTime :: ST.CalendarTime -> ZonedTime
 calendarTimeToZonedTime ct =
     ZonedTime {
