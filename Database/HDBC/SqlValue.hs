@@ -441,8 +441,8 @@ instance SqlType Char where
     safeFromSql (SqlString [x]) = return x
     safeFromSql y@(SqlString _) = quickErrorMsg y "String length /= 1"
     safeFromSql y@(SqlByteString x) = 
-        case BS.length x of
-          1 -> safeFromSql . SqlString . head . byteString2String $ x
+        case B.length x of
+          1 -> safeFromSql . SqlString . byteString2String $ x
           _ -> quickErrorMsg y "ByteString length /= 1"
     safeFromSql y@(SqlInt32 _) = quickError y
     safeFromSql y@(SqlInt64 _) = quickError y
