@@ -463,31 +463,35 @@ instance SqlType Char where
     safeFromSql y@(SqlEpochTime _) = quickError y
     safeFromSql y@(SqlTimeDiff _) = quickError y
     safeFromSql y@(SqlNull) = quickError y
-{-
+
 instance SqlType Double where
+    sqlTypeName _ = "Double"
     toSql = SqlDouble
     safeFromSql (SqlString x) = read' x
     safeFromSql (SqlByteString x) = (read' . byteString2String) x
-    safeFromSql (SqlInt32 x) = fromIntegral x
-    safeFromSql (SqlInt64 x) = fromIntegral x
-    safeFromSql (SqlWord32 x) = fromIntegral x
-    safeFromSql (SqlWord64 x) = fromIntegral x
-    safeFromSql (SqlInteger x) = fromIntegral x
-    safeFromSql (SqlChar x) = fromIntegral . ord $ x
-    safeFromSql (SqlBool x) = if x then 1.0 else 0.0
-    safeFromSql (SqlDouble x) = x
-    safeFromSql (SqlRational x) = fromRational x
-    safeFromSql y@(SqlLocalDate _) = fromIntegral ((safeFromSql y)::Integer)
-    safeFromSql (SqlLocalTimeOfDay x) = fromRational . toRational . timeOfDayToTime $ x
-    safeFromSql (SqlLocalTime _) = error "safeFromSql: Impossible to convert SqlLocalTime (LocalTime) to a numeric type."
-    safeFromSql (SqlZonedTime x) = fromRational . toRational . utcTimeToPOSIXSeconds . 
-                               zonedTimeToUTC $ x
-    safeFromSql (SqlUTCTime x) = fromRational . toRational . utcTimeToPOSIXSeconds $ x
-    safeFromSql (SqlDiffTime x) = fromRational . toRational $ x
-    safeFromSql (SqlPOSIXTime x) = fromRational . toRational $ x
-    safeFromSql (SqlEpochTime x) = fromIntegral x
-    safeFromSql (SqlTimeDiff x) = fromIntegral x
-    safeFromSql (SqlNull) = error "safeFromSql: cannot convert SqlNull to Double"
+    safeFromSql (SqlInt32 x) = return . fromIntegral $ x
+    safeFromSql (SqlInt64 x) = return . fromIntegral $ x
+    safeFromSql (SqlWord32 x) = return . fromIntegral $ x
+    safeFromSql (SqlWord64 x) = return . fromIntegral $ x
+    safeFromSql (SqlInteger x) = return . fromIntegral $ x
+    safeFromSql (SqlChar x) = return . fromIntegral . ord $ x
+    safeFromSql (SqlBool x) = return (if x then 1.0 else 0.0)
+    safeFromSql (SqlDouble x) = return x
+    safeFromSql (SqlRational x) = return . fromRational $ x
+    safeFromSql y@(SqlLocalDate _) = viaInteger y fromIntegral
+    safeFromSql (SqlLocalTimeOfDay x) = 
+        return . fromRational . toRational . timeOfDayToTime $ x
+    safeFromSql y@(SqlLocalTime _) = quickError y
+    safeFromSql (SqlZonedTime x) = 
+        return . fromRational . toRational . utcTimeToPOSIXSeconds . zonedTimeToUTC $ x
+    safeFromSql (SqlUTCTime x) = 
+        return . fromRational . toRational . utcTimeToPOSIXSeconds $ x
+    safeFromSql (SqlDiffTime x) = return . fromRational . toRational $ x
+    safeFromSql (SqlPOSIXTime x) = return . fromRational . toRational $ x
+    safeFromSql (SqlEpochTime x) = return . fromIntegral $ x
+    safeFromSql (SqlTimeDiff x) = return . fromIntegral $ x
+    safeFromSql y@(SqlNull) = quickError y
+{-
 
 instance SqlType Rational where
     toSql = SqlRational
