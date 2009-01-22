@@ -269,31 +269,32 @@ instance SqlType Int where
     safeFromSql (SqlTimeDiff x) = return . fromIntegral $ x
     safeFromSql y@(SqlNull) = quickError y
 
-{-
 instance SqlType Int32 where
+    sqlTypeName _ = "Int32"
     toSql = SqlInt32
     safeFromSql (SqlString x) = read' x
     safeFromSql (SqlByteString x) = (read' . byteString2String) x
-    safeFromSql (SqlInt32 x) = x
-    safeFromSql (SqlInt64 x) = fromIntegral x
-    safeFromSql (SqlWord32 x) = fromIntegral x
-    safeFromSql (SqlWord64 x) = fromIntegral x
-    safeFromSql (SqlInteger x) = fromIntegral x
-    safeFromSql (SqlChar x) = fromIntegral $ ord x
-    safeFromSql (SqlBool x) = if x then 1 else 0
-    safeFromSql (SqlDouble x) = truncate $ x
-    safeFromSql (SqlRational x) = truncate $ x
-    safeFromSql y@(SqlLocalDate _) = fromIntegral ((safeFromSql y)::Integer)
-    safeFromSql y@(SqlLocalTimeOfDay _) = fromIntegral ((safeFromSql y)::Integer)
-    safeFromSql y@(SqlLocalTime _) = fromIntegral ((safeFromSql y)::Integer)
-    safeFromSql y@(SqlZonedTime _) = fromIntegral ((safeFromSql y)::Integer)
-    safeFromSql y@(SqlUTCTime _) = fromIntegral ((safeFromSql y)::Integer)
-    safeFromSql (SqlDiffTime x) = truncate x
-    safeFromSql (SqlPOSIXTime x) = truncate x
-    safeFromSql (SqlEpochTime x) = fromIntegral x
-    safeFromSql (SqlTimeDiff x) = fromIntegral x
-    safeFromSql (SqlNull) = error "safeFromSql: cannot convert SqlNull to Int32"
+    safeFromSql (SqlInt32 x) = return x
+    safeFromSql (SqlInt64 x) = return . fromIntegral $ x
+    safeFromSql (SqlWord32 x) = return . fromIntegral $ x
+    safeFromSql (SqlWord64 x) = return . fromIntegral $ x
+    safeFromSql (SqlInteger x) = return . fromIntegral $ x
+    safeFromSql (SqlChar x) = return . fromIntegral . ord $ x
+    safeFromSql (SqlBool x) = return (if x then 1 else 0)
+    safeFromSql (SqlDouble x) = return . truncate $ x
+    safeFromSql (SqlRational x) = return . truncate $ x
+    safeFromSql y@(SqlLocalDate _) = viaInteger y fromIntegral
+    safeFromSql y@(SqlLocalTimeOfDay _) = viaInteger y fromIntegral
+    safeFromSql y@(SqlLocalTime _) = viaInteger y fromIntegral
+    safeFromSql y@(SqlZonedTime _) = viaInteger y fromIntegral
+    safeFromSql y@(SqlUTCTime _) = viaInteger y fromIntegral
+    safeFromSql (SqlDiffTime x) = return . truncate $ x
+    safeFromSql (SqlPOSIXTime x) = return . truncate $ x
+    safeFromSql (SqlEpochTime x) = return . fromIntegral $ x
+    safeFromSql (SqlTimeDiff x) = return . fromIntegral $ x
+    safeFromSql y@(SqlNull) = quickError y
 
+{-
 instance SqlType Int64 where
     toSql = SqlInt64
     safeFromSql (SqlString x) = read' x
