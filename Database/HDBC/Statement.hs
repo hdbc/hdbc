@@ -542,54 +542,18 @@ instance SqlType Rational where
     fromSql (SqlTimeDiff x) = fromIntegral x
     fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Double"
 
-instance SqlType ST.ClockTime where
-    toSql (ST.TOD x y) = SqlPOSIXTime . fromRational $ 
-                                        fromInteger x + fromRational (y % 1000000000000)
-    fromSql (SqlString x) = ST.TOD (read' x) 0
-    fromSql (SqlByteString x) = ST.TOD ((read' . byteString2String) x) 0
-    fromSql (SqlInt32 x) = ST.TOD (fromIntegral x) 0
-    fromSql (SqlInt64 x) = ST.TOD (fromIntegral x) 0
-    fromSql (SqlWord32 x) = ST.TOD (fromIntegral x) 0
-    fromSql (SqlWord64 x) = ST.TOD (fromIntegral x) 0
-    fromSql (SqlInteger x) = ST.TOD x 0
-    fromSql (SqlChar _) = error "fromSql: cannot convert SqlChar to ClockTime"
-    fromSql (SqlBool _) = error "fromSql: cannot convert SqlBool to ClockTime"
-    fromSql (SqlDouble x) = ST.TOD (truncate x) 0
-    fromSql (SqlRational x) = ST.TOD (truncate x) 0
-    fromSql (SqlLocalDate _) = error "fromSql: cannot convert SqlLocalDate to ClockTime"
-    fromSql (SqlLocalTimeOfDay _) = error "fromSql: cannot convert SqlLocalTimeOfDay to ClockTime"
-    fromSql (SqlLocalTime _) = error "fromSql: cannot convert SqlLocalTime to ClockTime"
-    fromSql y@(SqlZonedTime _) = ST.TOD (fromSql y) 0
-    fromSql y@(SqlUTCTime _) = ST.TOD (fromSql y) 0
-    fromSql (SqlDiffTime _) = error "fromSql: cannot convert SqlDiffTime to ClockTime"
-    fromSql y@(SqlPOSIXTime _) = ST.TOD (fromSql y) 0
-    fromSql (SqlEpochTime x) = ST.TOD x 0
-    fromSql (SqlTimeDiff _) = error "fromSql: cannot convert SqlTimeDiff to ClockTime"
-    fromSql SqlNull = error "fromSql: cannot convert SqlNull to ClockTime"
+--- FIXME: INSERT HERE
 
-instance SqlType NominalDiffTime where
-    toSql = SqlDiffTime
-    fromSql (SqlString x) = fromInteger (read' x)
-    fromSql (SqlByteString x) = fromInteger ((read' . byteString2String) x)
-    fromSql (SqlInt32 x) = fromIntegral x
-    fromSql (SqlInt64 x) = fromIntegral x
-    fromSql (SqlWord32 x) = fromIntegral x
-    fromSql (SqlWord64 x) = fromIntegral x
-    fromSql (SqlInteger x) = fromIntegral x
-    fromSql (SqlChar _) = error "fromSql: cannot convert SqlChar to NominalDiffTime"
-    fromSql (SqlBool _) = error "fromSql: cannot convert SqlBool to NominalDiffTime"
-    fromSql (SqlDouble x) = fromRational . toRational $ x
-    fromSql (SqlRational x) = fromRational x
-    fromSql (SqlLocalDate x) = fromIntegral . (\x -> x * 60 * 60 * 24) . toModifiedJulianDay $ x
-    fromSql (SqlLocalTimeOfDay x) = fromRational . toRational . timeOfDayToTime $ x
-    fromSql (SqlLocalTime _) = error "fromSql: cannot convert SqlLocalTime to NominalDiffTime"
-    fromSql (SqlZonedTime x) = utcTimeToPOSIXSeconds . zonedTimeToUTC $ x
-    fromSql (SqlUTCTime x) = utcTimeToPOSIXSeconds x
-    fromSql (SqlDiffTime x) = x
-    fromSql (SqlPOSIXTime x) = x
-    fromSql (SqlEpochTime x) = fromIntegral x
-    fromSql (SqlTimeDiff x) = fromIntegral x
-    fromSql SqlNull = error "fromSql: cannot convert SqlNull to NominalDiffTime"
+instance SqlType Day where
+    toSql = SqlLocalDate
+    --- FIXME: WRITE
+
+instance SqlType TimeOfDay where
+    toSql = SqlLocalTimeOfDay
+    --- FIXME: WRITE
+
+instance SqlType LocalTime where
+    toSql = SqlLocalTime
 
 instance SqlType ZonedTime where
     toSql x = SqlZonedTime x
@@ -638,6 +602,55 @@ instance SqlType UTCTime where
     fromSql y@(SqlEpochTime _) = posixSecondsToUTCTime . fromSql $ y
     fromSql (SqlTimeDiff _) = error "fromSql: cannot convert SqlTimeDiff to UTCTime; did you mean SqlPOSIXTime?"
     fromSql SqlNull = error "fromSql: cannot convert SqlNull to UTCTime"
+
+instance SqlType NominalDiffTime where
+    toSql = SqlDiffTime
+    fromSql (SqlString x) = fromInteger (read' x)
+    fromSql (SqlByteString x) = fromInteger ((read' . byteString2String) x)
+    fromSql (SqlInt32 x) = fromIntegral x
+    fromSql (SqlInt64 x) = fromIntegral x
+    fromSql (SqlWord32 x) = fromIntegral x
+    fromSql (SqlWord64 x) = fromIntegral x
+    fromSql (SqlInteger x) = fromIntegral x
+    fromSql (SqlChar _) = error "fromSql: cannot convert SqlChar to NominalDiffTime"
+    fromSql (SqlBool _) = error "fromSql: cannot convert SqlBool to NominalDiffTime"
+    fromSql (SqlDouble x) = fromRational . toRational $ x
+    fromSql (SqlRational x) = fromRational x
+    fromSql (SqlLocalDate x) = fromIntegral . (\x -> x * 60 * 60 * 24) . toModifiedJulianDay $ x
+    fromSql (SqlLocalTimeOfDay x) = fromRational . toRational . timeOfDayToTime $ x
+    fromSql (SqlLocalTime _) = error "fromSql: cannot convert SqlLocalTime to NominalDiffTime"
+    fromSql (SqlZonedTime x) = utcTimeToPOSIXSeconds . zonedTimeToUTC $ x
+    fromSql (SqlUTCTime x) = utcTimeToPOSIXSeconds x
+    fromSql (SqlDiffTime x) = x
+    fromSql (SqlPOSIXTime x) = x
+    fromSql (SqlEpochTime x) = fromIntegral x
+    fromSql (SqlTimeDiff x) = fromIntegral x
+    fromSql SqlNull = error "fromSql: cannot convert SqlNull to NominalDiffTime"
+
+instance SqlType ST.ClockTime where
+    toSql (ST.TOD x y) = SqlPOSIXTime . fromRational $ 
+                                        fromInteger x + fromRational (y % 1000000000000)
+    fromSql (SqlString x) = ST.TOD (read' x) 0
+    fromSql (SqlByteString x) = ST.TOD ((read' . byteString2String) x) 0
+    fromSql (SqlInt32 x) = ST.TOD (fromIntegral x) 0
+    fromSql (SqlInt64 x) = ST.TOD (fromIntegral x) 0
+    fromSql (SqlWord32 x) = ST.TOD (fromIntegral x) 0
+    fromSql (SqlWord64 x) = ST.TOD (fromIntegral x) 0
+    fromSql (SqlInteger x) = ST.TOD x 0
+    fromSql (SqlChar _) = error "fromSql: cannot convert SqlChar to ClockTime"
+    fromSql (SqlBool _) = error "fromSql: cannot convert SqlBool to ClockTime"
+    fromSql (SqlDouble x) = ST.TOD (truncate x) 0
+    fromSql (SqlRational x) = ST.TOD (truncate x) 0
+    fromSql (SqlLocalDate _) = error "fromSql: cannot convert SqlLocalDate to ClockTime"
+    fromSql (SqlLocalTimeOfDay _) = error "fromSql: cannot convert SqlLocalTimeOfDay to ClockTime"
+    fromSql (SqlLocalTime _) = error "fromSql: cannot convert SqlLocalTime to ClockTime"
+    fromSql y@(SqlZonedTime _) = ST.TOD (fromSql y) 0
+    fromSql y@(SqlUTCTime _) = ST.TOD (fromSql y) 0
+    fromSql (SqlDiffTime _) = error "fromSql: cannot convert SqlDiffTime to ClockTime"
+    fromSql y@(SqlPOSIXTime _) = ST.TOD (fromSql y) 0
+    fromSql (SqlEpochTime x) = ST.TOD x 0
+    fromSql (SqlTimeDiff _) = error "fromSql: cannot convert SqlTimeDiff to ClockTime"
+    fromSql SqlNull = error "fromSql: cannot convert SqlNull to ClockTime"
 
 instance SqlType ST.TimeDiff where
     toSql x = SqlDiffTime . fromIntegral . timeDiffToSecs $ x
