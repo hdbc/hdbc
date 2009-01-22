@@ -701,31 +701,32 @@ instance SqlType ST.ClockTime where
     safeFromSql (SqlEpochTime x) = return $ ST.TOD x 0
     safeFromSql y@(SqlTimeDiff _) = quickError y
     safeFromSql y@SqlNull = quickError y
-{-
+
 instance SqlType ST.TimeDiff where
+    sqlTypeName _ = "TimeDiff"
     toSql x = SqlDiffTime . fromIntegral . timeDiffToSecs $ x
-    safeFromSql (SqlString x) = secs2td (read' x)
-    safeFromSql (SqlByteString x) = secs2td ((read' . byteString2String) x)
+    safeFromSql (SqlString x) = read' x >>= secs2td
+    safeFromSql (SqlByteString x) = safeFromSql . SqlString . byteString2String $ x
     safeFromSql (SqlInt32 x) = secs2td (fromIntegral x)
     safeFromSql (SqlInt64 x) = secs2td (fromIntegral x)
     safeFromSql (SqlWord32 x) = secs2td (fromIntegral x)
     safeFromSql (SqlWord64 x) = secs2td (fromIntegral x)
     safeFromSql (SqlInteger x) = secs2td x
-    safeFromSql (SqlChar _) = error "safeFromSql: cannot convert SqlChar to TimeDiff"
-    safeFromSql (SqlBool _) = error "safeFromSql: cannot convert SqlBool to TimeDiff"
+    safeFromSql y@(SqlChar _) = quickError y
+    safeFromSql y@(SqlBool _) = quickError y
     safeFromSql (SqlDouble x) = secs2td (truncate x)
     safeFromSql (SqlRational x) = secs2td (truncate x)
-    safeFromSql (SqlLocalDate _) = error "safeFromSql: cannot convert SqlLocalDate to TimeDiff"
-    safeFromSql (SqlLocalTimeOfDay _) = error "safeFromSql: cannot convert SqlLocalTimeOfDay to TimeDiff"
-    safeFromSql (SqlLocalTime _) = error "safeFromSql: cannot convert SqlLocalTime to TimeDiff"
-    safeFromSql (SqlZonedTime _) = error "safeFromSql: cannot convert SqlZonedTime to TimeDiff"
-    safeFromSql (SqlUTCTime _) = error "safeFromSql: cannot convert SqlUTCTime to TimeDiff"
-    safeFromSql (SqlPOSIXTime _) = error "safeFromSql: cannot convert SqlPOSIXTime to TimeDiff"
+    safeFromSql y@(SqlLocalDate _) = quickError y
+    safeFromSql y@(SqlLocalTimeOfDay _) = quickError y
+    safeFromSql y@(SqlLocalTime _) = quickError y
+    safeFromSql y@(SqlZonedTime _) = quickError y
+    safeFromSql y@(SqlUTCTime _) = quickError y
+    safeFromSql y@(SqlPOSIXTime _) = quickError y
     safeFromSql (SqlDiffTime x) = secs2td (truncate x)
-    safeFromSql (SqlEpochTime _) = error "safeFromSql: cannot convert SqlEpochTime to TimeDiff"
+    safeFromSql y@(SqlEpochTime _) = quickError y
     safeFromSql (SqlTimeDiff x) = secs2td x
-    safeFromSql SqlNull = error "safeFromSql: cannot convert SqlNull to TimeDiff"
-
+    safeFromSql y@SqlNull = quickError y
+{-
 instance SqlType DiffTime where
     toSql x = SqlDiffTime . fromRational . toRational $ x
     safeFromSql (SqlString x) = fromInteger (read' x)
@@ -768,8 +769,8 @@ viaInteger sv func =
     do i <- safeFromSql sv
        return (func i)
 
-secs2td :: Integer -> ST.TimeDiff
-secs2td x = ST.diffClockTimes (ST.TOD x 0) (ST.TOD 0 0)
+secs2td :: Integer -> FromSqlResult ST.TimeDiff
+secs2td x = return $ ST.diffClockTimes (ST.TOD x 0) (ST.TOD 0 0)
 
 
 -- | Read a value from a string, and give an informative message
