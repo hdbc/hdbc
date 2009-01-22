@@ -482,8 +482,7 @@ instance SqlType Double where
     safeFromSql (SqlLocalTimeOfDay x) = 
         return . fromRational . toRational . timeOfDayToTime $ x
     safeFromSql y@(SqlLocalTime _) = quickError y
-    safeFromSql (SqlZonedTime x) = 
-        return . fromRational . toRational . utcTimeToPOSIXSeconds . zonedTimeToUTC $ x
+    safeFromSql (SqlZonedTime x) = safeFromSql . SqlUTCTime . zonedTimeToUTC $ x
     safeFromSql (SqlUTCTime x) = 
         return . fromRational . toRational . utcTimeToPOSIXSeconds $ x
     safeFromSql (SqlDiffTime x) = return . fromRational . toRational $ x
