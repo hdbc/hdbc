@@ -395,19 +395,19 @@ instance SqlType Integer where
     safeFromSql (SqlEpochTime x) = return x
     safeFromSql (SqlTimeDiff x) = return x
     safeFromSql y@(SqlNull) = quickError y
-{-
+
 instance SqlType Bool where
+    sqlTypeName _ = "Bool"
     toSql = SqlBool
-    safeFromSql (SqlString x) = 
+    safeFromSql y@(SqlString x) = 
         case map toUpper x of
-                           "TRUE" -> True
-                           "T" -> True
-                           "FALSE" -> False
-                           "F" -> False
-                           "0" -> False
-                           "1" -> True
-                           _ -> error $ "safeFromSql: cannot convert SqlString " 
-                                        ++ show x ++ " to Bool"
+          "TRUE" -> Right True
+          "T" -> Right True
+          "FALSE" -> Right False
+          "F" -> Right False
+          "0" -> Right False
+          "1" -> Right True
+          _ -> Left $ SqlValueError (show y) "Bool" "Cannot parse given String as Bool"
     safeFromSql (SqlByteString x) = (safeFromSql . SqlString . byteString2String) x
     safeFromSql (SqlInt32 x) = numToBool x
     safeFromSql (SqlInt64 x) = numToBool x
@@ -415,23 +415,24 @@ instance SqlType Bool where
     safeFromSql (SqlWord64 x) = numToBool x
     safeFromSql (SqlInteger x) = numToBool x
     safeFromSql (SqlChar x) = numToBool (ord x)
-    safeFromSql (SqlBool x) = x
+    safeFromSql (SqlBool x) = return x
     safeFromSql (SqlDouble x) = numToBool x
     safeFromSql (SqlRational x) = numToBool x
-    safeFromSql (SqlLocalDate _) = error "safeFromSql: cannot convert SqlLocalDate to Bool"
-    safeFromSql (SqlLocalTimeOfDay _) = error "safeFromSql: cannot convert SqlLocalTimeOfDay to Bool"
-    safeFromSql (SqlLocalTime _) = error "safeFromSql: cannot convert SqlLocalTime to Bool"
-    safeFromSql (SqlZonedTime _) = error "safeFromSql: cannot convert SqlZonedTime to Bool"
-    safeFromSql (SqlUTCTime _) = error "safeFromSql: cannot convert SqlUTCTime to Bool"
-    safeFromSql (SqlDiffTime _) = error "safeFromSql: cannot convert SqlDiffTime to Bool"
-    safeFromSql (SqlPOSIXTime _) = error "safeFromSql: cannot convert SqlPOSIXTime to Bool"
+    safeFromSql y@(SqlLocalDate _) = quickError y
+    safeFromSql y@(SqlLocalTimeOfDay _) = quickError y
+    safeFromSql y@(SqlLocalTime _) = quickError y
+    safeFromSql y@(SqlZonedTime _) = quickError y
+    safeFromSql y@(SqlUTCTime _) = quickError y
+    safeFromSql y@(SqlDiffTime _) = quickError y
+    safeFromSql y@(SqlPOSIXTime _) = quickError y
     safeFromSql (SqlEpochTime x) = numToBool x
     safeFromSql (SqlTimeDiff x) = numToBool x
-    safeFromSql (SqlNull) = error "safeFromSql: cannot convert SqlNull to Bool"
+    safeFromSql y@(SqlNull) = quickError y
 
-numToBool :: Num a => a -> Bool
-numToBool x = x /= 0
+numToBool :: Num a => a -> FromSqlResult Bool
+numToBool x = Right (x /= 0)
 
+{-
 instance SqlType Char where
     toSql = SqlChar
     safeFromSql (SqlString [x]) = x
