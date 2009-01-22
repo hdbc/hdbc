@@ -1,5 +1,5 @@
 Name: HDBC
-Version: 1.2.0
+Version: 2.0.0
 License: LGPL
 Maintainer: John Goerzen <jgoerzen@complete.org>
 Author: John Goerzen
@@ -22,7 +22,7 @@ flag splitBase
   description: Choose the new smaller, split-up base package.
 library
   if flag(splitBase)
-    Build-Depends: base>=3, old-time, time, bytestring, containers
+    Build-Depends: base>=3, old-time, time, bytestring, containers, old-locale
   else
     Build-Depends: base<3
   Build-Depends: mtl
@@ -30,7 +30,7 @@ library
   GHC-Options: -O2 -Wall -fglasgow-exts
 
   Exposed-Modules: Database.HDBC, Database.HDBC.Types, Database.HDBC.DriverUtils,
-    Database.HDBC.ColTypes, Database.HDBC.Statement
+    Database.HDBC.ColTypes, Database.HDBC.Statement, Database.HDBC.SqlValue
   Other-Modules: Database.HDBC.Utils
   --Extensions: ExistentialQuantification, AllowOverlappingInstances,
   --    AllowUndecidableInstances

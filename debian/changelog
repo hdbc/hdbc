@@ -1,9 +1,38 @@
-hdbc (1.2.0-1) experimental; urgency=low
+hdbc (2.0.0-1) UNRELEASED; urgency=low
 
-  * UNRELEASED
-  * New release.  Now supports new Data.Time.* types.
+  * New release:
+    + Native support for the new exception handling in GHC 6.10, wich CPP
+      conditional compilation to continue supporting the old-style exceptions in
+      GHC 6.8 and Hugs.
+
+    + Now supports converting Data.Time.* types to/from SqlValue.
+  
+    + Major expansion of SqlValue to be able to carry date/time data to/from
+      databases in terms of Data.Time.* types.
+
+    + Rework how SqlType typeclass works.  Replace fromSql with safeFromSql that
+      returns Left on impossible conversions instead raising an exception.  Wrote
+      new fromSql that provides old behavior by raising the error from safeFromSql
+      in the old manner.  Greatly enhanced many error messages throughout SqlType
+      instances.
+  
+    + Moved SqlType and SqlValue code from Database.HDBC.Satement to
+      Database.HDBC.SqlValue.  Database.HDBC.Statement continues to re-export them
+      for compatibility, but this is deprecated.  Database.HDBC and Database.HDBC.Types
+      both continue to re-export them, and this is not deprecated.
+
+    + Old System.Time APIs are retained for now, but marked deprecated.  The above
+      API changes are designed to be non-invasive in most cases, but may require
+      code change in some extremely rare corner cases.
+
+    + Fixes for Haddock formatting.
+
+    + Expansion of Haddock docs.
+
   * Noting addition of profiling libraries.  Closes: #473520, #509848.
+
   * No longer a Debian-native package due to problems with dh_haskell_depends.
+  
   * Adding doc package.
 
  -- John Goerzen <jgoerzen@complete.org>  Tue, 13 Jan 2009 15:04:27 -0600

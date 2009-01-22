@@ -38,14 +38,16 @@ module Database.HDBC.Types
     (IConnection(..),
     Statement(..),
     SqlError(..),
-    SqlType(..), nToSql, iToSql,
+    SqlType(..), nToSql, iToSql, posixToSql, fromSql, FromSqlResult,
     SqlValue(..),
+    SqlValueError(..), sqlValueErrorPretty,
     ConnWrapper(..),
     withWConn
     )
 
 where
 import Database.HDBC.Statement
+import Database.HDBC.SqlValue
 import Database.HDBC.ColTypes
 
 {- | Main database handle object.
