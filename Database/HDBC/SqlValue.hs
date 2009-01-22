@@ -2,6 +2,7 @@ module Database.HDBC.SqlValue
     (
     SqlType(..), nToSql, iToSql,
     fromSql,
+    FromSqlResult,
     SqlValue(..),
     SqlValueError(..),
     sqlValueErrorPretty
@@ -19,6 +20,7 @@ import Data.Time.Clock
 import Data.Time.Clock.POSIX
 import System.Locale
 import Data.Ratio
+import Control.Monad.Error
 
 data SqlValueError = SqlValueError {
       sqlSourceValue :: String,
@@ -26,19 +28,26 @@ data SqlValueError = SqlValueError {
       sqlValueErrorMsg :: String}
       deriving (Eq, Read, Show, Typeable)
 
+instance Error SqlValueError where
+    strMsg x = SqlValueError {sqlSourceValue = "(unknown)",
+                              sqlDestType = "(unknown)",
+                              sqlValueErrorMsg = x}
+
 sqlValueErrorPretty :: SqlValueError -> String
 sqlValueErrorPretty sv =
     "fromSql: could not convert " ++ sqlSourceValue sv ++ " to " ++
     sqlDestType sv ++ ": " ++ sqlValueErrorMsg sv
 
-quickError :: SqlType a => SqlValue -> a
-quickError sv = ret
+type FromSqlResult a = Either SqlValueError a
+
+quickError :: SqlType a => SqlValue -> FromSqlResult a
+quickError sv = if True then Left ret else Right fake
     where ret = SqlValueError {sqlSourceValue = show sv,
                                sqlDestType = t,
                                sqlValueErrorMsg = "incompatible types"}
-          t = sqlTypeName ret
-    
-
+          fake = fromSql (SqlString "fake")
+          t = sqlTypeName fake
+  
 {- | Conversions to and from 'SqlValue's and standard Haskell types.
 
 Conversions are powerful; for instance, you can call 'fromSql' on a SqlInt32
@@ -53,7 +62,6 @@ Here are some notes about conversion:
 
 See also 'nToSql', 'iToSql'.
 -}
-
 class (Show a) => SqlType a where
     {- | Convert a value to an 'SqlValue' -}
     toSql :: a -> SqlValue
@@ -61,7 +69,7 @@ class (Show a) => SqlType a where
     {- | Convert from an 'SqlValue' to a Haskell value.
 
          Most people use 'fromSql' instead. -}
-    safeFromSql :: SqlValue -> Either SqlValueError a
+    safeFromSql :: SqlValue -> FromSqlResult a
 
     {- | The name for this type, primarily for use in generating 'SqlValueError'
        in an automated fashion.  This function is used because not all types
@@ -193,69 +201,75 @@ instance Eq SqlValue where
     SqlNull == SqlNull = True
     SqlNull == _ = False
     _ == SqlNull = False
-    a == b = ((safeFromSql a)::String) == ((safeFromSql b)::String)
+    a == b = ((safeFromSql a)::FromSqlResult String) == 
+             ((safeFromSql b)::FromSqlResult String)
 
 instance SqlType String where
+    sqlTypeName _ = "String"
     toSql = SqlString
-    safeFromSql (SqlString x) = x
-    safeFromSql (SqlByteString x) = byteString2String x
-    safeFromSql (SqlInt32 x) = show x
-    safeFromSql (SqlInt64 x) = show x
-    safeFromSql (SqlWord32 x) = show x
-    safeFromSql (SqlWord64 x) = show x
-    safeFromSql (SqlInteger x) = show x
-    safeFromSql (SqlChar x) = [x]
-    safeFromSql (SqlBool x) = show x
-    safeFromSql (SqlDouble x) = show x
-    safeFromSql (SqlRational x) = show x
-    safeFromSql (SqlLocalDate x) = formatTime defaultTimeLocale
-                               (iso8601DateFormat Nothing) x
-    safeFromSql (SqlLocalTimeOfDay x) = formatTime defaultTimeLocale "%T" x
-    safeFromSql (SqlLocalTime x) = formatTime defaultTimeLocale
-                               (iso8601DateFormat (Just "%T")) x
-    safeFromSql (SqlZonedTime x) = formatTime defaultTimeLocale
-                               (iso8601DateFormat (Just "%T %z")) x
-    safeFromSql (SqlUTCTime x) = formatTime defaultTimeLocale
-                               (iso8601DateFormat (Just "%T")) x
-    safeFromSql (SqlDiffTime x) = show ((truncate x)::Integer)
-    safeFromSql (SqlPOSIXTime x) = show ((truncate x)::Integer)
-    safeFromSql (SqlEpochTime x) = show x
-    safeFromSql (SqlTimeDiff x) = show x
-    safeFromSql (SqlNull) = error "safeFromSql: cannot convert SqlNull to String"
+    safeFromSql (SqlString x) = return x
+    safeFromSql (SqlByteString x) = return . byteString2String $ x
+    safeFromSql (SqlInt32 x) = return . show $ x
+    safeFromSql (SqlInt64 x) = return . show $ x
+    safeFromSql (SqlWord32 x) = return . show $ x
+    safeFromSql (SqlWord64 x) = return . show $ x
+    safeFromSql (SqlInteger x) = return . show $ x
+    safeFromSql (SqlChar x) = return [x]
+    safeFromSql (SqlBool x) = return . show $ x
+    safeFromSql (SqlDouble x) = return . show $ x
+    safeFromSql (SqlRational x) = return . show $ x
+    safeFromSql (SqlLocalDate x) = 
+        return . formatTime defaultTimeLocale (iso8601DateFormat Nothing) $ x
+    safeFromSql (SqlLocalTimeOfDay x) = 
+        return . formatTime defaultTimeLocale "%T" $ x
+    safeFromSql (SqlLocalTime x) = 
+        return . formatTime defaultTimeLocale (iso8601DateFormat (Just "%T")) $ x
+    safeFromSql (SqlZonedTime x) = 
+        return . formatTime defaultTimeLocale (iso8601DateFormat (Just "%T %z")) $ x
+    safeFromSql (SqlUTCTime x) = 
+        return . formatTime defaultTimeLocale (iso8601DateFormat (Just "%T")) $ x
+    safeFromSql (SqlDiffTime x) = return $ show ((truncate x)::Integer)
+    safeFromSql (SqlPOSIXTime x) = return $ show ((truncate x)::Integer)
+    safeFromSql (SqlEpochTime x) = return . show $ x
+    safeFromSql (SqlTimeDiff x) = return . show $ x
+    safeFromSql y@(SqlNull) = quickError y
 
 instance SqlType B.ByteString where
+    sqlTypeName _ = "ByteString"
     toSql = SqlByteString
-    safeFromSql (SqlByteString x) = x
-    safeFromSql (SqlNull) = error "safeFromSql: cannot convert SqlNull to ByteString"
-    safeFromSql x = (string2ByteString . safeFromSql) x
+    safeFromSql (SqlByteString x) = return x
+    safeFromSql y@(SqlNull) = quickError y
+    safeFromSql x = safeFromSql x >>= return . string2ByteString
 
 string2ByteString :: String -> B.ByteString
 string2ByteString = B.pack . map (toEnum . fromEnum)
 
 instance SqlType Int where
+    sqlTypeName _ = "Int"
     toSql x = SqlInt32 (fromIntegral x)
     safeFromSql (SqlString x) = read' x
     safeFromSql (SqlByteString x) = (read' . byteString2String) x
-    safeFromSql (SqlInt32 x) = fromIntegral x
-    safeFromSql (SqlInt64 x) = fromIntegral x
-    safeFromSql (SqlWord32 x) = fromIntegral x
-    safeFromSql (SqlWord64 x) = fromIntegral x
-    safeFromSql (SqlInteger x) = fromIntegral x
-    safeFromSql (SqlChar x) = ord x
-    safeFromSql (SqlBool x) = if x then 1 else 0
-    safeFromSql (SqlDouble x) = truncate $ x
-    safeFromSql (SqlRational x) = truncate $ x
-    safeFromSql y@(SqlLocalDate _) = fromIntegral ((safeFromSql y)::Integer)
-    safeFromSql y@(SqlLocalTimeOfDay _) = fromIntegral ((safeFromSql y)::Integer)
-    safeFromSql y@(SqlLocalTime _) = fromIntegral ((safeFromSql y)::Integer)
-    safeFromSql y@(SqlZonedTime _) = fromIntegral ((safeFromSql y)::Integer)
-    safeFromSql y@(SqlUTCTime _) = fromIntegral ((safeFromSql y)::Integer)
-    safeFromSql (SqlDiffTime x) = truncate x
-    safeFromSql (SqlPOSIXTime x) = truncate x
-    safeFromSql (SqlEpochTime x) = fromIntegral x
-    safeFromSql (SqlTimeDiff x) = fromIntegral x
-    safeFromSql (SqlNull) = error "safeFromSql: cannot convert SqlNull to Int"
+    safeFromSql (SqlInt32 x) = return . fromIntegral $ x
+    safeFromSql (SqlInt64 x) = return . fromIntegral $ x
+    safeFromSql (SqlWord32 x) = return . fromIntegral $ x
+    safeFromSql (SqlWord64 x) = return . fromIntegral $ x
+    safeFromSql (SqlInteger x) = return . fromIntegral $ x
+    safeFromSql (SqlChar x) = return . ord $ x
+    safeFromSql (SqlBool x) = return (if x then 1 else 0)
+    safeFromSql (SqlDouble x) = return . truncate $ x
+    safeFromSql (SqlRational x) = return . truncate $ x
+    safeFromSql y@(SqlLocalDate _) = viaInteger y fromIntegral
+    safeFromSql y@(SqlLocalTimeOfDay _) = viaInteger y fromIntegral 
+    safeFromSql y@(SqlLocalTime _) = viaInteger y fromIntegral 
+    safeFromSql y@(SqlZonedTime _) = viaInteger y fromIntegral
+    safeFromSql y@(SqlUTCTime _) = viaInteger y fromIntegral
+    safeFromSql (SqlDiffTime x) = return . truncate $ x
+    safeFromSql (SqlPOSIXTime x) = return . truncate $ x
+    safeFromSql (SqlEpochTime x) = return . fromIntegral $ x
+    safeFromSql (SqlTimeDiff x) = return . fromIntegral $ x
+    safeFromSql y@(SqlNull) = quickError y
 
+{-
 instance SqlType Int32 where
     toSql = SqlInt32
     safeFromSql (SqlString x) = read' x
@@ -351,31 +365,34 @@ instance SqlType Word64 where
     safeFromSql (SqlEpochTime x) = fromIntegral x
     safeFromSql (SqlTimeDiff x) = fromIntegral x
     safeFromSql (SqlNull) = error "safeFromSql: cannot convert SqlNull to Int64"
-
+-}
 instance SqlType Integer where
     toSql = SqlInteger
     safeFromSql (SqlString x) = read' x
     safeFromSql (SqlByteString x) = (read' . byteString2String) x
-    safeFromSql (SqlInt32 x) = fromIntegral x
-    safeFromSql (SqlInt64 x) = fromIntegral x
-    safeFromSql (SqlWord32 x) = fromIntegral x
-    safeFromSql (SqlWord64 x) = fromIntegral x
-    safeFromSql (SqlInteger x) = x
-    safeFromSql (SqlChar x) = fromIntegral (ord x)
-    safeFromSql (SqlBool x) = if x then 1 else 0
-    safeFromSql (SqlDouble x) = truncate $ x
-    safeFromSql (SqlRational x) = truncate $ x
-    safeFromSql (SqlLocalDate x) = toModifiedJulianDay x
-    safeFromSql (SqlLocalTimeOfDay x) = fromIntegral . fromEnum . timeOfDayToTime $ x
-    safeFromSql (SqlLocalTime _) = error "safeFromSql: Impossible to convert SqlLocalTime (LocalTime) to a numeric type."
-    safeFromSql (SqlZonedTime x) = truncate . utcTimeToPOSIXSeconds . zonedTimeToUTC $ x
-    safeFromSql (SqlUTCTime x) = truncate . utcTimeToPOSIXSeconds $ x
-    safeFromSql (SqlDiffTime x) = truncate x
-    safeFromSql (SqlPOSIXTime x) = truncate x
-    safeFromSql (SqlEpochTime x) = x
-    safeFromSql (SqlTimeDiff x) = x
-    safeFromSql (SqlNull) = error "safeFromSql: cannot convert SqlNull to Integer"
-
+    safeFromSql (SqlInt32 x) = return . fromIntegral $ x
+    safeFromSql (SqlInt64 x) = return . fromIntegral $ x
+    safeFromSql (SqlWord32 x) = return . fromIntegral $ x
+    safeFromSql (SqlWord64 x) = return . fromIntegral $ x
+    safeFromSql (SqlInteger x) = return x
+    safeFromSql (SqlChar x) = return . fromIntegral . ord $ x
+    safeFromSql (SqlBool x) = return (if x then 1 else 0)
+    safeFromSql (SqlDouble x) = return . truncate $ x
+    safeFromSql (SqlRational x) = return . truncate $ x
+    safeFromSql (SqlLocalDate x) = return . toModifiedJulianDay $ x
+    safeFromSql (SqlLocalTimeOfDay x) = 
+        return . fromIntegral . fromEnum . timeOfDayToTime $ x
+    safeFromSql y@(SqlLocalTime _) = quickError y
+    safeFromSql (SqlZonedTime x) = 
+        return . truncate . utcTimeToPOSIXSeconds . zonedTimeToUTC $ x
+    safeFromSql (SqlUTCTime x) =
+        return . truncate . utcTimeToPOSIXSeconds $ x
+    safeFromSql (SqlDiffTime x) = return . truncate $ x
+    safeFromSql (SqlPOSIXTime x) = return . truncate $ x
+    safeFromSql (SqlEpochTime x) = return x
+    safeFromSql (SqlTimeDiff x) = return x
+    safeFromSql y@(SqlNull) = quickError y
+{-
 instance SqlType Bool where
     toSql = SqlBool
     safeFromSql (SqlString x) = 
@@ -708,15 +725,20 @@ instance SqlType DiffTime where
 instance SqlType ST.CalendarTime where
     toSql x = toSql (ST.toClockTime x)
     safeFromSql = ST.toUTCTime . safeFromSql
-
+-}
 instance (SqlType a) => SqlType (Maybe a) where
     toSql Nothing = SqlNull
     toSql (Just a) = toSql a
-    safeFromSql SqlNull = Nothing
-    safeFromSql x = Just (safeFromSql x)
+    safeFromSql SqlNull = return Nothing
+    safeFromSql x = safeFromSql x >>= return . Just
 
 byteString2String :: B.ByteString -> String
 byteString2String = map (toEnum . fromEnum) . B.unpack
+
+viaInteger :: SqlType a => SqlValue -> (Integer -> a) -> FromSqlResult a
+viaInteger sv func = 
+    do i <- safeFromSql sv
+       return (func i)
 
 secs2td :: Integer -> ST.TimeDiff
 secs2td x = ST.diffClockTimes (ST.TOD x 0) (ST.TOD 0 0)
@@ -724,13 +746,15 @@ secs2td x = ST.diffClockTimes (ST.TOD x 0) (ST.TOD 0 0)
 
 -- | Read a value from a string, and give an informative message
 --   if it fails.
-read' :: (Typeable a,Read a) => String -> a
-read' s = ret
+read' :: (Read a, SqlType a) => String -> FromSqlResult a
+read' s = if True then ret else Right fake
   where ret = case reads s of
-                  [(x,"")] -> x
-                  _ -> error $ "fromSql: Cannot read " ++ show s 
-                               ++ " as " ++ t ++ "."
-        t = show (typeOf ret)
+                  [(x,"")] -> Right x
+                  _ -> Left $ SqlValueError {sqlSourceValue = show (SqlString s),
+                                             sqlDestType = t,
+                                             sqlValueErrorMsg = "Cannot read source value as dest type"}
+        fake = fromSql (SqlString "fake")
+        t = sqlTypeName fake
 
 parseTime' :: ParseTime t => String -> String -> String -> t
 parseTime' t fmtstr inpstr = ret
