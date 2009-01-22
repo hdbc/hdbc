@@ -556,7 +556,7 @@ instance SqlType Day where
     fromSql (SqlDouble x) = ModifiedJulianDay {toModifiedJulianDay = truncate x}
     fromSql (SqlRational x) = ModifiedJulianDay {toModifiedJulianDay = truncate . fromRational $ x}
     fromSql (SqlLocalDate x) = x
-    fromSql (SqlLocalTime _) = error "fromSql: cannot convert SqlLocalTime to Day"
+    fromSql (SqlLocalTimeOfDay _) = error "x"
     fromSql (SqlLocalTime x) = localDay x
     fromSql (SqlZonedTime x) = localDay . zonedTimeToLocalTime $ x
     fromSql y@(SqlUTCTime _) = localDay . zonedTimeToLocalTime . fromSql $ y
@@ -577,8 +577,9 @@ instance SqlType TimeOfDay where
     fromSql (SqlInteger x) = timeToTimeOfDay . fromInteger $ x
     fromSql (SqlChar _) = error "fromSql: cannot convert SqlChar to TimeOfDay"
     fromSql (SqlBool _) = error "fromSql: cannot convert SqlBool to TimeOfDay"
-    fromSql (SqlDouble x) = timeToTimeOfDay . fromIntegral . truncate $ x
-    fromSql (SqlRational x) = timeToTimeOfDay . fromIntegral . truncate . fromRational $ x
+    fromSql (SqlDouble x) = timeToTimeOfDay . fromIntegral $ 
+                            ((truncate x)::Integer)
+    fromSql (SqlRational x) = fromSql . SqlDouble . fromRational $ x
     fromSql (SqlLocalDate _) = error "fromSql: cannot convert SqlLocalDate to TimeOfDay"
     fromSql (SqlLocalTimeOfDay x) = x
     fromSql (SqlLocalTime x) = localTimeOfDay x
@@ -656,7 +657,7 @@ instance SqlType UTCTime where
     fromSql (SqlLocalTime _) = error "fromSql: cannot convert SqlLocalTime to UTCTime"
     fromSql (SqlZonedTime x) = zonedTimeToUTC x
     fromSql (SqlUTCTime x) = x
-    fromSql (SqlDiffTime x) = error "fromSql: cannot convert SqlDiffTime to UTCTime; did you mean SqlPOSIXTime?"
+    fromSql (SqlDiffTime _) = error "fromSql: cannot convert SqlDiffTime to UTCTime; did you mean SqlPOSIXTime?"
     fromSql (SqlPOSIXTime x) = posixSecondsToUTCTime x
     fromSql y@(SqlEpochTime _) = posixSecondsToUTCTime . fromSql $ y
     fromSql (SqlTimeDiff _) = error "fromSql: cannot convert SqlTimeDiff to UTCTime; did you mean SqlPOSIXTime?"
@@ -675,7 +676,8 @@ instance SqlType NominalDiffTime where
     fromSql (SqlBool _) = error "fromSql: cannot convert SqlBool to NominalDiffTime"
     fromSql (SqlDouble x) = fromRational . toRational $ x
     fromSql (SqlRational x) = fromRational x
-    fromSql (SqlLocalDate x) = fromIntegral . (\x -> x * 60 * 60 * 24) . toModifiedJulianDay $ x
+    fromSql (SqlLocalDate x) = fromIntegral . (\y -> y * 60 * 60 * 24) . 
+                               toModifiedJulianDay $ x
     fromSql (SqlLocalTimeOfDay x) = fromRational . toRational . timeOfDayToTime $ x
     fromSql (SqlLocalTime _) = error "fromSql: cannot convert SqlLocalTime to NominalDiffTime"
     fromSql (SqlZonedTime x) = utcTimeToPOSIXSeconds . zonedTimeToUTC $ x
