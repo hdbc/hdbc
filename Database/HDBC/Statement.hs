@@ -152,23 +152,54 @@ is needed locally in Haskell.
 Most people will use 'toSql' and 'fromSql' instead of manipulating
 'SqlValue's directly.
 
-The default representation of time values is an integer number of seconds.
-Databases such as PostgreSQL with builtin timestamp types can will see
-automatic conversion between these Haskell types to local types.  Other
-databases can just use an int or a string. 
+HDBC database backends are expected to marshal date/time data back and
+forth using the appropriate representation for the underlying database engine.
+Databases such as PostgreSQL with builtin date and time types should see automatic
+conversion between these Haskell types to database types.  Other databases will be
+presented with an integer or a string.  Care should be taken to use the same type on
+the Haskell side as you use on the database side.  For instance, if your database
+type lacks timezone information, you ought not to use 'ZonedTime', but instead
+'LocalTime' or 'UTCTime'.  Database type systems are not always as rich as Haskell.
+For instance, for data stored in a TIMESTAMP
+WITHOUT TIME ZONE column, HDBC may not be able to tell if it is intended as 'UTCTime'
+or 'LocalTime' data, and will happily convert it to both, upon your request.  It is
+your responsibility to ensure that you treat timezone issues with due care.
 
 This behavior also exists for other types.  For instance, many databases don't
 have a Rational type, so they'll just use Haskell's show function and
 store a Rational as a string.
 
-Two SqlValues are considered to be equal if one of these hold (first one that
-is true holds; if none are true, they are not equal):
+The conversion between Haskell types and database types is complex,
+and generic code in HDBC or its backends cannot possibly accomodate
+every possible situation.  In some cases, you may be best served by converting your
+Haskell type to a String, and passing that to the database.
+
+Two SqlValues are considered to be equal if one of these hold.  The
+first comparison that can be made is controlling; if none of these
+comparisons can be made, then they are not equal:
  * Both are NULL
- * Both represent the same type and the encapsulated values are equal
+ * Both represent the same type and the encapsulated values are considered equal
+   by applying (==) to them
  * The values of each, when converted to a string, are equal.
 
-Note that a 'NominalDiffTime' is converted to a 'SqlPOSIXTime' by 'toSQL'; you
-must construct 'SqlDiffTime' manually. -}
+Note that a 'NominalDiffTime' or 'POSIXTime' is converted to 'SqlDiffTime' by
+'toSQL'.  HDBC cannot differentiate between 'NominalDiffTime' and 'POSIXTime'
+since they are the same underlying type.  You must construct 'SqlPOSIXTime'
+manually, or use 'SqlUTCTime'.
+
+'SqlEpochTime' and 'SqlTimeDiff' are no longer created automatically by any
+'toSql' or 'fromSql' functions.  They may still be manually constructed, but are
+expected to be removed in a future version.  Although these two constructures will
+be removed, support for marshalling to and from the old System.Time data will be
+maintained as long as System.Time is, simply using the newer data types for conversion.
+
+Default string representations are given as comments below where such are non-obvious.
+These are used for 'fromSql' when a 'String' is desired.  They are also defaults for
+representing data to SQL backends, though individual backends may override them
+when a different format is demanded by the underlying database.  Date and time formats
+use ISO8601 date format, with HH:MM:SS added for time, and -HHMM added for timezone
+offsets.
+-}
 data SqlValue = SqlString String 
               | SqlByteString B.ByteString
               | SqlWord32 Word32
@@ -183,7 +214,7 @@ data SqlValue = SqlString String
               | SqlLocalTimeOfDay TimeOfDay -- ^ Local HH:MM:SS w/o timezone
               | SqlLocalTime LocalTime      -- ^ Local YYYY-MM-DD HH:MM:SS w/o timezone
               | SqlLocalDate Day            -- ^ Local YYYY-MM-DD w/o timezone
-              | SqlZonedTime ZonedTime      -- ^ Local M/D/Y HH:MM:SS -HHMM
+              | SqlZonedTime ZonedTime      -- ^ Local YYYY-MM-DD HH:MM:SS -HHMM
               | SqlUTCTime UTCTime          -- ^ UTC time
               | SqlPOSIXTime POSIXTime      -- ^ Time as seconds since 1/1/1970 UTC
               | SqlDiffTime NominalDiffTime -- ^ Calendar diff between seconds.  Must be constructed manually.
