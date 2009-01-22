@@ -420,7 +420,7 @@ instance SqlType Integer where
     fromSql (SqlDouble x) = truncate $ x
     fromSql (SqlRational x) = truncate $ x
     fromSql (SqlLocalDate x) = toModifiedJulianDay x
-    fromSql (SqlLocalTimeOfDay x) = truncate $ timeOfDayToTime x
+    fromSql (SqlLocalTimeOfDay x) = fromIntegral . fromEnum . timeOfDayToTime $ x
     fromSql (SqlLocalTime x) = error "fromSql: Impossible to convert SqlLocalTime (LocalTime) to a numeric type."
     fromSql (SqlZonedTime x) = truncate . utcTimeToPOSIXSeconds . zonedTimeToUTC $ x
     fromSql (SqlUTCTime x) = truncate . utcTimeToPOSIXSeconds $ x
@@ -504,6 +504,14 @@ instance SqlType Double where
     fromSql (SqlBool x) = if x then 1.0 else 0.0
     fromSql (SqlDouble x) = x
     fromSql (SqlRational x) = fromRational x
+    fromSql y@(SqlLocalDate _) = fromIntegral ((fromSql y)::Integer)
+    fromSql (SqlLocalTimeOfDay x) = fromRational . toRational . timeOfDayToTime $ x
+    fromSql (SqlLocalTime _) = error "fromSql: Impossible to convert SqlLocalTime (LocalTime) to a numeric type."
+    fromSql (SqlZonedTime x) = fromRational . toRational . utcTimeToPOSIXSeconds . 
+                               zonedTimeToUTC $ x
+    fromSql (SqlUTCTime x) = fromRational . toRational . utcTimeToPOSIXSeconds $ x
+    fromSql (SqlDiffTime x) = fromRational . toRational $ x
+    fromSql (SqlPOSIXTime x) = fromRational . toRational $ x
     fromSql (SqlEpochTime x) = fromIntegral x
     fromSql (SqlTimeDiff x) = fromIntegral x
     fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Double"
