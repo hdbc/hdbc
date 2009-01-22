@@ -764,8 +764,28 @@ instance SqlType DiffTime where
 
 instance SqlType ST.CalendarTime where
     sqlTypeName _ = "CalendarTime"
-    toSql x = toSql (ST.toClockTime x)
+    toSql x = toSql . calendarTimeToZonedTime $ x
     safeFromSql y = safeFromSql y >>= return . ST.toUTCTime
+
+calendarTimeToZonedTime :: ST.CalendarTime -> ZonedTime
+calendarTimeToZonedTime ct =
+    ZonedTime {
+     zonedTimeToLocalTime = LocalTime {
+       localDay = fromGregorian (fromIntegral $ ST.ctYear ct) 
+                  (1 + (fromEnum $ ST.ctMonth ct))
+                  (ST.ctDay ct),
+       localTimeOfDay = TimeOfDay {
+         todHour = ST.ctHour ct,
+         todMin = ST.ctMin ct,
+         todSec = (fromIntegral $ ST.ctSec ct) + 
+                  fromRational (ST.ctPicosec ct % 1000000000000)
+                        }
+                            },
+     zonedTimeZone = TimeZone {
+                       timeZoneMinutes = ST.ctTZ ct `div` 60,
+                       timeZoneSummerOnly = ST.ctIsDST ct,
+                       timeZoneName = ST.ctTZName ct}
+}
 
 instance (SqlType a) => SqlType (Maybe a) where
     sqlTypeName x = "Maybe " ++ sqlTypeName x
