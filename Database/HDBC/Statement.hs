@@ -592,8 +592,28 @@ instance SqlType NominalDiffTime where
     fromSql SqlNull = error "fromSql: cannot convert SqlNull to NominalDiffTime"
 
 instance SqlType UTCTime where
-    toSql x = toSql (utcTimeToPOSIXSeconds x)
-    fromSql x = posixSecondsToUTCTime (fromSql x)
+    toSql = SqlUTCTime
+    fromSql (SqlString x) = parseTime' "UTCTime" (iso8601DateFormat (Just "%T")) x
+    fromSql (SqlByteString x) = fromSql (SqlString (byteString2String x))
+    fromSql y@(SqlInt32 _) = posixSecondsToUTCTime . fromSql $ y
+    fromSql y@(SqlInt64 _) = posixSecondsToUTCTime . fromSql $ y
+    fromSql y@(SqlWord32 _) = posixSecondsToUTCTime . fromSql $ y
+    fromSql y@(SqlWord64 _) = posixSecondsToUTCTime . fromSql $ y
+    fromSql y@(SqlInteger _) = posixSecondsToUTCTime . fromSql $ y
+    fromSql (SqlChar _) = error "fromSql: cannot convert SqlChar to UTCTime"
+    fromSql (SqlBool _) = error "fromSql: cannot convert SqlBool to UTCTime"
+    fromSql y@(SqlDouble _) = posixSecondsToUTCTime . fromSql $ y
+    fromSql y@(SqlRational _) = posixSecondsToUTCTime . fromSql $ y
+    fromSql (SqlLocalDate _) = error "fromSql: cannot convert SqlLocalDate to UTCTime"
+    fromSql (SqlLocalTimeOfDay _) = error "fromSql: cannot convert SqlLocalTimeOfDay to UTCTime"
+    fromSql (SqlLocalTime _) = error "fromSql: cannot convert SqlLocalTime to UTCTime"
+    fromSql (SqlZonedTime x) = zonedTimeToUTC x
+    fromSql (SqlUTCTime x) = x
+    fromSql (SqlDiffTime x) = error "fromSql: cannot convert SqlDiffTime to UTCTime; did you mean SqlPOSIXTime?"
+    fromSql (SqlPOSIXTime x) = posixSecondsToUTCTime x
+    fromSql y@(SqlEpochTime _) = posixSecondsToUTCTime . fromSql $ y
+    fromSql (SqlTimeDiff _) = error "fromSql: cannot convert SqlTimeDiff to UTCTime; did you mean SqlPOSIXTime?"
+    fromSql SqlNull = error "fromSql: cannot convert SqlNull to UTCTime"
 
 instance SqlType ZonedTime where
     toSql x = toSql (zonedTimeToUTC x)
@@ -659,6 +679,13 @@ read' s = ret
                   _ -> error $ "fromSql: Cannot read " ++ show s 
                                ++ " as " ++ t ++ "."
         t = show (typeOf ret)
+
+parseTime' :: ParseTime t => String -> String -> String -> t
+parseTime' t fmtstr inpstr = ret
+    where ret = case parseTime defaultTimeLocale fmtstr inpstr of
+                  Nothing -> error $ "fromSql: Cannot read " ++ show inpstr ++ " as " ++ 
+                             t ++ " using default format string " ++ show fmtstr ++ "."
+                  Just x -> x
 
 --------------
 -- The following function copied from MissingH.Time.hs
