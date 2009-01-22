@@ -22,7 +22,7 @@ flag splitBase
   description: Choose the new smaller, split-up base package.
 library
   if flag(splitBase)
-    Build-Depends: base>=3, old-time, time, bytestring, containers
+    Build-Depends: base>=3, old-time, time, bytestring, containers, old-locale
   else
     Build-Depends: base<3
   Build-Depends: mtl

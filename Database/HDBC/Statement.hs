@@ -13,9 +13,9 @@ import Data.Char(ord,toUpper)
 import Data.Word
 import Data.Int
 import qualified System.Time as ST
-import qualified Data.Time as DT
-import qualified Data.Time.Clock.POSIX as DTP
-import qualified Data.Time.LocalTime as DTL
+import Data.Time
+import Data.Time.Clock.POSIX
+import System.Locale
 import Database.HDBC.ColTypes
 
 data Statement = Statement
@@ -211,13 +211,13 @@ data SqlValue = SqlString String
               | SqlBool Bool
               | SqlDouble Double
               | SqlRational Rational
-              | SqlLocalTimeOfDay TimeOfDay -- ^ Local HH:MM:SS w/o timezone
-              | SqlLocalTime LocalTime      -- ^ Local YYYY-MM-DD HH:MM:SS w/o timezone
-              | SqlLocalDate Day            -- ^ Local YYYY-MM-DD w/o timezone
-              | SqlZonedTime ZonedTime      -- ^ Local YYYY-MM-DD HH:MM:SS -HHMM
-              | SqlUTCTime UTCTime          -- ^ UTC time
-              | SqlPOSIXTime POSIXTime      -- ^ Time as seconds since 1/1/1970 UTC
-              | SqlDiffTime NominalDiffTime -- ^ Calendar diff between seconds.  Must be constructed manually.
+              | SqlLocalDate Day            -- ^ Local YYYY-MM-DD (no timezone)
+              | SqlLocalTimeOfDay TimeOfDay -- ^ Local HH:MM:SS (no timezone)
+              | SqlLocalTime LocalTime      -- ^ Local YYYY-MM-DD HH:MM:SS (no timezone)
+              | SqlZonedTime ZonedTime      -- ^ Local YYYY-MM-DD HH:MM:SS -HHMM.  Considered equal if both convert to the same UTC time.
+              | SqlUTCTime UTCTime          -- ^ UTC YYYY-MM-DD HH:MM:SS
+              | SqlDiffTime NominalDiffTime -- ^ Calendar diff between seconds.  Rendered as Integer when converted to String, but greater precision may be preserved for other types or to underlying database.
+              | SqlPOSIXTime POSIXTime      -- ^ Time as seconds since 1/1/1970 UTC.  Integer rendering as for 'SqlDiffTime'.
               | SqlEpochTime Integer      -- ^ DEPRECATED Representation of ClockTime or CalendarTime.  Use SqlPOSIXTime instead.
               | SqlTimeDiff Integer -- ^ DEPRECATED Representation of TimeDiff.  Use SqlDiffTime instead.
               | SqlNull         -- ^ NULL in SQL or Nothing in Haskell
@@ -238,7 +238,7 @@ instance Eq SqlValue where
     SqlLocalTimeOfDay a == SqlLocalTimeOfDay b = a == b
     SqlLocalTime a == SqlLocalTime b = a == b
     SqlLocalDate a == SqlLocalDate b = a == b
-    SqlZonedTime a == SqlZonedTime b = a == b
+    SqlZonedTime a == SqlZonedTime b = zonedTimeToUTC a == zonedTimeToUTC b
     SqlUTCTime a == SqlUTCTime b = a == b
     SqlPOSIXTime a == SqlPOSIXTime b = a == b
     SqlDiffTime a == SqlDiffTime b = a == b
@@ -262,13 +262,17 @@ instance SqlType String where
     fromSql (SqlBool x) = show x
     fromSql (SqlDouble x) = show x
     fromSql (SqlRational x) = show x
+    fromSql (SqlLocalDate x) = formatTime defaultTimeLocale
+                               (iso8601DateFormat Nothing) x
     fromSql (SqlLocalTimeOfDay x) = formatTime defaultTimeLocale "%T" x
     fromSql (SqlLocalTime x) = formatTime defaultTimeLocale
                                (iso8601DateFormat (Just "%T")) x
-    fromSql (SqlLocalDate x) = formatTime defaultTimeLocale
-                               (iso8601DateFormat Nothing) x
     fromSql (SqlZonedTime x) = formatTime defaultTimeLocale
-                               (iso8601DateFormat (Just "%T %z"))
+                               (iso8601DateFormat (Just "%T %z")) x
+    fromSql (SqlUTCTime x) = formatTime defaultTimeLocale
+                               (iso8601DateFormat (Just "%T")) x
+    fromSql (SqlDiffTime x) = show . truncate $ x
+    fromSql (SqlPOSIXTime x) = show . truncate $ x
     fromSql (SqlEpochTime x) = show x
     fromSql (SqlTimeDiff x) = show x
     fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to String"
@@ -295,6 +299,13 @@ instance SqlType Int where
     fromSql (SqlBool x) = if x then 1 else 0
     fromSql (SqlDouble x) = truncate $ x
     fromSql (SqlRational x) = truncate $ x
+    fromSql y@(SqlLocalDate x) = fromIntegral ((fromSql y)::Integer)
+    fromSql y@(SqlLocalTimeOfDay x) = fromIntegral ((fromSql y)::Integer)
+    fromSql y@(SqlLocalTime x) = fromIntegral ((fromSql y)::Integer)
+    fromSql y@(SqlZonedTime x) = fromIntegral ((fromSql y)::Integer)
+    fromSql y@(SqlUTCTime x) = fromIntegral ((fromSql y)::Integer)
+    fromSql (SqlDiffTime x) = truncate x
+    fromSql (SqlPOSIXTime x) = truncate x
     fromSql (SqlEpochTime x) = fromIntegral x
     fromSql (SqlTimeDiff x) = fromIntegral x
     fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Int"
@@ -482,7 +493,7 @@ instance SqlType ST.ClockTime where
     fromSql (SqlTimeDiff _) = error "fromSql: cannot convert SqlTimeDiff to ClockTime"
     fromSql SqlNull = error "fromSql: cannot convert SqlNull to ClockTime"
 
-instance SqlType DTP.POSIXTime where
+instance SqlType POSIXTime where
     toSql x = SqlEpochTime (floor x)
     fromSql (SqlString x) = fromInteger (read' x)
     fromSql (SqlByteString x) = fromInteger ((read' . byteString2String) x)
@@ -499,13 +510,13 @@ instance SqlType DTP.POSIXTime where
     fromSql (SqlTimeDiff _) = error "fromSql: cannot convert SqlTimeDiff to POSIXTime"
     fromSql SqlNull = error "fromSql: cannot convert SqlNull to POSIXTime"
 
-instance SqlType DT.UTCTime where
-    toSql x = toSql (DTP.utcTimeToPOSIXSeconds x)
-    fromSql x = DTP.posixSecondsToUTCTime (fromSql x)
+instance SqlType UTCTime where
+    toSql x = toSql (utcTimeToPOSIXSeconds x)
+    fromSql x = posixSecondsToUTCTime (fromSql x)
 
-instance SqlType DT.ZonedTime where
-    toSql x = toSql (DT.zonedTimeToUTC x)
-    fromSql x = DT.utcToZonedTime DT.utc (fromSql x)
+instance SqlType ZonedTime where
+    toSql x = toSql (zonedTimeToUTC x)
+    fromSql x = utcToZonedTime utc (fromSql x)
 
 instance SqlType ST.TimeDiff where
     toSql x = SqlTimeDiff (timeDiffToSecs x)
@@ -524,7 +535,7 @@ instance SqlType ST.TimeDiff where
     fromSql (SqlTimeDiff x) = secs2td x
     fromSql SqlNull = error "fromSql: cannot convert SqlNull to TimeDiff"
 
-instance SqlType DT.DiffTime where
+instance SqlType DiffTime where
     toSql x = SqlTimeDiff (floor . toRational $ x)
     fromSql (SqlString x) = fromInteger (read' x)
     fromSql (SqlByteString x) = fromInteger ((read' . byteString2String) x)
