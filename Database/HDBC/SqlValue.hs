@@ -40,13 +40,16 @@ sqlValueErrorPretty sv =
 
 type FromSqlResult a = Either SqlValueError a
 
-quickError :: SqlType a => SqlValue -> FromSqlResult a
-quickError sv = if True then Left ret else Right fake
+quickErrorMsg :: SqlType a => SqlValue -> String -> FromSqlResult a
+quickErrorMsg sv msg = if True then Left ret else Right fake
     where ret = SqlValueError {sqlSourceValue = show sv,
                                sqlDestType = t,
-                               sqlValueErrorMsg = "incompatible types"}
+                               sqlValueErrorMsg = "msg"}
           fake = fromSql (SqlString "fake")
           t = sqlTypeName fake
+
+quickError :: SqlType a => SqlValue -> FromSqlResult a
+quickError sv = quickErrorMsg sv "incompatible types"
   
 {- | Conversions to and from 'SqlValue's and standard Haskell types.
 
@@ -432,32 +435,35 @@ instance SqlType Bool where
 numToBool :: Num a => a -> FromSqlResult Bool
 numToBool x = Right (x /= 0)
 
-{-
 instance SqlType Char where
+    sqlTypeName _ = "Char"
     toSql = SqlChar
-    safeFromSql (SqlString [x]) = x
-    safeFromSql (SqlByteString x) = (head . byteString2String) x
-    safeFromSql (SqlString _) = error "safeFromSql: cannot convert SqlString to Char"
-    safeFromSql (SqlInt32 _) = error "safeFromSql: cannot convert SqlInt32 to Char"
-    safeFromSql (SqlInt64 _) = error "safeFromSql: cannot convert SqlInt64 to Char"
-    safeFromSql (SqlWord32 _) = error "safeFromSql: cannot convert SqlWord32 to Char"
-    safeFromSql (SqlWord64 _) = error "safeFromSql: cannot convert SqlWord64 to Char"
-    safeFromSql (SqlInteger _) = error "safeFromSql: cannot convert SqlInt to Char"
-    safeFromSql (SqlChar x) = x
-    safeFromSql (SqlBool x) = if x then '1' else '0'
-    safeFromSql (SqlDouble _) = error "safeFromSql: cannot convert SqlDouble to Char"
-    safeFromSql (SqlRational _) = error "safeFromSql: cannot convert SqlRational to Char"
-    safeFromSql (SqlLocalDate _) = error "safeFromSql: cannot convert SqlLocalDate to Char"
-    safeFromSql (SqlLocalTimeOfDay _) = error "safeFromSql: cannot convert SqlLocalTimeOfDay to Char"
-    safeFromSql (SqlLocalTime _) = error "safeFromSql: cannot convert SqlLocalTime to Char"
-    safeFromSql (SqlZonedTime _) = error "safeFromSql: cannot convert SqlZonedTime to Char"
-    safeFromSql (SqlUTCTime _) = error "safeFromSql: cannot convert SqlUTCTime to Char"
-    safeFromSql (SqlDiffTime _) = error "safeFromSql: cannot convert SqlDiffTime to Char"
-    safeFromSql (SqlPOSIXTime _) = error "safeFromSql: cannot convert SqlPOSIXTime to Char"
-    safeFromSql (SqlEpochTime _) = error "safeFromSql: cannot convert SqlEpochTime to Char"
-    safeFromSql (SqlTimeDiff _) = error "safeFromSql: cannot convert SqlTimeDiff to Char"
-    safeFromSql (SqlNull) = error "safeFromSql: cannot convert SqlNull to Char"
-
+    safeFromSql (SqlString [x]) = return x
+    safeFromSql y@(SqlString _) = quickErrorMsg y "String length /= 1"
+    safeFromSql y@(SqlByteString x) = 
+        case BS.length x of
+          1 -> safeFromSql . SqlString . head . byteString2String $ x
+          _ -> quickErrorMsg y "ByteString length /= 1"
+    safeFromSql y@(SqlInt32 _) = quickError y
+    safeFromSql y@(SqlInt64 _) = quickError y
+    safeFromSql y@(SqlWord32 _) = quickError y
+    safeFromSql y@(SqlWord64 _) = quickError y
+    safeFromSql y@(SqlInteger _) = quickError y
+    safeFromSql (SqlChar x) = return x
+    safeFromSql (SqlBool x) = return (if x then '1' else '0')
+    safeFromSql y@(SqlDouble _) = quickError y
+    safeFromSql y@(SqlRational _) = quickError y
+    safeFromSql y@(SqlLocalDate _) = quickError y
+    safeFromSql y@(SqlLocalTimeOfDay _) = quickError y
+    safeFromSql y@(SqlLocalTime _) = quickError y
+    safeFromSql y@(SqlZonedTime _) = quickError y
+    safeFromSql y@(SqlUTCTime _) = quickError y
+    safeFromSql y@(SqlDiffTime _) = quickError y
+    safeFromSql y@(SqlPOSIXTime _) = quickError y
+    safeFromSql y@(SqlEpochTime _) = quickError y
+    safeFromSql y@(SqlTimeDiff _) = quickError y
+    safeFromSql y@(SqlNull) = quickError y
+{-
 instance SqlType Double where
     toSql = SqlDouble
     safeFromSql (SqlString x) = read' x
