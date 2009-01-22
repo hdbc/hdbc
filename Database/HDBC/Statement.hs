@@ -4,8 +4,10 @@ module Database.HDBC.Statement
     SqlError(..),
 
     -- * Re-exported from "Database.HDBC.SqlValue"; this re-exporting is deprecated
-    SqlType(..), nToSql, iToSql,
-    SqlValue(..)
+    SqlType(..), nToSql, iToSql, fromSql, FromSqlResult,
+    SqlValue(..),
+    SqlValueError(..),
+    sqlValueErrorPretty
     )
 
 where
