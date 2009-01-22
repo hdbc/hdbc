@@ -726,35 +726,37 @@ instance SqlType ST.TimeDiff where
     safeFromSql y@(SqlEpochTime _) = quickError y
     safeFromSql (SqlTimeDiff x) = secs2td x
     safeFromSql y@SqlNull = quickError y
-{-
+
 instance SqlType DiffTime where
+    sqlTypeName _ = "DiffTime"
     toSql x = SqlDiffTime . fromRational . toRational $ x
-    safeFromSql (SqlString x) = fromInteger (read' x)
-    safeFromSql (SqlByteString x) = fromInteger ((read' . byteString2String) x)
-    safeFromSql (SqlInt32 x) = fromIntegral x
-    safeFromSql (SqlInt64 x) = fromIntegral x
-    safeFromSql (SqlWord32 x) = fromIntegral x
-    safeFromSql (SqlWord64 x) = fromIntegral x
-    safeFromSql (SqlInteger x) = fromIntegral x
-    safeFromSql (SqlChar _) = error "safeFromSql: cannot convert SqlChar to DiffTime"
-    safeFromSql (SqlBool _) = error "safeFromSql: cannot convert SqlBool to DiffTime"
-    safeFromSql (SqlDouble x) = fromIntegral ((truncate x)::Integer)
-    safeFromSql (SqlRational x) = fromIntegral ((truncate x)::Integer)
-    safeFromSql (SqlLocalDate _) = error "safeFromSql: cannot convert SqlLocalDate to DiffTime"
-    safeFromSql (SqlLocalTimeOfDay _) = error "safeFromSql: cannot convert SqlLocalTimeOfDay to DiffTime"
-    safeFromSql (SqlLocalTime _) = error "safeFromSql: cannot convert SqlLocalTime to DiffTime"
-    safeFromSql (SqlZonedTime _) = error "safeFromSql: cannot convert SqlZonedTime to DiffTime"
-    safeFromSql (SqlUTCTime _) = error "safeFromSql: cannot convert SqlUTCTime to DiffTime"
-    safeFromSql (SqlDiffTime x) = fromRational . toRational $ x
-    safeFromSql (SqlPOSIXTime _) = error "safeFromSql: cannot convert SqlPOSIXTime to DiffTime"
-    safeFromSql (SqlEpochTime _) = error "safeFromSql: cannot convert SqlEpochTime to DiffTime"
-    safeFromSql (SqlTimeDiff x) = fromIntegral x
-    safeFromSql SqlNull = error "safeFromSql: cannot convert SqlNull to DiffTime"
+    safeFromSql (SqlString x) = read' x >>= return . fromInteger
+    safeFromSql (SqlByteString x) = safeFromSql . SqlString . byteString2String $ x
+    safeFromSql (SqlInt32 x) = return . fromIntegral $ x
+    safeFromSql (SqlInt64 x) = return . fromIntegral $ x
+    safeFromSql (SqlWord32 x) = return . fromIntegral $ x
+    safeFromSql (SqlWord64 x) = return . fromIntegral $ x
+    safeFromSql (SqlInteger x) = return . fromIntegral $ x
+    safeFromSql y@(SqlChar _) = quickError y
+    safeFromSql y@(SqlBool _) = quickError y
+    safeFromSql (SqlDouble x) = return $ fromIntegral ((truncate x)::Integer)
+    safeFromSql (SqlRational x) = return $ fromIntegral ((truncate x)::Integer)
+    safeFromSql y@(SqlLocalDate _) = quickError y
+    safeFromSql y@(SqlLocalTimeOfDay _) = quickError y
+    safeFromSql y@(SqlLocalTime _) = quickError y
+    safeFromSql y@(SqlZonedTime _) = quickError y
+    safeFromSql y@(SqlUTCTime _) = quickError y
+    safeFromSql (SqlDiffTime x) = return . fromRational . toRational $ x
+    safeFromSql y@(SqlPOSIXTime _) = quickError y
+    safeFromSql y@(SqlEpochTime _) = quickError y
+    safeFromSql (SqlTimeDiff x) = return . fromIntegral $ x
+    safeFromSql y@SqlNull = quickError y
 
 instance SqlType ST.CalendarTime where
+    sqlTypeName _ = "CalendarTime"
     toSql x = toSql (ST.toClockTime x)
-    safeFromSql = ST.toUTCTime . safeFromSql
--}
+    safeFromSql y = safeFromSql y >>= return . ST.toUTCTime
+
 instance (SqlType a) => SqlType (Maybe a) where
     toSql Nothing = SqlNull
     toSql (Just a) = toSql a
