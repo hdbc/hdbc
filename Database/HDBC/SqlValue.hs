@@ -788,15 +788,13 @@ read' s = if True then ret else Right fake
         t = sqlTypeName fake
 
 parseTime' :: (SqlType t, ParseTime t) => String -> String -> String -> FromSqlResult t
-parseTime' t fmtstr inpstr = if True then ret else Right fake
+parseTime' t fmtstr inpstr = ret
     where ret = 
               case parseTime defaultTimeLocale fmtstr inpstr of
                 Nothing -> Left $ SqlValueError {sqlSourceValue = show (SqlString inpstr),
                                                  sqlDestType = t,
                                                  sqlValueErrorMsg = "Cannot parse using default format string " ++ show fmtstr}
                 Just x -> Right x
-          fake = fromSql (SqlString "fake")
-          t = sqlTypeName fake
 
 --------------
 -- The following function copied from MissingH.Time.hs
