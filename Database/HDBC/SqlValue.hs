@@ -508,7 +508,7 @@ instance SqlType Rational where
     safeFromSql y@(SqlLocalDate _) = viaInteger y fromIntegral
     safeFromSql (SqlLocalTimeOfDay x) = return . toRational . timeOfDayToTime $ x
     safeFromSql y@(SqlLocalTime _) = quickError y
-    safeFromSql (SqlZonedTime x) = return . toRational . utcTimeToPOSIXSeconds . zonedTimeToUTC $ x
+    safeFromSql (SqlZonedTime x) = safeFromSql . SqlUTCTime . zonedTimeToUTC $ x
     safeFromSql (SqlUTCTime x) = return . toRational . utcTimeToPOSIXSeconds $ x
     safeFromSql (SqlDiffTime x) = return . toRational $ x
     safeFromSql (SqlPOSIXTime x) = return . toRational $ x
