@@ -542,18 +542,40 @@ instance SqlType Rational where
     fromSql (SqlTimeDiff x) = fromIntegral x
     fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Double"
 
---- FIXME: INSERT HERE
-
 instance SqlType Day where
     toSql = SqlLocalDate
-    --- FIXME: WRITE
+    fromSql (SqlString x) = parseTime' "Day" (iso8601DateFormat Nothing) x
+    fromSql y@(SqlByteString _) = fromSql (SqlString (fromSql y))
+    fromSql (SqlInt32 x) = ModifiedJulianDay {toModifiedJulianDay = fromIntegral x}
+    fromSql (SqlInt64 x) = ModifiedJulianDay {toModifiedJulianDay = fromIntegral x}
+    fromSql (SqlWord32 x) = ModifiedJulianDay {toModifiedJulianDay = fromIntegral x}
+    fromSql (SqlWord64 x) = ModifiedJulianDay {toModifiedJulianDay = fromIntegral x}
+    fromSql (SqlInteger x) = ModifiedJulianDay {toModifiedJulianDay = x}
+    fromSql (SqlChar _) = error "fromSql: cannot convert SqlChar to Day"
+    fromSql (SqlBool _) = error "fromSql: cannot convert SqlBool to Day"
+    fromSql (SqlDouble x) = ModifiedJulianDay {toModifiedJulianDay = truncate x}
+    fromSql (SqlRational x) = ModifiedJulianDay {toModifiedJulianDay = truncate . fromRational $ x}
+    fromSql (SqlLocalDate x) = x
+    fromSql (SqlLocalTime _) = error "fromSql: cannot convert SqlLocalTime to Day"
+    fromSql (SqlLocalTime x) = localDay x
+    fromSql (SqlZonedTime x) = localDay . zonedTimeToLocalTime $ x
+    fromSql y@(SqlUTCTime _) = localDay . zonedTimeToLocalTime . fromSql $ y
+    fromSql (SqlDiffTime _) = error "fromSql: cannot convert SqlDiffTime to Day"
+    fromSql y@(SqlPOSIXTime _) = localDay . zonedTimeToLocalTime . fromSql $ y
+    fromSql y@(SqlEpochTime _) = localDay . zonedTimeToLocalTime . fromSql $ y
+    fromSql (SqlTimeDiff _) = error "fromSql: cannot convert SqlTimeDiff to Day"
+    fromSql (SqlNull) = error "fromSql: cannot convert SqlNull to Day"
 
 instance SqlType TimeOfDay where
     toSql = SqlLocalTimeOfDay
+    fromSql (SqlString x) = parseTime' "TimeOfDay" "%T" x
     --- FIXME: WRITE
+    fromSql (SqlInteger x) = timeToTimeOfDay . fromInteger $ x
 
 instance SqlType LocalTime where
     toSql = SqlLocalTime
+    fromSql (SqlString x) = parseTime' "LocalTime" (iso8601DateFormat (Just "%T")) x
+    fromSql (SqlInteger _) = error "fromSql: Impossible to convert SqlInteger to LocalTime"
 
 instance SqlType ZonedTime where
     toSql x = SqlZonedTime x
