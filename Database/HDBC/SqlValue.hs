@@ -18,6 +18,7 @@ import qualified System.Time as ST
 import Data.Time
 import Data.Time.Clock
 import Data.Time.Clock.POSIX
+import Data.Time.Calendar.OrdinalDate(sundayStartWeek, toOrdinalDate)
 import System.Locale
 import Data.Ratio
 import Control.Monad.Error
@@ -765,23 +766,27 @@ instance SqlType DiffTime where
 instance SqlType ST.CalendarTime where
     sqlTypeName _ = "CalendarTime"
     toSql x = toSql . calendarTimeToZonedTime $ x
-    safeFromSql y = safeFromSql y >>= return . ST.toUTCTime
+    safeFromSql y = safeFromSql y >>= return . zonedTimeToCalendarTime
 
--- FIXME: finish this
-zonedTimeToCalenderTime zt =
+zonedTimeToCalendarTime :: ZonedTime -> ST.CalendarTime
+zonedTimeToCalendarTime zt =
     ST.CalendarTime {
             ST.ctYear = fromIntegral year,
             ST.ctMonth = toEnum (month - 1),
             ST.ctDay = day,
             ST.ctHour = todHour ltod,
-            ST.ctMin = todMon ltod,
+            ST.ctMin = todMin ltod,
             ST.ctSec = secs,
-            ST.ctPicosec = fromRational $ ((todSec ltod) - (fromIntegral secs)) * 1000000000000,
-            ST.ct
+            ST.ctPicosec = truncate $ (((toRational (todSec ltod) - (toRational secs)) * 1000000000000)::Rational),
+            ST.ctWDay = toEnum . snd . sundayStartWeek . localDay . zonedTimeToLocalTime $ zt,
+            ST.ctYDay = snd . toOrdinalDate . localDay . zonedTimeToLocalTime $ zt,
+            ST.ctTZName = timeZoneName . zonedTimeZone $ zt,
+            ST.ctTZ = (timeZoneMinutes . zonedTimeZone $ zt) * 60,
+            ST.ctIsDST = timeZoneSummerOnly . zonedTimeZone $ zt
           }
     where (year, month, day) = toGregorian . localDay . zonedTimeToLocalTime $ zt
           ltod = localTimeOfDay . zonedTimeToLocalTime $ zt
-          secs = (fromIntegral . todSec $ ltod)::Int
+          secs = (truncate . todSec $ ltod)::Int
 
 calendarTimeToZonedTime :: ST.CalendarTime -> ZonedTime
 calendarTimeToZonedTime ct =
