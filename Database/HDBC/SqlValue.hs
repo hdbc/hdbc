@@ -5,6 +5,8 @@ module Database.HDBC.SqlValue
     SqlValue(..)
     )
 
+-- FIXME: need to convert some of these time things to not be using viaInteger???
+
 where
 import Data.Dynamic
 import qualified Data.ByteString as B
@@ -257,31 +259,31 @@ instance Convertible SqlValue Int where
     safeConvert (SqlTimeDiff x) = safeConvert x
     safeConvert y@(SqlNull) = quickError y
 
-{-
-instance SqlType Int32 where
-    toSql = SqlInt32
+instance Convertible Int32 SqlValue where
+    safeConvert = return . SqlInt32
+instance Convertible SqlValue Int32 where
     safeConvert (SqlString x) = read' x
     safeConvert (SqlByteString x) = (read' . byteString2String) x
     safeConvert (SqlInt32 x) = return x
-    safeConvert (SqlInt64 x) = return . fromIntegral $ x
-    safeConvert (SqlWord32 x) = return . fromIntegral $ x
-    safeConvert (SqlWord64 x) = return . fromIntegral $ x
-    safeConvert (SqlInteger x) = return . fromIntegral $ x
-    safeConvert (SqlChar x) = return . fromIntegral . ord $ x
+    safeConvert (SqlInt64 x) = safeConvert x
+    safeConvert (SqlWord32 x) = safeConvert x
+    safeConvert (SqlWord64 x) = safeConvert x
+    safeConvert (SqlInteger x) = safeConvert x
+    safeConvert (SqlChar x) = safeConvert x
     safeConvert (SqlBool x) = return (if x then 1 else 0)
-    safeConvert (SqlDouble x) = return . truncate $ x
-    safeConvert (SqlRational x) = return . truncate $ x
+    safeConvert (SqlDouble x) = safeConvert x
+    safeConvert (SqlRational x) = safeConvert x
     safeConvert y@(SqlLocalDate _) = viaInteger y fromIntegral
     safeConvert y@(SqlLocalTimeOfDay _) = viaInteger y fromIntegral
     safeConvert y@(SqlLocalTime _) = viaInteger y fromIntegral
     safeConvert y@(SqlZonedTime _) = viaInteger y fromIntegral
     safeConvert y@(SqlUTCTime _) = viaInteger y fromIntegral
-    safeConvert (SqlDiffTime x) = return . truncate $ x
-    safeConvert (SqlPOSIXTime x) = return . truncate $ x
-    safeConvert (SqlEpochTime x) = return . fromIntegral $ x
-    safeConvert (SqlTimeDiff x) = return . fromIntegral $ x
+    safeConvert y@(SqlDiffTime _) = viaInteger y fromIntegral
+    safeConvert y@(SqlPOSIXTime _) = viaInteger y fromIntegral
+    safeConvert (SqlEpochTime x) = safeConvert x
+    safeConvert (SqlTimeDiff x) = safeConvert x
     safeConvert y@(SqlNull) = quickError y
-
+{-
 instance SqlType Int64 where
     toSql = SqlInt64
     safeConvert (SqlString x) = read' x
@@ -779,11 +781,15 @@ instance (SqlType a) => SqlType (Maybe a) where
 byteString2String :: B.ByteString -> String
 byteString2String = map (toEnum . fromEnum) . B.unpack
 
+viaInteger' :: (Convertible SqlValue a, Bounded a, Show a, Convertible a Integer,
+               Typeable a) => SqlValue -> (Integer -> ConvertResult a) -> ConvertResult a
+viaInteger' sv func = 
+    do i <- ((safeConvert sv)::ConvertResult Integer)
+       boundedConversion func i
+
 viaInteger :: (Convertible SqlValue a, Bounded a, Show a, Convertible a Integer,
                Typeable a) => SqlValue -> (Integer -> a) -> ConvertResult a
-viaInteger sv func = 
-    do i <- ((safeConvert sv)::ConvertResult Integer)
-       boundedConversion (return . func) i
+viaInteger sv func = viaInteger' sv (return . func)
 
 secs2td :: Integer -> ConvertResult ST.TimeDiff
 secs2td x = return $ ST.diffClockTimes (ST.TOD x 0) (ST.TOD 0 0)
