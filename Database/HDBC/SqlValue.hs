@@ -283,80 +283,81 @@ instance Convertible SqlValue Int32 where
     safeConvert (SqlEpochTime x) = safeConvert x
     safeConvert (SqlTimeDiff x) = safeConvert x
     safeConvert y@(SqlNull) = quickError y
-{-
-instance SqlType Int64 where
-    toSql = SqlInt64
+
+instance Convertible Int64 SqlValue where
+    safeConvert = return . SqlInt64
+instance Convertible SqlValue Int64 where
     safeConvert (SqlString x) = read' x
     safeConvert (SqlByteString x) = (read' . byteString2String) x
-    safeConvert (SqlInt32 x) = return . fromIntegral $ x
+    safeConvert (SqlInt32 x) = safeConvert x
     safeConvert (SqlInt64 x) = return x
-    safeConvert (SqlWord32 x) = return . fromIntegral $ x
-    safeConvert (SqlWord64 x) = return . fromIntegral $ x
-    safeConvert (SqlInteger x) = return . fromIntegral $ x
-    safeConvert (SqlChar x) = return . fromIntegral . ord $ x
+    safeConvert (SqlWord32 x) = safeConvert x
+    safeConvert (SqlWord64 x) = safeConvert x
+    safeConvert (SqlInteger x) = safeConvert x
+    safeConvert (SqlChar x) = safeConvert x
     safeConvert (SqlBool x) = return (if x then 1 else 0)
-    safeConvert (SqlDouble x) = return . truncate $ x
-    safeConvert (SqlRational x) = return . truncate $ x
+    safeConvert (SqlDouble x) = safeConvert x
+    safeConvert (SqlRational x) = safeConvert x
     safeConvert y@(SqlLocalDate _) = viaInteger y fromIntegral
-    safeConvert y@(SqlLocalTimeOfDay _) = viaInteger y fromIntegral 
-    safeConvert y@(SqlLocalTime _) = viaInteger y fromIntegral 
+    safeConvert y@(SqlLocalTimeOfDay _) = viaInteger y fromIntegral
+    safeConvert y@(SqlLocalTime _) = viaInteger y fromIntegral
     safeConvert y@(SqlZonedTime _) = viaInteger y fromIntegral
     safeConvert y@(SqlUTCTime _) = viaInteger y fromIntegral
-    safeConvert (SqlDiffTime x) = return . truncate $ x
-    safeConvert (SqlPOSIXTime x) = return . truncate $ x
-    safeConvert (SqlEpochTime x) = return . fromIntegral $ x
-    safeConvert (SqlTimeDiff x) = return . fromIntegral $ x
+    safeConvert y@(SqlDiffTime _) = viaInteger y fromIntegral
+    safeConvert y@(SqlPOSIXTime _) = viaInteger y fromIntegral
+    safeConvert (SqlEpochTime x) = safeConvert x
+    safeConvert (SqlTimeDiff x) = safeConvert x
     safeConvert y@(SqlNull) = quickError y
 
-instance SqlType Word32 where
-    toSql = SqlWord32
+instance Convertible Word32 SqlValue where
+    safeConvert = return . SqlWord32
+instance Convertible SqlValue Word32 where
     safeConvert (SqlString x) = read' x
     safeConvert (SqlByteString x) = (read' . byteString2String) x
-    safeConvert (SqlInt32 x) = return . fromIntegral $ x
-    safeConvert (SqlInt64 x) = return . fromIntegral $ x
+    safeConvert (SqlInt32 x) = safeConvert x
+    safeConvert (SqlInt64 x) = safeConvert x
     safeConvert (SqlWord32 x) = return x
-    safeConvert (SqlWord64 x) = return . fromIntegral $ x
-    safeConvert (SqlInteger x) = return . fromIntegral $ x
-    safeConvert (SqlChar x) = return . fromIntegral . ord $ x
+    safeConvert (SqlWord64 x) = safeConvert x
+    safeConvert (SqlInteger x) = safeConvert x
+    safeConvert (SqlChar x) = safeConvert x
     safeConvert (SqlBool x) = return (if x then 1 else 0)
-    safeConvert (SqlDouble x) = return . truncate $ x
-    safeConvert (SqlRational x) = return . truncate $ x
+    safeConvert (SqlDouble x) = safeConvert x
+    safeConvert (SqlRational x) = safeConvert x
     safeConvert y@(SqlLocalDate _) = viaInteger y fromIntegral
     safeConvert y@(SqlLocalTimeOfDay _) = viaInteger y fromIntegral
     safeConvert y@(SqlLocalTime _) = viaInteger y fromIntegral
     safeConvert y@(SqlZonedTime _) = viaInteger y fromIntegral
     safeConvert y@(SqlUTCTime _) = viaInteger y fromIntegral
-    safeConvert (SqlDiffTime x) = return . truncate $ x
-    safeConvert (SqlPOSIXTime x) = return . truncate $ x
-    safeConvert (SqlEpochTime x) = return . fromIntegral $ x
-    safeConvert (SqlTimeDiff x) = return . fromIntegral $ x
+    safeConvert y@(SqlDiffTime _) = viaInteger y fromIntegral
+    safeConvert y@(SqlPOSIXTime _) = viaInteger y fromIntegral
+    safeConvert (SqlEpochTime x) = safeConvert x
+    safeConvert (SqlTimeDiff x) = safeConvert x
     safeConvert y@(SqlNull) = quickError y
 
-instance SqlType Word64 where
-    toSql = SqlWord64
+instance Convertible Word64 SqlValue where
+    safeConvert = return . SqlWord64
+instance Convertible SqlValue Word64 where
     safeConvert (SqlString x) = read' x
     safeConvert (SqlByteString x) = (read' . byteString2String) x
-    safeConvert (SqlInt32 x) = return . fromIntegral $ x
-    safeConvert (SqlInt64 x) = return . fromIntegral $ x
-    safeConvert (SqlWord32 x) = return . fromIntegral $ x
+    safeConvert (SqlInt32 x) = safeConvert x
+    safeConvert (SqlInt64 x) = safeConvert x
+    safeConvert (SqlWord32 x) = safeConvert x
     safeConvert (SqlWord64 x) = return x
-    safeConvert (SqlInteger x) = return . fromIntegral $ x
-    safeConvert (SqlChar x) = return . fromIntegral . ord $ x
+    safeConvert (SqlInteger x) = safeConvert x
+    safeConvert (SqlChar x) = safeConvert x
     safeConvert (SqlBool x) = return (if x then 1 else 0)
-    safeConvert (SqlDouble x) = return . truncate $ x
-    safeConvert (SqlRational x) = return . truncate $ x
+    safeConvert (SqlDouble x) = safeConvert x
+    safeConvert (SqlRational x) = safeConvert x
     safeConvert y@(SqlLocalDate _) = viaInteger y fromIntegral
     safeConvert y@(SqlLocalTimeOfDay _) = viaInteger y fromIntegral
     safeConvert y@(SqlLocalTime _) = viaInteger y fromIntegral
     safeConvert y@(SqlZonedTime _) = viaInteger y fromIntegral
     safeConvert y@(SqlUTCTime _) = viaInteger y fromIntegral
-    safeConvert (SqlDiffTime x) = return . truncate $ x
-    safeConvert (SqlPOSIXTime x) = return . truncate $ x
-    safeConvert (SqlEpochTime x) = return . fromIntegral $ x
-    safeConvert (SqlTimeDiff x) = return . fromIntegral $ x
+    safeConvert y@(SqlDiffTime _) = viaInteger y fromIntegral
+    safeConvert y@(SqlPOSIXTime _) = viaInteger y fromIntegral
+    safeConvert (SqlEpochTime x) = safeConvert x
+    safeConvert (SqlTimeDiff x) = safeConvert x
     safeConvert y@(SqlNull) = quickError y
-
--}
 
 instance Convertible Integer SqlValue where
     safeConvert = return . SqlInteger
