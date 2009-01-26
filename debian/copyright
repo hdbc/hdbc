@@ -2,12 +2,12 @@ This is hdbc, written and maintained by John Goerzen <jgoerzen@complete.org>
 on Tue, 27 Dec 2005 10:22:53 -0600.
 
 The original source can always be found at:
-	ftp://ftp.debian.org/dists/unstable/main/source/
+	http://software.complete.org/hdbc
 
 The Darcs repository for this program can be accessed with:
-   darcs get --partial http://darcs.complete.org/hdbc
+   git clone git://git.complete.org/hdbc
 
-Copyright (C) 2005-2007 John Goerzen <jgoerzen@complete.org>
+Copyright (C) 2005-2009 John Goerzen <jgoerzen@complete.org>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public

@@ -5,6 +5,9 @@ Build-Depends: debhelper (>= 4.0.0), ghc6 (>= 6.8.2dfsg1), haskell-devscripts (>
 Build-Depends-Indep: debhelper (>= 4.0.0), haddock, hugs (>= 98.200503.08), haskell-devscripts (>= 0.6.15), ghc6 (>= 6.8.2dfsg1), cpphs, libghc6-mtl-doc, libghc6-time-doc, ghc6-doc
 Standards-Version: 3.6.2
 Section: libs
+Homepage: http://software.complete.org/hdbc
+Vcs-Browser: http://git.complete.org/hdbc
+Vcs-Git: git://git.complete.org/hdbc
 
 Package: libghc6-hdbc-dev
 Section: libdevel
