@@ -386,9 +386,10 @@ instance Convertible SqlValue Integer where
     safeConvert (SqlEpochTime x) = return x
     safeConvert (SqlTimeDiff x) = return x
     safeConvert y@(SqlNull) = quickError y
-{-
-instance SqlType Bool where
-    toSql = SqlBool
+
+instance Convertible Bool SqlValue where
+    safeConvert = return . SqlBool
+instance Convertible SqlValue Bool where
     safeConvert y@(SqlString x) = 
         case map toUpper x of
           "TRUE" -> Right True
@@ -397,6 +398,7 @@ instance SqlType Bool where
           "F" -> Right False
           "0" -> Right False
           "1" -> Right True
+                 -- FIXME: stop generating this manually?
           _ -> Left $ ConvertError (show y) "SqlValue" "Bool" "Cannot parse given String as Bool"
     safeConvert (SqlByteString x) = (safeConvert . SqlString . byteString2String) x
     safeConvert (SqlInt32 x) = numToBool x
@@ -422,14 +424,15 @@ instance SqlType Bool where
 numToBool :: Num a => a -> ConvertResult Bool
 numToBool x = Right (x /= 0)
 
-instance SqlType Char where
-    toSql = SqlChar
+instance Convertible Char SqlValue where
+    safeConvert = return . SqlChar
+instance Convertible SqlValue Char where
     safeConvert (SqlString [x]) = return x
-    safeConvert y@(SqlString _) = convError y "String length /= 1"
+    safeConvert y@(SqlString _) = convError "String length /= 1" y
     safeConvert y@(SqlByteString x) = 
         case B.length x of
           1 -> safeConvert . SqlString . byteString2String $ x
-          _ -> convError y "ByteString length /= 1"
+          _ -> convError "ByteString length /= 1" y
     safeConvert y@(SqlInt32 _) = quickError y
     safeConvert y@(SqlInt64 _) = quickError y
     safeConvert y@(SqlWord32 _) = quickError y
@@ -450,6 +453,7 @@ instance SqlType Char where
     safeConvert y@(SqlTimeDiff _) = quickError y
     safeConvert y@(SqlNull) = quickError y
 
+{- FIXME: start here
 instance SqlType Double where
     toSql = SqlDouble
     safeConvert (SqlString x) = read' x
