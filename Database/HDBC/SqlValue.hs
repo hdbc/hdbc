@@ -779,10 +779,11 @@ instance (SqlType a) => SqlType (Maybe a) where
 byteString2String :: B.ByteString -> String
 byteString2String = map (toEnum . fromEnum) . B.unpack
 
-viaInteger :: Convertible SqlValue a => SqlValue -> (Integer -> a) -> ConvertResult a
+viaInteger :: (Convertible SqlValue a, Bounded a, Show a, Convertible a Integer,
+               Typeable a) => SqlValue -> (Integer -> a) -> ConvertResult a
 viaInteger sv func = 
-    do i <- safeConvert sv
-       return (func i)
+    do i <- ((safeConvert sv)::ConvertResult Integer)
+       boundedConversion (return . func) i
 
 secs2td :: Integer -> ConvertResult ST.TimeDiff
 secs2td x = return $ ST.diffClockTimes (ST.TOD x 0) (ST.TOD 0 0)
