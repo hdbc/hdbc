@@ -44,8 +44,6 @@ module Database.HDBC
      -- * Typing of transfer data
      SqlType(..), nToSql, iToSql, posixToSql, fromSql, FromSqlResult,
      SqlValue(..),
-     SqlValueError(..),
-     sqlValueErrorPretty,
 
      -- * Database Connections
      IConnection,

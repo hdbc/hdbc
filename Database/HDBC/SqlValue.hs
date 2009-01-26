@@ -3,9 +3,7 @@ module Database.HDBC.SqlValue
     SqlType(..), nToSql, iToSql, posixToSql,
     fromSql,
     FromSqlResult,
-    SqlValue(..),
-    SqlValueError(..),
-    sqlValueErrorPretty
+    SqlValue(..)
     )
 
 where
@@ -22,31 +20,17 @@ import Data.Time.Calendar.OrdinalDate(sundayStartWeek, toOrdinalDate)
 import System.Locale
 import Data.Ratio
 import Control.Monad.Error
-
-data SqlValueError = SqlValueError {
-      sqlSourceValue :: String,
-      sqlDestType :: String,
-      sqlValueErrorMsg :: String}
-      deriving (Eq, Read, Show, Typeable)
-
-instance Error SqlValueError where
-    strMsg x = SqlValueError {sqlSourceValue = "(unknown)",
-                              sqlDestType = "(unknown)",
-                              sqlValueErrorMsg = x}
-
-sqlValueErrorPretty :: SqlValueError -> String
-sqlValueErrorPretty sv =
-    "fromSql: could not convert " ++ sqlSourceValue sv ++ " to " ++
-    sqlDestType sv ++ ": " ++ sqlValueErrorMsg sv
+import Data.Convertible
 
 {- | The result of 'safeFromSql'. -}
-type FromSqlResult a = Either SqlValueError a
+type FromSqlResult a = Either ConvertError a
 
 quickErrorMsg :: SqlType a => SqlValue -> String -> FromSqlResult a
 quickErrorMsg sv msg = if True then Left ret else Right fake
-    where ret = SqlValueError {sqlSourceValue = show sv,
-                               sqlDestType = t,
-                               sqlValueErrorMsg = msg}
+    where ret = ConvertError {convSourceValue = show sv,
+                              convSourceType = "SqlValue",
+                              convDestType = t,
+                              convErrorMessage = msg}
           fake = fromSql (SqlString "fake")
           t = sqlTypeName fake
 
@@ -76,7 +60,7 @@ class (Show a) => SqlType a where
          Most people use the simpler 'fromSql' instead. -}
     safeFromSql :: SqlValue -> FromSqlResult a
 
-    {- | The name for this type, primarily for internal use in generating 'SqlValueError'
+    {- | The name for this type, primarily for internal use in generating 'ConvertError'
        in an automated fashion.  This function is used because not all types
        we deal with are instances of Data.Typeable. -}
     sqlTypeName :: a -> String
@@ -86,7 +70,7 @@ by calling 'error', after pretty-printing the error from 'safeFromSql'. -}
 fromSql :: (SqlType a) => SqlValue -> a
 fromSql sv = 
     case safeFromSql sv of
-      Left sve -> error (sqlValueErrorPretty sve)
+      Left sve -> error (prettyConvertError sve)
       Right r -> r
 
 {- | Converts any Integral type to a 'SqlValue' by using toInteger. -}
@@ -421,7 +405,7 @@ instance SqlType Bool where
           "F" -> Right False
           "0" -> Right False
           "1" -> Right True
-          _ -> Left $ SqlValueError (show y) "Bool" "Cannot parse given String as Bool"
+          _ -> Left $ ConvertError (show y) "SqlValue" "Bool" "Cannot parse given String as Bool"
     safeFromSql (SqlByteString x) = (safeFromSql . SqlString . byteString2String) x
     safeFromSql (SqlInt32 x) = numToBool x
     safeFromSql (SqlInt64 x) = numToBool x
@@ -833,9 +817,10 @@ read' :: (Read a, SqlType a) => String -> FromSqlResult a
 read' s = if True then ret else Right fake
   where ret = case reads s of
                   [(x,"")] -> Right x
-                  _ -> Left $ SqlValueError {sqlSourceValue = show (SqlString s),
-                                             sqlDestType = t,
-                                             sqlValueErrorMsg = "Cannot read source value as dest type"}
+                  _ -> Left $ ConvertError {convSourceValue = show (SqlString s),
+                                            convSourceType = "SqlValue",
+                                            convDestType = t,
+                                            convErrorMessage = "Cannot read source value as dest type"}
         fake = fromSql (SqlString "fake")
         t = sqlTypeName fake
 
@@ -843,9 +828,10 @@ parseTime' :: (SqlType t, ParseTime t) => String -> String -> String -> FromSqlR
 parseTime' t fmtstr inpstr = ret
     where ret = 
               case parseTime defaultTimeLocale fmtstr inpstr of
-                Nothing -> Left $ SqlValueError {sqlSourceValue = show (SqlString inpstr),
-                                                 sqlDestType = t,
-                                                 sqlValueErrorMsg = "Cannot parse using default format string " ++ show fmtstr}
+                Nothing -> Left $ ConvertError {convSourceValue = show (SqlString inpstr),
+                                                convSourceType = "SqlValue",
+                                                convDestType = t,
+                                                convErrorMessage = "Cannot parse using default format string " ++ show fmtstr}
                 Just x -> Right x
 
 --------------

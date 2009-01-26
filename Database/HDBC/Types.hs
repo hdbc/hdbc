@@ -40,7 +40,6 @@ module Database.HDBC.Types
     SqlError(..),
     SqlType(..), nToSql, iToSql, posixToSql, fromSql, FromSqlResult,
     SqlValue(..),
-    SqlValueError(..), sqlValueErrorPretty,
     ConnWrapper(..),
     withWConn
     )
