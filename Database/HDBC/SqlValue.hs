@@ -25,17 +25,8 @@ import Data.Convertible
 {- | The result of 'safeFromSql'. -}
 type FromSqlResult a = Either ConvertError a
 
-quickErrorMsg :: SqlType a => SqlValue -> String -> FromSqlResult a
-quickErrorMsg sv msg = if True then Left ret else Right fake
-    where ret = ConvertError {convSourceValue = show sv,
-                              convSourceType = "SqlValue",
-                              convDestType = t,
-                              convErrorMessage = msg}
-          fake = fromSql (SqlString "fake")
-          t = sqlTypeName fake
-
-quickError :: SqlType a => SqlValue -> FromSqlResult a
-quickError sv = quickErrorMsg sv "incompatible types"
+quickError :: SqlType a => SqlValue -> ConvertResult a
+quickError sv = convError sv "incompatible types"
   
 {- | Conversions to and from 'SqlValue's and standard Haskell types.
 
@@ -59,11 +50,6 @@ class (Show a) => SqlType a where
 
          Most people use the simpler 'fromSql' instead. -}
     safeFromSql :: SqlValue -> FromSqlResult a
-
-    {- | The name for this type, primarily for internal use in generating 'ConvertError'
-       in an automated fashion.  This function is used because not all types
-       we deal with are instances of Data.Typeable. -}
-    sqlTypeName :: a -> String
 
 {- | Convert from an SqlValue to a Haskell value.  Any problem is indicated
 by calling 'error', after pretty-printing the error from 'safeFromSql'. -}
@@ -174,6 +160,9 @@ data SqlValue = SqlString String
               | SqlNull         -- ^ NULL in SQL or Nothing in Haskell
      deriving (Show)
 
+instance Typeable SqlValue where
+    typeOf _ = mkTypeName "SqlValue"
+
 instance Eq SqlValue where
     SqlString a == SqlString b = a == b
     SqlByteString a == SqlByteString b = a == b
@@ -202,7 +191,6 @@ instance Eq SqlValue where
              ((safeFromSql b)::FromSqlResult String)
 
 instance SqlType String where
-    sqlTypeName _ = "String"
     toSql = SqlString
     safeFromSql (SqlString x) = return x
     safeFromSql (SqlByteString x) = return . byteString2String $ x
@@ -232,7 +220,6 @@ instance SqlType String where
     safeFromSql y@(SqlNull) = quickError y
 
 instance SqlType B.ByteString where
-    sqlTypeName _ = "ByteString"
     toSql = SqlByteString
     safeFromSql (SqlByteString x) = return x
     safeFromSql y@(SqlNull) = quickError y
@@ -242,7 +229,6 @@ string2ByteString :: String -> B.ByteString
 string2ByteString = B.pack . map (toEnum . fromEnum)
 
 instance SqlType Int where
-    sqlTypeName _ = "Int"
     toSql x = SqlInt32 (fromIntegral x)
     safeFromSql (SqlString x) = read' x
     safeFromSql (SqlByteString x) = (read' . byteString2String) x
@@ -267,7 +253,6 @@ instance SqlType Int where
     safeFromSql y@(SqlNull) = quickError y
 
 instance SqlType Int32 where
-    sqlTypeName _ = "Int32"
     toSql = SqlInt32
     safeFromSql (SqlString x) = read' x
     safeFromSql (SqlByteString x) = (read' . byteString2String) x
@@ -292,7 +277,6 @@ instance SqlType Int32 where
     safeFromSql y@(SqlNull) = quickError y
 
 instance SqlType Int64 where
-    sqlTypeName _ = "Int64"
     toSql = SqlInt64
     safeFromSql (SqlString x) = read' x
     safeFromSql (SqlByteString x) = (read' . byteString2String) x
@@ -317,7 +301,6 @@ instance SqlType Int64 where
     safeFromSql y@(SqlNull) = quickError y
 
 instance SqlType Word32 where
-    sqlTypeName _ = "Word32"
     toSql = SqlWord32
     safeFromSql (SqlString x) = read' x
     safeFromSql (SqlByteString x) = (read' . byteString2String) x
@@ -342,7 +325,6 @@ instance SqlType Word32 where
     safeFromSql y@(SqlNull) = quickError y
 
 instance SqlType Word64 where
-    sqlTypeName _ = "Word64"
     toSql = SqlWord64
     safeFromSql (SqlString x) = read' x
     safeFromSql (SqlByteString x) = (read' . byteString2String) x
@@ -367,7 +349,6 @@ instance SqlType Word64 where
     safeFromSql y@(SqlNull) = quickError y
 
 instance SqlType Integer where
-    sqlTypeName _ = "Integer"
     toSql = SqlInteger
     safeFromSql (SqlString x) = read' x
     safeFromSql (SqlByteString x) = (read' . byteString2String) x
@@ -395,7 +376,6 @@ instance SqlType Integer where
     safeFromSql y@(SqlNull) = quickError y
 
 instance SqlType Bool where
-    sqlTypeName _ = "Bool"
     toSql = SqlBool
     safeFromSql y@(SqlString x) = 
         case map toUpper x of
@@ -431,14 +411,13 @@ numToBool :: Num a => a -> FromSqlResult Bool
 numToBool x = Right (x /= 0)
 
 instance SqlType Char where
-    sqlTypeName _ = "Char"
     toSql = SqlChar
     safeFromSql (SqlString [x]) = return x
-    safeFromSql y@(SqlString _) = quickErrorMsg y "String length /= 1"
+    safeFromSql y@(SqlString _) = convError y "String length /= 1"
     safeFromSql y@(SqlByteString x) = 
         case B.length x of
           1 -> safeFromSql . SqlString . byteString2String $ x
-          _ -> quickErrorMsg y "ByteString length /= 1"
+          _ -> convError y "ByteString length /= 1"
     safeFromSql y@(SqlInt32 _) = quickError y
     safeFromSql y@(SqlInt64 _) = quickError y
     safeFromSql y@(SqlWord32 _) = quickError y
@@ -460,7 +439,6 @@ instance SqlType Char where
     safeFromSql y@(SqlNull) = quickError y
 
 instance SqlType Double where
-    sqlTypeName _ = "Double"
     toSql = SqlDouble
     safeFromSql (SqlString x) = read' x
     safeFromSql (SqlByteString x) = (read' . byteString2String) x
@@ -487,7 +465,6 @@ instance SqlType Double where
     safeFromSql y@(SqlNull) = quickError y
 
 instance SqlType Rational where
-    sqlTypeName _ = "Rational"
     toSql = SqlRational
     safeFromSql (SqlString x) = read' x
     safeFromSql (SqlByteString x) = (read' . byteString2String) x
@@ -512,7 +489,6 @@ instance SqlType Rational where
     safeFromSql y@(SqlNull) = quickError y
 
 instance SqlType Day where
-    sqlTypeName _ = "Day"
     toSql = SqlLocalDate
     safeFromSql (SqlString x) = parseTime' "Day" (iso8601DateFormat Nothing) x
     safeFromSql (SqlByteString x) = safeFromSql (SqlString (byteString2String x))
@@ -543,7 +519,6 @@ instance SqlType Day where
     safeFromSql y@(SqlNull) = quickError y
 
 instance SqlType TimeOfDay where
-    sqlTypeName _ = "TimeOfDay"
     toSql = SqlLocalTimeOfDay
     safeFromSql (SqlString x) = parseTime' "TimeOfDay" "%T" x
     safeFromSql (SqlByteString x) = safeFromSql (SqlString (byteString2String x))
@@ -569,7 +544,6 @@ instance SqlType TimeOfDay where
     safeFromSql y@SqlNull = quickError y
 
 instance SqlType LocalTime where
-    sqlTypeName _ = "LocalTime"
     toSql = SqlLocalTime
     safeFromSql (SqlString x) = parseTime' "LocalTime" (iso8601DateFormat (Just "%T")) x
     safeFromSql (SqlByteString x) = safeFromSql (SqlString (byteString2String x))
@@ -594,7 +568,6 @@ instance SqlType LocalTime where
     safeFromSql y@SqlNull = quickError y
 
 instance SqlType ZonedTime where
-    sqlTypeName _ = "ZonedTime"
     toSql x = SqlZonedTime x
     safeFromSql (SqlString x) = parseTime' "ZonedTime" (iso8601DateFormat (Just "%T %z")) x
     safeFromSql (SqlByteString x) = safeFromSql (SqlString (byteString2String x))
@@ -619,7 +592,6 @@ instance SqlType ZonedTime where
     safeFromSql y@SqlNull = quickError y
 
 instance SqlType UTCTime where
-    sqlTypeName _ = "UTCTime"
     toSql = SqlUTCTime
     safeFromSql (SqlString x) = parseTime' "UTCTime" (iso8601DateFormat (Just "%T")) x
     safeFromSql (SqlByteString x) = safeFromSql (SqlString (byteString2String x))
@@ -637,14 +609,13 @@ instance SqlType UTCTime where
     safeFromSql y@(SqlLocalTime _) = quickError y
     safeFromSql (SqlZonedTime x) = return . zonedTimeToUTC $ x
     safeFromSql (SqlUTCTime x) = return x
-    safeFromSql y@(SqlDiffTime _) = quickErrorMsg y "incompatible types (did you mean SqlPOSIXTime?)"
+    safeFromSql y@(SqlDiffTime _) = convError y "incompatible types (did you mean SqlPOSIXTime?)"
     safeFromSql (SqlPOSIXTime x) = return . posixSecondsToUTCTime $ x
     safeFromSql y@(SqlEpochTime _) = safeFromSql y >>= return . posixSecondsToUTCTime
-    safeFromSql y@(SqlTimeDiff _) = quickErrorMsg y "incompatible types (did you mean SqlPOSIXTime?)"
+    safeFromSql y@(SqlTimeDiff _) = convError y "incompatible types (did you mean SqlPOSIXTime?)"
     safeFromSql y@SqlNull = quickError y
 
 instance SqlType NominalDiffTime where
-    sqlTypeName _ = "NominalDiffTime/POSIXTime"
     toSql = SqlDiffTime
     safeFromSql (SqlString x) = read' x >>= return . fromInteger
     safeFromSql (SqlByteString x) = read' (byteString2String x) >>= return . fromInteger
@@ -671,7 +642,6 @@ instance SqlType NominalDiffTime where
     safeFromSql y@SqlNull = quickError y
 
 instance SqlType ST.ClockTime where
-    sqlTypeName _ = "ClockTime"
     toSql (ST.TOD x y) = SqlPOSIXTime . fromRational $ 
                                         fromInteger x + fromRational (y % 1000000000000)
     safeFromSql (SqlString x) = do r <- read' x
@@ -698,7 +668,6 @@ instance SqlType ST.ClockTime where
     safeFromSql y@SqlNull = quickError y
 
 instance SqlType ST.TimeDiff where
-    sqlTypeName _ = "TimeDiff"
     toSql x = SqlDiffTime . fromIntegral . timeDiffToSecs $ x
     safeFromSql (SqlString x) = read' x >>= secs2td
     safeFromSql (SqlByteString x) = safeFromSql . SqlString . byteString2String $ x
@@ -723,7 +692,6 @@ instance SqlType ST.TimeDiff where
     safeFromSql y@SqlNull = quickError y
 
 instance SqlType DiffTime where
-    sqlTypeName _ = "DiffTime"
     toSql x = SqlDiffTime . fromRational . toRational $ x
     safeFromSql (SqlString x) = read' x >>= return . fromInteger
     safeFromSql (SqlByteString x) = safeFromSql . SqlString . byteString2String $ x
@@ -748,7 +716,6 @@ instance SqlType DiffTime where
     safeFromSql y@SqlNull = quickError y
 
 instance SqlType ST.CalendarTime where
-    sqlTypeName _ = "CalendarTime"
     toSql x = toSql . calendarTimeToZonedTime $ x
     safeFromSql y = safeFromSql y >>= return . zonedTimeToCalendarTime
 
