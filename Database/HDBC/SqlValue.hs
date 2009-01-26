@@ -22,12 +22,27 @@ import Data.Ratio
 import Control.Monad.Error
 import Data.Convertible
 
-{- | The result of 'safeFromSql'. -}
-type FromSqlResult a = Either ConvertError a
-
 quickError :: SqlType a => SqlValue -> ConvertResult a
 quickError sv = convError sv "incompatible types"
   
+{- | Convert a value to an 'SqlValue'.  This function is simply
+a restricted-type wrapper around 'convert'. -}
+toSql :: Convertible a SqlValue => a -> SqlValue
+toSql = convert
+
+{- | Convert from an 'SqlValue' to a Haskell value.  Many people will use the simpler
+   'fromSql' instead.  This function is simply a restricted-type wrapper around
+   'safeConvert'. -}
+safeFromSql :: Convertible SqlValue a => SqlValue -> ConvertResult a
+safeFromSql = safeConvert
+
+{- | Convert from an 'SqlValue' to a Haskell value.  Any problem is indicated by
+   calling 'error'.  This function is simply a restricted-type wrapper around
+   'convert'. -}
+fromSql :: Convertible SqlValue a => SqlValue -> a
+fromSql = safeConvert
+
+
 {- | Conversions to and from 'SqlValue's and standard Haskell types.
 
 Conversions are powerful; for instance, you can call 'fromSql' on a SqlInt32
@@ -43,21 +58,10 @@ Here are some notes about conversion:
 See also 'nToSql', 'iToSql', 'posixToSql'.
 -}
 class (Show a) => SqlType a where
-    {- | Convert a value to an 'SqlValue' -}
-    toSql :: a -> SqlValue
-
     {- | Convert from an 'SqlValue' to a Haskell value.
 
          Most people use the simpler 'fromSql' instead. -}
     safeFromSql :: SqlValue -> FromSqlResult a
-
-{- | Convert from an SqlValue to a Haskell value.  Any problem is indicated
-by calling 'error', after pretty-printing the error from 'safeFromSql'. -}
-fromSql :: (SqlType a) => SqlValue -> a
-fromSql sv = 
-    case safeFromSql sv of
-      Left sve -> error (prettyConvertError sve)
-      Right r -> r
 
 {- | Converts any Integral type to a 'SqlValue' by using toInteger. -}
 nToSql :: Integral a => a -> SqlValue
