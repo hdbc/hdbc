@@ -1,7 +1,7 @@
 module Database.HDBC.SqlValue
     (
+    safeFromSql, toSql, fromSql,
     SqlType(..), nToSql, iToSql, posixToSql,
-    fromSql,
     FromSqlResult,
     SqlValue(..)
     )
@@ -41,7 +41,6 @@ safeFromSql = safeConvert
    'convert'. -}
 fromSql :: Convertible SqlValue a => SqlValue -> a
 fromSql = safeConvert
-
 
 {- | Conversions to and from 'SqlValue's and standard Haskell types.
 
