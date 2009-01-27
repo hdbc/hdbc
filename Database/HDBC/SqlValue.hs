@@ -765,15 +765,13 @@ instance Convertible SqlValue ST.CalendarTime where
     safeConvert x = do r <- ((safeConvert x)::ConvertResult ZonedTime)
                        safeConvert r
 
-{-
-instance (SqlType a) => SqlType (Maybe a) where
-    sqlTypeName x = "Maybe " ++ sqlTypeName x
-    toSql Nothing = SqlNull
-    toSql (Just a) = toSql a
+instance (Convertible a SqlValue) => Convertible (Maybe a) SqlValue where
+    safeConvert Nothing = return SqlNull
+    safeConvert (Just a) = safeConvert a
+instance (Convertible SqlValue a) => Convertible SqlValue (Maybe a) where
     safeConvert SqlNull = return Nothing
-    safeConvert x = safeConvert x >>= return . Just
+    safeConvert a = safeConvert a >>= (return . Just)
 
--}
 byteString2String :: B.ByteString -> String
 byteString2String = map (toEnum . fromEnum) . B.unpack
 
