@@ -25,7 +25,7 @@ quickError :: (Typeable a, Convertible SqlValue a) => SqlValue -> ConvertResult 
 quickError sv = convError "incompatible types" sv
   
 {- | Convert a value to an 'SqlValue'.  This function is simply
-a restricted-type wrapper around 'convert'.  See extended nots on 'safeFromSql'. -}
+a restricted-type wrapper around 'convert'.  See extended notes on 'safeFromSql'. -}
 toSql :: Convertible a SqlValue => a -> SqlValue
 toSql = convert
 
