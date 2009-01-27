@@ -25,7 +25,7 @@ library
     Build-Depends: base>=3, old-time, time, bytestring, containers, old-locale
   else
     Build-Depends: base<3
-  Build-Depends: mtl, convertible
+  Build-Depends: mtl, convertible >= 1.0.1
 
   GHC-Options: -O2 -Wall -fglasgow-exts
 
