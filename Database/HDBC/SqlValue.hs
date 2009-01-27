@@ -246,6 +246,11 @@ instance Convertible SqlValue String where
     safeConvert (SqlTimeDiff x) = return . show $ x
     safeConvert y@(SqlNull) = quickError y
 
+#ifdef __HUGS__
+instance Typeable B.ByteString where
+    typeOf _ = mkTypeName "ByteString"
+#endif
+
 instance Convertible B.ByteString SqlValue where
     safeConvert = return . SqlByteString
 instance Convertible SqlValue B.ByteString where
@@ -821,8 +826,8 @@ read' s =
       _ -> convError "Cannot read source value as dest type" (SqlString s)
 
 #ifdef __HUGS__
-parseTime' :: Convertible SqlValue t => String -> String -> ConvertResult t
-parseTime' x =
+parseTime' :: (Typeable t, Convertible SqlValue t) => String -> String -> ConvertResult t
+parseTime' _ inpstr =
     convError "Hugs does not support time parsing" (SqlString inpstr)
 #else
 parseTime' :: (Typeable t, Convertible SqlValue t, ParseTime t) => String -> String -> ConvertResult t
