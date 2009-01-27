@@ -16,7 +16,6 @@ import qualified System.Time as ST
 import Data.Time
 import Data.Time.Clock
 import Data.Time.Clock.POSIX
-import Data.Time.Calendar.OrdinalDate(sundayStartWeek, toOrdinalDate)
 import System.Locale
 import Data.Ratio
 import Control.Monad.Error
@@ -277,7 +276,7 @@ instance Convertible SqlValue Int where
     safeConvert y@(SqlLocalTimeOfDay _) = viaInteger y fromIntegral 
     safeConvert y@(SqlLocalTime _) = viaInteger y fromIntegral 
     safeConvert y@(SqlZonedTime _) = viaInteger y fromIntegral
-    safeConvert y@(SqlUTCTime x) = safeConvert x
+    safeConvert (SqlUTCTime x) = safeConvert x
     safeConvert (SqlDiffTime x) = safeConvert x
     safeConvert (SqlPOSIXTime x) = safeConvert x
     safeConvert (SqlEpochTime x) = safeConvert x
@@ -516,7 +515,8 @@ instance Convertible SqlValue Rational where
     safeConvert (SqlWord64 x) = safeConvert x
     safeConvert (SqlInteger x) = safeConvert x
     safeConvert (SqlChar x) = return . fromIntegral . fromEnum $ x
-    safeConvert (SqlBool x) = return $ if True then fromIntegral 1 else fromIntegral 0
+    safeConvert (SqlBool x) = return $ if x then fromIntegral (1::Int) 
+                                       else fromIntegral (0::Int)
     safeConvert (SqlDouble x) = safeConvert x
     safeConvert (SqlRational x) = return x
     safeConvert y@(SqlLocalDate _) = ((safeConvert y)::ConvertResult Integer) >>= 
@@ -549,7 +549,7 @@ instance Typeable DiffTime where
 instance Convertible Day SqlValue where
     safeConvert = return . SqlLocalDate
 instance Convertible SqlValue Day where
-    safeConvert (SqlString x) = parseTime' "Day" (iso8601DateFormat Nothing) x
+    safeConvert (SqlString x) = parseTime' (iso8601DateFormat Nothing) x
     safeConvert (SqlByteString x) = safeConvert (SqlString (byteString2String x))
     safeConvert (SqlInt32 x) = 
         return $ ModifiedJulianDay {toModifiedJulianDay = fromIntegral x}
@@ -580,7 +580,7 @@ instance Convertible SqlValue Day where
 instance Convertible TimeOfDay SqlValue where
     safeConvert = return . SqlLocalTimeOfDay
 instance Convertible SqlValue TimeOfDay where
-    safeConvert (SqlString x) = parseTime' "TimeOfDay" "%T" x
+    safeConvert (SqlString x) = parseTime' "%T" x
     safeConvert (SqlByteString x) = safeConvert (SqlString (byteString2String x))
     safeConvert (SqlInt32 x) = return . timeToTimeOfDay . fromIntegral $ x
     safeConvert (SqlInt64 x) = return . timeToTimeOfDay . fromIntegral $ x
@@ -606,7 +606,7 @@ instance Convertible SqlValue TimeOfDay where
 instance Convertible LocalTime SqlValue where
     safeConvert = return . SqlLocalTime
 instance Convertible SqlValue LocalTime where
-    safeConvert (SqlString x) = parseTime' "LocalTime" (iso8601DateFormat (Just "%T")) x
+    safeConvert (SqlString x) = parseTime' (iso8601DateFormat (Just "%T")) x
     safeConvert (SqlByteString x) = safeConvert (SqlString (byteString2String x))
     safeConvert y@(SqlInt32 _) = quickError y
     safeConvert y@(SqlInt64 _) = quickError y
@@ -631,7 +631,7 @@ instance Convertible SqlValue LocalTime where
 instance Convertible ZonedTime SqlValue where
     safeConvert = return . SqlZonedTime
 instance Convertible SqlValue ZonedTime where
-    safeConvert (SqlString x) = parseTime' "ZonedTime" (iso8601DateFormat (Just "%T %z")) x
+    safeConvert (SqlString x) = parseTime' (iso8601DateFormat (Just "%T %z")) x
     safeConvert (SqlByteString x) = safeConvert (SqlString (byteString2String x))
     safeConvert (SqlInt32 x) = safeConvert (SqlInteger (fromIntegral x))
     safeConvert (SqlInt64 x) = safeConvert (SqlInteger (fromIntegral x))
@@ -656,7 +656,7 @@ instance Convertible SqlValue ZonedTime where
 instance Convertible UTCTime SqlValue where
     safeConvert = return . SqlUTCTime
 instance Convertible SqlValue UTCTime where
-    safeConvert (SqlString x) = parseTime' "UTCTime" (iso8601DateFormat (Just "%T")) x
+    safeConvert (SqlString x) = parseTime' (iso8601DateFormat (Just "%T")) x
     safeConvert (SqlByteString x) = safeConvert (SqlString (byteString2String x))
     safeConvert y@(SqlInt32 _) = safeConvert y >>= return . posixSecondsToUTCTime
     safeConvert y@(SqlInt64 _) = safeConvert y >>= return . posixSecondsToUTCTime
@@ -711,7 +711,7 @@ instance Convertible SqlValue ST.ClockTime where
     safeConvert (SqlString x) = do r <- read' x
                                    return $ ST.TOD r 0
     safeConvert (SqlByteString x) = safeConvert . SqlString . byteString2String $ x
-    safeConvert y@(SqlInt32 x) = return $ ST.TOD (fromIntegral x) 0
+    safeConvert (SqlInt32 x) = return $ ST.TOD (fromIntegral x) 0
     safeConvert (SqlInt64 x) = return $ ST.TOD (fromIntegral x) 0
     safeConvert (SqlWord32 x) = return $ ST.TOD (fromIntegral x) 0
     safeConvert (SqlWord64 x) = return $ ST.TOD (fromIntegral x) 0
@@ -820,8 +820,8 @@ read' s =
       [(x,"")] -> Right x
       _ -> convError "Cannot read source value as dest type" (SqlString s)
 
-parseTime' :: (Typeable t, Convertible SqlValue t, ParseTime t) => String -> String -> String -> ConvertResult t
-parseTime' t fmtstr inpstr = 
+parseTime' :: (Typeable t, Convertible SqlValue t, ParseTime t) => String -> String -> ConvertResult t
+parseTime' fmtstr inpstr = 
     case parseTime defaultTimeLocale fmtstr inpstr of
       Nothing -> convError ("Cannot parse using default format string " ++ show fmtstr)
                  (SqlString inpstr)
