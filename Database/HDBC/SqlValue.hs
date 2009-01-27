@@ -517,6 +517,8 @@ instance Typeable ZonedTime where
     typeOf _ = mkTypeName "ZonedTime"
 instance Typeable ST.ClockTime where
     typeOf _ = mkTypeName "ClockTime"
+instance Typeable ST.TimeDiff where
+    typeOf _ = mkTypeName "TimeDiff"
 
 instance Convertible Day SqlValue where
     safeConvert = return . SqlLocalDate
@@ -702,10 +704,11 @@ instance Convertible SqlValue ST.ClockTime where
     safeConvert (SqlEpochTime x) = return $ ST.TOD x 0
     safeConvert y@(SqlTimeDiff _) = quickError y
     safeConvert y@SqlNull = quickError y
-{-
-instance SqlType ST.TimeDiff where
-    toSql x = SqlDiffTime . fromIntegral . timeDiffToSecs $ x
-    safeConvert (SqlString x) = read' x >>= secs2td
+
+instance Convertible ST.TimeDiff SqlValue where
+    safeConvert x = safeConvert x >>= return . SqlDiffTime
+instance Convertible SqlValue ST.TimeDiff where
+    safeConvert (SqlString x) = ((read' x)::ConvertResult Integer) >>= safeConvert
     safeConvert (SqlByteString x) = safeConvert . SqlString . byteString2String $ x
     safeConvert (SqlInt32 x) = secs2td (fromIntegral x)
     safeConvert (SqlInt64 x) = secs2td (fromIntegral x)
@@ -726,7 +729,7 @@ instance SqlType ST.TimeDiff where
     safeConvert y@(SqlEpochTime _) = quickError y
     safeConvert (SqlTimeDiff x) = secs2td x
     safeConvert y@SqlNull = quickError y
-
+{-
 instance SqlType DiffTime where
     toSql x = SqlDiffTime . fromRational . toRational $ x
     safeConvert (SqlString x) = read' x >>= return . fromInteger
