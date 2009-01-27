@@ -786,8 +786,7 @@ instance Convertible ST.CalendarTime SqlValue where
     safeConvert x = safeConvert x >>= return . SqlZonedTime
 instance Convertible SqlValue ST.CalendarTime where
     -- convert via ZonedTime
-    safeConvert x = do r <- ((safeConvert x)::ConvertResult ZonedTime)
-                       safeConvert r
+    safeConvert = convertVia (undefined::ZonedTime)
 
 instance (Convertible a SqlValue) => Convertible (Maybe a) SqlValue where
     safeConvert Nothing = return SqlNull
