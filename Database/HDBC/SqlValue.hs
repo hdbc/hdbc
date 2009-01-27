@@ -710,7 +710,7 @@ instance Convertible ST.TimeDiff SqlValue where
 instance Convertible SqlValue ST.TimeDiff where
     safeConvert (SqlString x) = ((read' x)::ConvertResult Integer) >>= safeConvert
     safeConvert (SqlByteString x) = safeConvert . SqlString . byteString2String $ x
-    safeConvert (SqlInt32 x) = safeConvert (fromIntegral x)
+    safeConvert (SqlInt32 x) = secs2td (fromIntegral x)
     safeConvert (SqlInt64 x) = secs2td (fromIntegral x)
     safeConvert (SqlWord32 x) = secs2td (fromIntegral x)
     safeConvert (SqlWord64 x) = secs2td (fromIntegral x)
@@ -820,7 +820,7 @@ viaInteger :: (Convertible SqlValue a, Bounded a, Show a, Convertible a Integer,
 viaInteger sv func = viaInteger' sv (return . func)
 
 secs2td :: Integer -> ConvertResult ST.TimeDiff
-secs2td x = return $ ST.diffClockTimes (ST.TOD x 0) (ST.TOD 0 0)
+secs2td x = safeConvert x
 
 
 -- FIXME: eliminate manually-crafted ConvertEror here?
