@@ -252,7 +252,7 @@ instance Convertible SqlValue Int where
     safeConvert y@(SqlLocalTimeOfDay _) = viaInteger y fromIntegral 
     safeConvert y@(SqlLocalTime _) = viaInteger y fromIntegral 
     safeConvert y@(SqlZonedTime _) = viaInteger y fromIntegral
-    safeConvert y@(SqlUTCTime _) = viaInteger y fromIntegral
+    safeConvert y@(SqlUTCTime x) = safeConvert x
     safeConvert (SqlDiffTime x) = safeConvert x
     safeConvert (SqlPOSIXTime x) = safeConvert x
     safeConvert (SqlEpochTime x) = safeConvert x
@@ -379,8 +379,7 @@ instance Convertible SqlValue Integer where
     safeConvert y@(SqlLocalTime _) = quickError y
     safeConvert (SqlZonedTime x) = 
         return . truncate . utcTimeToPOSIXSeconds . zonedTimeToUTC $ x
-    safeConvert (SqlUTCTime x) =
-        return . truncate . utcTimeToPOSIXSeconds $ x
+    safeConvert (SqlUTCTime x) = safeConvert x
     safeConvert (SqlDiffTime x) = safeConvert x
     safeConvert (SqlPOSIXTime x) = safeConvert x
     safeConvert (SqlEpochTime x) = return x
