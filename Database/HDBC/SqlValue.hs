@@ -789,8 +789,6 @@ secs2td :: Integer -> ConvertResult ST.TimeDiff
 secs2td x = safeConvert x
 
 
--- FIXME: eliminate manually-crafted ConvertEror here?
-
 -- | Read a value from a string, and give an informative message
 --   if it fails.
 read' :: (Typeable a, Read a, Convertible SqlValue a) => String -> ConvertResult a
@@ -799,29 +797,9 @@ read' s =
       [(x,"")] -> Right x
       _ -> convError "Cannot read source value as dest type" (SqlString s)
 
--- FIXME: eliminate manually-crafted ConvertEror here?
-
-parseTime' :: (Convertible SqlValue t, ParseTime t) => String -> String -> String -> ConvertResult t
-parseTime' t fmtstr inpstr = ret
-    where ret = 
-              case parseTime defaultTimeLocale fmtstr inpstr of
-                Nothing -> Left $ ConvertError {convSourceValue = show (SqlString inpstr),
-                                                convSourceType = "SqlValue",
-                                                convDestType = t,
-                                                convErrorMessage = "Cannot parse using default format string " ++ show fmtstr}
-                Just x -> Right x
-
---------------
--- The following function copied from MissingH.Time.hs
-
-{- | Converts the given timeDiff to the number of seconds it represents.
-
-Uses the same algorithm as normalizeTimeDiff in GHC. -}
-timeDiffToSecs :: ST.TimeDiff -> Integer
-timeDiffToSecs td =
-    (fromIntegral $ ST.tdSec td) +
-    60 * ((fromIntegral $ ST.tdMin td) +
-          60 * ((fromIntegral $ ST.tdHour td) +
-                24 * ((fromIntegral $ ST.tdDay td) +
-                      30 * ((fromIntegral $ ST.tdMonth td) +
-                            365 * (fromIntegral $ ST.tdYear td)))))
+parseTime' :: (Typeable t, Convertible SqlValue t, ParseTime t) => String -> String -> String -> ConvertResult t
+parseTime' t fmtstr inpstr = 
+    case parseTime defaultTimeLocale fmtstr inpstr of
+      Nothing -> convError ("Cannot parse using default format string " ++ show fmtstr)
+                 (SqlString inpstr)
+      Just x -> Right x
