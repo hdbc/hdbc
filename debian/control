@@ -2,7 +2,7 @@ Source: hdbc
 Priority: optional
 Maintainer: John Goerzen <jgoerzen@complete.org>
 Build-Depends: debhelper (>= 4.0.0), ghc6 (>= 6.8.2dfsg1), haskell-devscripts (>= 0.6.15), cpphs, haddock, libghc6-mtl-dev, libghc6-time-dev, libghc6-time-prof, libghc6-convertible-dev (>= 1.0.1-2), libghc6-convertible-prof (>= 1.0.1-2), libghc6-mtl-prof
-Build-Depends-Indep: debhelper (>= 4.0.0), haddock, hugs (>= 98.200503.08), haskell-devscripts (>= 0.6.15), ghc6 (>= 6.8.2dfsg1), cpphs, libghc6-mtl-doc, libghc6-time-doc, ghc6-doc, haskell-convertible-doc, libhugs-convertible (>= 1.0.1)
+Build-Depends-Indep: debhelper (>= 4.0.0), haddock, hugs (>= 98.200503.08), haskell-devscripts (>= 0.6.15), ghc6 (>= 6.8.2dfsg1), cpphs, libghc6-mtl-doc, libghc6-time-doc, ghc6-doc, haskell-convertible-doc, libhugs-convertible (>= 1.0.1), libhugs-time-bundled
 Standards-Version: 3.6.2
 Section: libs
 Homepage: http://software.complete.org/hdbc
@@ -38,7 +38,7 @@ Description: Haskell Database Connectivity, GHC6 profiling data
 Package: libhugs-hdbc
 Section: libs
 Architecture: all
-Depends: ${haskell:Depends}, libhugs-convertible (>= 1.0.1)
+Depends: ${haskell:Depends}, libhugs-convertible (>= 1.0.1), libhugs-time-bundled
 Description: Haskell Database Connectivity, Hugs package
  HDBC provides an abstraction layer between Haskell programs and SQL
  relational databases. This lets you write database code once, in
