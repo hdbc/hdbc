@@ -12,6 +12,7 @@ where
 import Data.Dynamic
 import Database.HDBC.ColTypes
 import Database.HDBC.SqlValue
+import Control.Exception
 
 data Statement = Statement
     {
@@ -107,3 +108,12 @@ sqlErrorTc = mkTyCon "Database.HDBC.SqlError"
 instance Typeable SqlError where
     typeOf _ = mkTyConApp sqlErrorTc []
 
+#if __GLASGOW_HASKELL__ >= 610
+--data SqlException
+instance Exception SqlError where
+{-
+    toException = SomeException
+    fromException (SomeException e) = Just e
+    fromException _ = Nothing
+-}
+#endif

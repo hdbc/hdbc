@@ -145,6 +145,17 @@ on this behavior is solicited.
 -}
 withTransaction :: IConnection conn => conn -> (conn -> IO a) -> IO a
 withTransaction conn func =
+#if __GLASGOW_HASKELL__ >= 610
+    do r <- onException (func conn) doRollback
+       commit conn
+       return r
+    where doRollback = 
+              -- Discard any exception from (rollback conn) so original
+              -- exception can be re-raised
+              Control.Exception.catch (rollback conn) doRollbackHandler
+          doRollbackHandler :: SomeException -> IO ()
+          doRollbackHandler _ = return ()
+#else
     do r <- try (func conn)
        case r of
          Right x -> do commit conn
@@ -152,7 +163,7 @@ withTransaction conn func =
          Left e -> 
              do try (rollback conn) -- Discard any exception here
                 throw e
-
+#endif
 {- | Lazily fetch all rows from an executed 'Statement'.
 
 You can think of this as hGetContents applied to a database result set.
