@@ -745,7 +745,7 @@ instance Convertible SqlValue DiffTime where
     safeConvert y@(SqlChar _) = quickError y
     safeConvert y@(SqlBool _) = quickError y
     safeConvert (SqlDouble x) = return . fromRational . toRational $ x
-    safeConvert (SqlRational x) = return $ fromIntegral ((truncate x)::Integer)
+    safeConvert (SqlRational x) = return . fromRational $ x
     safeConvert y@(SqlLocalDate _) = quickError y
     safeConvert y@(SqlLocalTimeOfDay _) = quickError y
     safeConvert y@(SqlLocalTime _) = quickError y
