@@ -5,8 +5,6 @@ module Database.HDBC.SqlValue
     SqlValue(..)
     )
 
--- FIXME: need to convert some of these time things to not be using viaInteger???
-
 where
 import Data.Dynamic
 import qualified Data.ByteString as B
@@ -397,8 +395,7 @@ instance Convertible SqlValue Bool where
           "F" -> Right False
           "0" -> Right False
           "1" -> Right True
-                 -- FIXME: stop generating this manually?
-          _ -> Left $ ConvertError (show y) "SqlValue" "Bool" "Cannot parse given String as Bool"
+          _ -> convError "Cannot parse given String as Bool" y
     safeConvert (SqlByteString x) = (safeConvert . SqlString . byteString2String) x
     safeConvert (SqlInt32 x) = numToBool x
     safeConvert (SqlInt64 x) = numToBool x
