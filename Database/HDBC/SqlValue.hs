@@ -1,9 +1,9 @@
 module Database.HDBC.SqlValue
     (
      -- * SQL value marshalling
-     safeFromSql, toSql, fromSql,
-     nToSql, iToSql, posixToSql,
      SqlValue(..),
+     safeFromSql, toSql, fromSql,
+     nToSql, iToSql, posixToSql
     )
 
 where
