@@ -683,8 +683,7 @@ instance Convertible SqlValue ST.ClockTime where
     safeConvert (SqlString x) = do r <- read' x
                                    return $ ST.TOD r 0
     safeConvert (SqlByteString x) = safeConvert . SqlString . byteString2String $ x
-    safeConvert y@(SqlInt32 x) = ((safeConvert y)::ConvertResult POSIXTime) >>= 
-                                 safeConvert -- FIXMEreturn $ ST.TOD (fromIntegral x) 0
+    safeConvert y@(SqlInt32 x) = return $ ST.TOD (fromIntegral x) 0
     safeConvert (SqlInt64 x) = return $ ST.TOD (fromIntegral x) 0
     safeConvert (SqlWord32 x) = return $ ST.TOD (fromIntegral x) 0
     safeConvert (SqlWord64 x) = return $ ST.TOD (fromIntegral x) 0
