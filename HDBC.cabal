@@ -27,11 +27,13 @@ library
     Build-Depends: base<3
   Build-Depends: mtl, convertible >= 1.0.1
 
-  GHC-Options: -O2 -Wall -fglasgow-exts
+  GHC-Options: -O2 -Wall -fno-warn-orphans
 
   Exposed-Modules: Database.HDBC, Database.HDBC.Types, Database.HDBC.DriverUtils,
     Database.HDBC.ColTypes, Database.HDBC.Statement, Database.HDBC.SqlValue
   Other-Modules: Database.HDBC.Utils
   --Extensions: ExistentialQuantification, AllowOverlappingInstances,
   --    AllowUndecidableInstances
-  Extensions: ExistentialQuantification, CPP
+  Extensions: ExistentialQuantification, CPP, MultiParamTypeClasses,
+    FlexibleContexts, TypeSynonymInstances, TypeOperators, RankNTypes
+    
