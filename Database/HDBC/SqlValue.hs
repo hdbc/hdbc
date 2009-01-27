@@ -519,6 +519,8 @@ instance Typeable ST.ClockTime where
     typeOf _ = mkTypeName "ClockTime"
 instance Typeable ST.TimeDiff where
     typeOf _ = mkTypeName "TimeDiff"
+instance Typeable DiffTime where
+    typeOf _ = mkTypeName "DiffTime"
 
 instance Convertible Day SqlValue where
     safeConvert = return . SqlLocalDate
@@ -725,13 +727,14 @@ instance Convertible SqlValue ST.TimeDiff where
     safeConvert y@(SqlZonedTime _) = quickError y
     safeConvert y@(SqlUTCTime _) = quickError y
     safeConvert y@(SqlPOSIXTime _) = quickError y
-    safeConvert (SqlDiffTime x) = secs2td (truncate x)
+    safeConvert (SqlDiffTime x) = safeConvert x
     safeConvert y@(SqlEpochTime _) = quickError y
     safeConvert (SqlTimeDiff x) = secs2td x
     safeConvert y@SqlNull = quickError y
-{-
-instance SqlType DiffTime where
-    toSql x = SqlDiffTime . fromRational . toRational $ x
+
+instance Convertible DiffTime SqlValue where
+    safeConvert = return . SqlDiffTime . fromRational . toRational
+instance Convertible SqlValue DiffTime where
     safeConvert (SqlString x) = read' x >>= return . fromInteger
     safeConvert (SqlByteString x) = safeConvert . SqlString . byteString2String $ x
     safeConvert (SqlInt32 x) = return . fromIntegral $ x
@@ -741,7 +744,7 @@ instance SqlType DiffTime where
     safeConvert (SqlInteger x) = return . fromIntegral $ x
     safeConvert y@(SqlChar _) = quickError y
     safeConvert y@(SqlBool _) = quickError y
-    safeConvert (SqlDouble x) = return $ fromIntegral ((truncate x)::Integer)
+    safeConvert (SqlDouble x) = return . fromRational . toRational $ x
     safeConvert (SqlRational x) = return $ fromIntegral ((truncate x)::Integer)
     safeConvert y@(SqlLocalDate _) = quickError y
     safeConvert y@(SqlLocalTimeOfDay _) = quickError y
@@ -753,7 +756,7 @@ instance SqlType DiffTime where
     safeConvert y@(SqlEpochTime _) = quickError y
     safeConvert (SqlTimeDiff x) = return . fromIntegral $ x
     safeConvert y@SqlNull = quickError y
-
+{-
 instance SqlType ST.CalendarTime where
     toSql x = toSql . calendarTimeToZonedTime $ x
     safeConvert y = safeConvert y >>= return . zonedTimeToCalendarTime
