@@ -820,9 +820,15 @@ read' s =
       [(x,"")] -> Right x
       _ -> convError "Cannot read source value as dest type" (SqlString s)
 
+#ifdef __HUGS__
+parseTime' :: Convertible SqlValue t => String -> String -> ConvertResult t
+parseTime' x =
+    convError "Hugs does not support time parsing" (SqlString inpstr)
+#else
 parseTime' :: (Typeable t, Convertible SqlValue t, ParseTime t) => String -> String -> ConvertResult t
 parseTime' fmtstr inpstr = 
     case parseTime defaultTimeLocale fmtstr inpstr of
       Nothing -> convError ("Cannot parse using default format string " ++ show fmtstr)
                  (SqlString inpstr)
       Just x -> Right x
+#endif
