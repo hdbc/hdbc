@@ -26,23 +26,11 @@ quickError :: (Typeable a, Convertible SqlValue a) => SqlValue -> ConvertResult 
 quickError sv = convError "incompatible types" sv
   
 {- | Convert a value to an 'SqlValue'.  This function is simply
-a restricted-type wrapper around 'convert'.  See extended notes on 'safeFromSql'. -}
+a restricted-type wrapper around 'convert'.  See extended notes on 'SqlValue'. -}
 toSql :: Convertible a SqlValue => a -> SqlValue
 toSql = convert
 
 {- | Conversions to and from 'SqlValue's and standard Haskell types.
-
-Conversions are powerful; for instance, you can call 'fromSql' on a SqlInt32
-and get a String or a Double out of it.  This class attempts to Do
-The Right Thing whenever possible, and will raise an error when asked to
-do something incorrect.  In particular, when converting to any type
-except a Maybe, 'SqlNull' as the input will cause an error to be raised.
-
-Here are some notes about conversion:
-
- * Fractions of a second are not preserved on time values
-
-See also 'nToSql', 'iToSql', 'posixToSql', 'SqlValue'.
 
 This function converts from an 'SqlValue' to a Haskell value.  Many people will use the simpler
    'fromSql' instead.  This function is simply a restricted-type wrapper around
@@ -52,7 +40,7 @@ safeFromSql = safeConvert
 
 {- | Convert from an 'SqlValue' to a Haskell value.  Any problem is indicated by
    calling 'error'.  This function is simply a restricted-type wrapper around
-   'convert'.  See extended notes on 'safeFromSql'. -}
+   'convert'.  See extended notes on 'SqlValue'. -}
 fromSql :: Convertible SqlValue a => SqlValue -> a
 fromSql = convert
 
@@ -69,18 +57,58 @@ iToSql = toSql
 posixToSql :: POSIXTime -> SqlValue
 posixToSql x = SqlPOSIXTime x
 
-{- | The main type for expressing Haskell values to SQL databases.
+{- | 'SqlValue' is he main type for expressing Haskell values to SQL databases.
+
+/INTRODUCTION TO SQLVALUE/
 
 This type is used to marshall Haskell data to and from database APIs.
 HDBC driver interfaces will do their best to use the most accurate and
 efficient way to send a particular value to the database server.
 
-Values read back from the server are put in the most appropriate 'SqlValue'
-type.  'fromSql' can then be used to convert them into whatever type
+Values read back from the server are constructed with the most appropriate 'SqlValue'
+constructor.  'fromSql' or 'safeFromSql' 
+can then be used to convert them into whatever type
 is needed locally in Haskell.
 
 Most people will use 'toSql' and 'fromSql' instead of manipulating
 'SqlValue's directly.
+
+/EASY CONVERSIONS BETWEEN HASKELL TYPES/
+
+Conversions are powerful; for instance, you can call 'fromSql' on a SqlInt32
+and get a String or a Double out of it.  This class attempts to Do
+The Right Thing whenever possible, and will raise an error when asked to
+do something incorrect.  In particular, when converting to any type
+except a Maybe, 'SqlNull' as the input will cause an error to be raised.
+
+Conversions are implemented in terms of the "Data.Convertible" module, part of the
+convertible package.  You can refer to its documentation, and import that module,
+if you wish to parse the Left result from 'safeFromSql' yourself, or write your
+own conversion instances.
+
+Here are some notes about conversion:
+
+ * Fractions of a second are not preserved on time values
+
+ * There is no @safeToSql@ because 'toSql' never fails.
+
+See also 'toSql', 'safeFromSql', 'fromSql', 'nToSql', 'iToSql', 'posixToSql'.
+
+/ERROR CONDITIONS/
+
+There may sometimes be an error during conversion.  For instance, if you have a
+'SqlString' and are attempting to convert it to an Integer, but it doesn't parse as
+an Integer, you will get an error.  This will be indicated as an exception if using
+'fromSql', or a Left result if using 'safeFromSql'.
+
+/SPECIAL NOTE ON POSIXTIME/
+
+Note that a 'NominalDiffTime' or 'POSIXTime' is converted to 'SqlDiffTime' by
+'toSql'.  HDBC cannot differentiate between 'NominalDiffTime' and 'POSIXTime'
+since they are the same underlying type.  You must construct 'SqlPOSIXTime'
+manually or via 'posixToSql', or use 'SqlUTCTime'.
+
+/DETAILS ON SQL TYPES/
 
 HDBC database backends are expected to marshal date and time data back and
 forth using the appropriate representation for the underlying database engine.
@@ -105,6 +133,8 @@ and generic code in HDBC or its backends cannot possibly accomodate
 every possible situation.  In some cases, you may be best served by converting your
 Haskell type to a String, and passing that to the database.
 
+/EQUALITY OF SQLVALUE/
+
 Two SqlValues are considered to be equal if one of these hold.  The
 first comparison that can be made is controlling; if none of these
 comparisons can be made, then they are not equal:
@@ -116,16 +146,7 @@ comparisons can be made, then they are not equal:
 
  * The values of each, when converted to a string, are equal.
 
-Note that a 'NominalDiffTime' or 'POSIXTime' is converted to 'SqlDiffTime' by
-'toSql'.  HDBC cannot differentiate between 'NominalDiffTime' and 'POSIXTime'
-since they are the same underlying type.  You must construct 'SqlPOSIXTime'
-manually or via 'posixToSql', or use 'SqlUTCTime'.
-
-'SqlEpochTime' and 'SqlTimeDiff' are no longer created automatically by any
-'toSql' or 'fromSql' functions.  They may still be manually constructed, but are
-expected to be removed in a future version.  Although these two constructures will
-be removed, support for marshalling to and from the old System.Time data will be
-maintained as long as System.Time is, simply using the newer data types for conversion.
+/STRING VERSIONS OF TIMES/
 
 Default string representations are given as comments below where such are non-obvious.
 These are used for 'fromSql' when a 'String' is desired.  They are also defaults for
@@ -134,7 +155,14 @@ when a different format is demanded by the underlying database.  Date and time f
 use ISO8601 date format, with HH:MM:SS added for time, and -HHMM added for timezone
 offsets.
 
-See also: the extended notes on 'safeFromSql'.
+/DEPRECATED CONSTRUCTORS/
+
+'SqlEpochTime' and 'SqlTimeDiff' are no longer created automatically by any
+'toSql' or 'fromSql' functions or database backends.  They may still be manually
+constructed, but are
+expected to be removed in a future version.  Although these two constructures will
+be removed, support for marshalling to and from the old System.Time data will be
+maintained as long as System.Time is, simply using the newer data types for conversion.
 -}
 data SqlValue = SqlString String 
               | SqlByteString B.ByteString
