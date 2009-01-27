@@ -710,7 +710,7 @@ instance Convertible ST.TimeDiff SqlValue where
 instance Convertible SqlValue ST.TimeDiff where
     safeConvert (SqlString x) = ((read' x)::ConvertResult Integer) >>= safeConvert
     safeConvert (SqlByteString x) = safeConvert . SqlString . byteString2String $ x
-    safeConvert (SqlInt32 x) = secs2td (fromIntegral x)
+    safeConvert (SqlInt32 x) = safeConvert (fromIntegral x)
     safeConvert (SqlInt64 x) = secs2td (fromIntegral x)
     safeConvert (SqlWord32 x) = secs2td (fromIntegral x)
     safeConvert (SqlWord64 x) = secs2td (fromIntegral x)
