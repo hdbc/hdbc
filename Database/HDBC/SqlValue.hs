@@ -794,15 +794,10 @@ secs2td x = safeConvert x
 -- | Read a value from a string, and give an informative message
 --   if it fails.
 read' :: (Typeable a, Read a, Convertible SqlValue a) => String -> ConvertResult a
-read' s = if True then ret else Right fake
-  where ret = case reads s of
-                  [(x,"")] -> Right x
-                  _ -> Left $ ConvertError {convSourceValue = show (SqlString s),
-                                            convSourceType = "SqlValue",
-                                            convDestType = t,
-                                            convErrorMessage = "Cannot read source value as dest type"}
-        fake = fromSql (SqlString "fake")
-        t = show . typeOf $ fake
+read' s = 
+    case reads s of
+      [(x,"")] -> Right x
+      _ -> convError "Cannot read source value as dest type" (SqlString s)
 
 -- FIXME: eliminate manually-crafted ConvertEror here?
 
