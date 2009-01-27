@@ -78,6 +78,7 @@ module Database.HDBC
 
      -- * Exceptions
      SqlError(..),
+     throwSqlError,
      catchSql, handleSql, sqlExceptions, handleSqlError,
 
      -- * Column Types
