@@ -9,11 +9,18 @@ install:
 clean:
 	./Setup.lhs clean
 
-.PHONY: doc
-doc:
-	-rm -r doc
-	mkdir doc
-	haddock -h -t 'Haskell Database Connectivity (HDBC)' \
-		-D doc/hdbc.interface \
-		-o doc `find Database -name "*.hs"`
+.PHONY: test
+test: test-ghc test-hugs
+	@echo ""
+	@echo "All tests pass."
 
+test-hugs:
+	@echo " ****** Running hugs tests"
+	runhugs -98 +o -P$(PWD):$(PWD)/testsrc: testsrc/runtests.hs
+
+test-ghc:
+	@echo " ****** Building GHC tests"
+	runghc Setup.lhs configure -f buildtests
+	runghc Setup.lhs build
+	@echo " ****** Running GHC tests"
+	./dist/build/runtests/runtests
