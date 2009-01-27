@@ -2,7 +2,6 @@ module Database.HDBC.Statement
     (
     Statement(..),
     SqlError(..),
-    throwSqlError,
 
     -- * Re-exported from "Database.HDBC.SqlValue"; this re-exporting is deprecated
     nToSql, iToSql, posixToSql, fromSql, safeFromSql, toSql,
@@ -117,17 +116,4 @@ instance Exception SqlError where
     fromException (SomeException e) = Just e
     fromException _ = Nothing
 -}
-#endif
-
-{- | A utility function to throw a 'SqlError'.  The mechanics of throwing
-such a thing differ between GHC 6.8.x, Hugs, and GHC 6.10.  This function
-takes care of the special cases to make it simpler.
-
-With GHC 6.10, it is a type-restricted alias for throw.  On all other systems,
-it is a type-restricted alias for throwDyn. -}
-throwSqlError :: SqlError -> IO a
-#if __GLASGOW_HASKELL__ >= 610
-throwSqlError = throw
-#else
-throwSqlError = throwDyn
 #endif

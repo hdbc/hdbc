@@ -103,7 +103,7 @@ import Database.HDBC.Utils(catchSql, handleSql, sqlExceptions,
                            quickQuery, fetchRowMap, fetchAllRowsMap,
                            quickQuery', fetchAllRowsMap',
                            fetchRowAL, fetchAllRowsAL,
-                           fetchAllRowsAL')
+                           fetchAllRowsAL', throwSqlError)
 import Database.HDBC.Types
 import Database.HDBC.ColTypes
 
