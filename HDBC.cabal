@@ -46,6 +46,8 @@ Executable runtests
       Buildable: False
    Build-Depends: HUnit, QuickCheck, testpack
    Main-Is: runtests.hs
+   Other-Modules: TestSqlValue
+                  TestInfrastructure
    Hs-Source-Dirs: ., testsrc
    GHC-Options: -O2
    Extensions: ExistentialQuantification, CPP, MultiParamTypeClasses,

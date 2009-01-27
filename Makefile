@@ -16,9 +16,10 @@ test: test-ghc test-hugs
 
 test-hugs:
 	@echo " ****** Running hugs tests"
-	./Setup.lhs configure --hugs
+	./Setup.lhs configure -f buildtests --hugs
 	./Setup.lhs build
-	runhugs -98 +o -P$(PWD)/dist/scratch:$(PWD)/testsrc: testsrc/runtests.hs
+	runhugs -98 +o -P$(PWD)/dist/scratch:$(PWD)/dist/scratch/programs/runtests: \
+		dist/scratch/programs/runtests/Main.hs
 
 test-ghc:
 	@echo " ****** Building GHC tests"

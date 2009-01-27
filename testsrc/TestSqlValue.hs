@@ -10,9 +10,14 @@ module TestSqlValue where
 import TestInfrastructure
 import Test.QuickCheck
 import Test.QuickCheck.Tools
-import Database.HDBC.SqlValue
+import Database.HDBC
 
-propInt :: Int -> Result
-propInt x = toSql x @?= SqlInt32 (fromIntegral x)
+toSql_Int :: Int -> Result
+toSql_Int x = toSql x @?= SqlInt32 (fromIntegral x)
 
-allt = [q "toSql Int" propInt]
+fromSql_Int :: Int -> Result
+fromSql_Int x = 
+    Right x @=? safeFromSql (SqlInt32 (fromIntegral x))
+
+allt = [q "toSql Int" toSql_Int,
+        q "safeFromSql Int" fromSql_Int]
