@@ -1,7 +1,7 @@
 module Database.HDBC.SqlValue
     (
     safeFromSql, toSql, fromSql,
-    -- SqlType(..), nToSql, iToSql, posixToSql,
+    nToSql, iToSql, posixToSql,
     SqlValue(..)
     )
 
@@ -59,11 +59,9 @@ fromSql = convert
 nToSql :: Integral a => a -> SqlValue
 nToSql n = SqlInteger (toInteger n)
 
-{-
 {- | Convenience function for using numeric literals in your program. -}
 iToSql :: Int -> SqlValue
 iToSql = toSql
--}
 
 {- | Convenience function for converting 'POSIXTime' to a 'SqlValue', because
 'toSql' cannot do the correct thing in this instance. -}

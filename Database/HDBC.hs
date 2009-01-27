@@ -42,7 +42,7 @@ module Database.HDBC
      -- $drivers
 
      -- * Typing of transfer data
-     SqlType(..), nToSql, iToSql, posixToSql, fromSql, FromSqlResult,
+     toSql, fromSql, safeFromSql, nToSql, iToSql, posixToSql, 
      SqlValue(..),
 
      -- * Database Connections
