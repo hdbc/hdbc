@@ -756,51 +756,16 @@ instance Convertible SqlValue DiffTime where
     safeConvert y@(SqlEpochTime _) = quickError y
     safeConvert (SqlTimeDiff x) = return . fromIntegral $ x
     safeConvert y@SqlNull = quickError y
+
+instance Convertible ST.CalendarTime SqlValue where
+    -- convert via ZonedTime
+    safeConvert x = safeConvert x >>= return . SqlZonedTime
+instance Convertible SqlValue ST.CalendarTime where
+    -- convert via ZonedTime
+    safeConvert x = do r <- ((safeConvert x)::ConvertResult ZonedTime)
+                       safeConvert r
+
 {-
-instance SqlType ST.CalendarTime where
-    toSql x = toSql . calendarTimeToZonedTime $ x
-    safeConvert y = safeConvert y >>= return . zonedTimeToCalendarTime
-
-zonedTimeToCalendarTime :: ZonedTime -> ST.CalendarTime
-zonedTimeToCalendarTime zt =
-    ST.CalendarTime {
-            ST.ctYear = fromIntegral year,
-            ST.ctMonth = toEnum (month - 1),
-            ST.ctDay = day,
-            ST.ctHour = todHour ltod,
-            ST.ctMin = todMin ltod,
-            ST.ctSec = secs,
-            ST.ctPicosec = truncate $ (((toRational (todSec ltod) - (toRational secs)) * 1000000000000)::Rational),
-            ST.ctWDay = toEnum . snd . sundayStartWeek . localDay . zonedTimeToLocalTime $ zt,
-            ST.ctYDay = snd . toOrdinalDate . localDay . zonedTimeToLocalTime $ zt,
-            ST.ctTZName = timeZoneName . zonedTimeZone $ zt,
-            ST.ctTZ = (timeZoneMinutes . zonedTimeZone $ zt) * 60,
-            ST.ctIsDST = timeZoneSummerOnly . zonedTimeZone $ zt
-          }
-    where (year, month, day) = toGregorian . localDay . zonedTimeToLocalTime $ zt
-          ltod = localTimeOfDay . zonedTimeToLocalTime $ zt
-          secs = (truncate . todSec $ ltod)::Int
-
-calendarTimeToZonedTime :: ST.CalendarTime -> ZonedTime
-calendarTimeToZonedTime ct =
-    ZonedTime {
-     zonedTimeToLocalTime = LocalTime {
-       localDay = fromGregorian (fromIntegral $ ST.ctYear ct) 
-                  (1 + (fromEnum $ ST.ctMonth ct))
-                  (ST.ctDay ct),
-       localTimeOfDay = TimeOfDay {
-         todHour = ST.ctHour ct,
-         todMin = ST.ctMin ct,
-         todSec = (fromIntegral $ ST.ctSec ct) + 
-                  fromRational (ST.ctPicosec ct % 1000000000000)
-                        }
-                            },
-     zonedTimeZone = TimeZone {
-                       timeZoneMinutes = ST.ctTZ ct `div` 60,
-                       timeZoneSummerOnly = ST.ctIsDST ct,
-                       timeZoneName = ST.ctTZName ct}
-}
-
 instance (SqlType a) => SqlType (Maybe a) where
     sqlTypeName x = "Maybe " ++ sqlTypeName x
     toSql Nothing = SqlNull
