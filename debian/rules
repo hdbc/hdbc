@@ -45,6 +45,8 @@ build-stamp: configure-stamp
 	#$(MAKE)
 	#$(MAKE) doc
 
+	$(MAKE) test
+
 	touch build-stamp
 
 clean:
