@@ -8,7 +8,7 @@ module Database.HDBC.SqlValue
 
 where
 import Data.Dynamic
-import qualified Data.ByteString as B
+import qualified Data.ByteString.UTF8 as B
 import Data.Char(ord,toUpper)
 import Data.Word
 import Data.Int
@@ -220,7 +220,7 @@ instance Convertible String SqlValue where
     safeConvert = return . SqlString
 instance Convertible SqlValue String where
     safeConvert (SqlString x) = return x
-    safeConvert (SqlByteString x) = return . byteString2String $ x
+    safeConvert (SqlByteString x) = return . B.toString $ x
     safeConvert (SqlInt32 x) = return . show $ x
     safeConvert (SqlInt64 x) = return . show $ x
     safeConvert (SqlWord32 x) = return . show $ x
@@ -256,10 +256,7 @@ instance Convertible B.ByteString SqlValue where
 instance Convertible SqlValue B.ByteString where
     safeConvert (SqlByteString x) = return x
     safeConvert y@(SqlNull) = quickError y
-    safeConvert x = safeConvert x >>= return . string2ByteString
-
-string2ByteString :: String -> B.ByteString
-string2ByteString = B.pack . map (toEnum . fromEnum)
+    safeConvert x = safeConvert x >>= return . B.fromString
 
 instance Convertible Int SqlValue where
     safeConvert x = 
@@ -267,7 +264,7 @@ instance Convertible Int SqlValue where
            return $ SqlInt32 i
 instance Convertible SqlValue Int where
     safeConvert (SqlString x) = read' x
-    safeConvert (SqlByteString x) = (read' . byteString2String) x
+    safeConvert (SqlByteString x) = (read' . B.toString) x
     safeConvert (SqlInt32 x) = safeConvert x
     safeConvert (SqlInt64 x) = safeConvert x
     safeConvert (SqlWord32 x) = safeConvert x
@@ -292,7 +289,7 @@ instance Convertible Int32 SqlValue where
     safeConvert = return . SqlInt32
 instance Convertible SqlValue Int32 where
     safeConvert (SqlString x) = read' x
-    safeConvert (SqlByteString x) = (read' . byteString2String) x
+    safeConvert (SqlByteString x) = (read' . B.toString) x
     safeConvert (SqlInt32 x) = return x
     safeConvert (SqlInt64 x) = safeConvert x
     safeConvert (SqlWord32 x) = safeConvert x
@@ -317,7 +314,7 @@ instance Convertible Int64 SqlValue where
     safeConvert = return . SqlInt64
 instance Convertible SqlValue Int64 where
     safeConvert (SqlString x) = read' x
-    safeConvert (SqlByteString x) = (read' . byteString2String) x
+    safeConvert (SqlByteString x) = (read' . B.toString) x
     safeConvert (SqlInt32 x) = safeConvert x
     safeConvert (SqlInt64 x) = return x
     safeConvert (SqlWord32 x) = safeConvert x
@@ -342,7 +339,7 @@ instance Convertible Word32 SqlValue where
     safeConvert = return . SqlWord32
 instance Convertible SqlValue Word32 where
     safeConvert (SqlString x) = read' x
-    safeConvert (SqlByteString x) = (read' . byteString2String) x
+    safeConvert (SqlByteString x) = (read' . B.toString) x
     safeConvert (SqlInt32 x) = safeConvert x
     safeConvert (SqlInt64 x) = safeConvert x
     safeConvert (SqlWord32 x) = return x
@@ -367,7 +364,7 @@ instance Convertible Word64 SqlValue where
     safeConvert = return . SqlWord64
 instance Convertible SqlValue Word64 where
     safeConvert (SqlString x) = read' x
-    safeConvert (SqlByteString x) = (read' . byteString2String) x
+    safeConvert (SqlByteString x) = (read' . B.toString) x
     safeConvert (SqlInt32 x) = safeConvert x
     safeConvert (SqlInt64 x) = safeConvert x
     safeConvert (SqlWord32 x) = safeConvert x
@@ -392,7 +389,7 @@ instance Convertible Integer SqlValue where
     safeConvert = return . SqlInteger
 instance Convertible SqlValue Integer where
     safeConvert (SqlString x) = read' x
-    safeConvert (SqlByteString x) = (read' . byteString2String) x
+    safeConvert (SqlByteString x) = (read' . B.toString) x
     safeConvert (SqlInt32 x) = safeConvert x
     safeConvert (SqlInt64 x) = safeConvert x
     safeConvert (SqlWord32 x) = safeConvert x
@@ -427,7 +424,7 @@ instance Convertible SqlValue Bool where
           "0" -> Right False
           "1" -> Right True
           _ -> convError "Cannot parse given String as Bool" y
-    safeConvert (SqlByteString x) = (safeConvert . SqlString . byteString2String) x
+    safeConvert (SqlByteString x) = (safeConvert . SqlString . B.toString) x
     safeConvert (SqlInt32 x) = numToBool x
     safeConvert (SqlInt64 x) = numToBool x
     safeConvert (SqlWord32 x) = numToBool x
@@ -458,7 +455,7 @@ instance Convertible SqlValue Char where
     safeConvert y@(SqlString _) = convError "String length /= 1" y
     safeConvert y@(SqlByteString x) = 
         case B.length x of
-          1 -> safeConvert . SqlString . byteString2String $ x
+          1 -> safeConvert . SqlString . B.toString $ x
           _ -> convError "ByteString length /= 1" y
     safeConvert y@(SqlInt32 _) = quickError y
     safeConvert y@(SqlInt64 _) = quickError y
@@ -484,7 +481,7 @@ instance Convertible Double SqlValue where
     safeConvert = return . SqlDouble
 instance Convertible SqlValue Double where
     safeConvert (SqlString x) = read' x
-    safeConvert (SqlByteString x) = (read' . byteString2String) x
+    safeConvert (SqlByteString x) = (read' . B.toString) x
     safeConvert (SqlInt32 x) = safeConvert x
     safeConvert (SqlInt64 x) = safeConvert x
     safeConvert (SqlWord32 x) = safeConvert x
@@ -513,7 +510,7 @@ instance Convertible Rational SqlValue where
     safeConvert = return . SqlRational
 instance Convertible SqlValue Rational where
     safeConvert (SqlString x) = read' x
-    safeConvert (SqlByteString x) = (read' . byteString2String) x
+    safeConvert (SqlByteString x) = (read' . B.toString) x
     safeConvert (SqlInt32 x) = safeConvert x
     safeConvert (SqlInt64 x) = safeConvert x
     safeConvert (SqlWord32 x) = safeConvert x
@@ -555,7 +552,7 @@ instance Convertible Day SqlValue where
     safeConvert = return . SqlLocalDate
 instance Convertible SqlValue Day where
     safeConvert (SqlString x) = parseTime' (iso8601DateFormat Nothing) x
-    safeConvert (SqlByteString x) = safeConvert (SqlString (byteString2String x))
+    safeConvert (SqlByteString x) = safeConvert (SqlString (B.toString x))
     safeConvert (SqlInt32 x) = 
         return $ ModifiedJulianDay {toModifiedJulianDay = fromIntegral x}
     safeConvert (SqlInt64 x) = 
@@ -586,7 +583,7 @@ instance Convertible TimeOfDay SqlValue where
     safeConvert = return . SqlLocalTimeOfDay
 instance Convertible SqlValue TimeOfDay where
     safeConvert (SqlString x) = parseTime' "%T" x
-    safeConvert (SqlByteString x) = safeConvert (SqlString (byteString2String x))
+    safeConvert (SqlByteString x) = safeConvert (SqlString (B.toString x))
     safeConvert (SqlInt32 x) = return . timeToTimeOfDay . fromIntegral $ x
     safeConvert (SqlInt64 x) = return . timeToTimeOfDay . fromIntegral $ x
     safeConvert (SqlWord32 x) = return . timeToTimeOfDay . fromIntegral $ x
@@ -612,7 +609,7 @@ instance Convertible LocalTime SqlValue where
     safeConvert = return . SqlLocalTime
 instance Convertible SqlValue LocalTime where
     safeConvert (SqlString x) = parseTime' (iso8601DateFormat (Just "%T")) x
-    safeConvert (SqlByteString x) = safeConvert (SqlString (byteString2String x))
+    safeConvert (SqlByteString x) = safeConvert (SqlString (B.toString x))
     safeConvert y@(SqlInt32 _) = quickError y
     safeConvert y@(SqlInt64 _) = quickError y
     safeConvert y@(SqlWord32 _) = quickError y
@@ -637,7 +634,7 @@ instance Convertible ZonedTime SqlValue where
     safeConvert = return . SqlZonedTime
 instance Convertible SqlValue ZonedTime where
     safeConvert (SqlString x) = parseTime' (iso8601DateFormat (Just "%T %z")) x
-    safeConvert (SqlByteString x) = safeConvert (SqlString (byteString2String x))
+    safeConvert (SqlByteString x) = safeConvert (SqlString (B.toString x))
     safeConvert (SqlInt32 x) = safeConvert (SqlInteger (fromIntegral x))
     safeConvert (SqlInt64 x) = safeConvert (SqlInteger (fromIntegral x))
     safeConvert (SqlWord32 x) = safeConvert (SqlInteger (fromIntegral x))
@@ -662,7 +659,7 @@ instance Convertible UTCTime SqlValue where
     safeConvert = return . SqlUTCTime
 instance Convertible SqlValue UTCTime where
     safeConvert (SqlString x) = parseTime' (iso8601DateFormat (Just "%T")) x
-    safeConvert (SqlByteString x) = safeConvert (SqlString (byteString2String x))
+    safeConvert (SqlByteString x) = safeConvert (SqlString (B.toString x))
     safeConvert y@(SqlInt32 _) = safeConvert y >>= return . posixSecondsToUTCTime
     safeConvert y@(SqlInt64 _) = safeConvert y >>= return . posixSecondsToUTCTime
     safeConvert y@(SqlWord32 _) = safeConvert y >>= return . posixSecondsToUTCTime
@@ -687,7 +684,7 @@ instance Convertible NominalDiffTime SqlValue where
     safeConvert = return . SqlDiffTime
 instance Convertible SqlValue NominalDiffTime where
     safeConvert (SqlString x) = read' x >>= return . fromInteger
-    safeConvert (SqlByteString x) = read' (byteString2String x) >>= return . fromInteger
+    safeConvert (SqlByteString x) = read' (B.toString x) >>= return . fromInteger
     safeConvert (SqlInt32 x) = return . fromIntegral $ x
     safeConvert (SqlInt64 x) = return . fromIntegral $ x
     safeConvert (SqlWord32 x) = return . fromIntegral $ x
@@ -715,7 +712,7 @@ instance Convertible ST.ClockTime SqlValue where
 instance Convertible SqlValue ST.ClockTime where
     safeConvert (SqlString x) = do r <- read' x
                                    return $ ST.TOD r 0
-    safeConvert (SqlByteString x) = safeConvert . SqlString . byteString2String $ x
+    safeConvert (SqlByteString x) = safeConvert . SqlString . B.toString $ x
     safeConvert (SqlInt32 x) = return $ ST.TOD (fromIntegral x) 0
     safeConvert (SqlInt64 x) = return $ ST.TOD (fromIntegral x) 0
     safeConvert (SqlWord32 x) = return $ ST.TOD (fromIntegral x) 0
@@ -740,7 +737,7 @@ instance Convertible ST.TimeDiff SqlValue where
     safeConvert x = safeConvert x >>= return . SqlDiffTime
 instance Convertible SqlValue ST.TimeDiff where
     safeConvert (SqlString x) = ((read' x)::ConvertResult Integer) >>= safeConvert
-    safeConvert (SqlByteString x) = safeConvert . SqlString . byteString2String $ x
+    safeConvert (SqlByteString x) = safeConvert . SqlString . B.toString $ x
     safeConvert (SqlInt32 x) = secs2td (fromIntegral x)
     safeConvert (SqlInt64 x) = secs2td (fromIntegral x)
     safeConvert (SqlWord32 x) = secs2td (fromIntegral x)
@@ -765,7 +762,7 @@ instance Convertible DiffTime SqlValue where
     safeConvert = return . SqlDiffTime . fromRational . toRational
 instance Convertible SqlValue DiffTime where
     safeConvert (SqlString x) = read' x >>= return . fromInteger
-    safeConvert (SqlByteString x) = safeConvert . SqlString . byteString2String $ x
+    safeConvert (SqlByteString x) = safeConvert . SqlString . B.toString $ x
     safeConvert (SqlInt32 x) = return . fromIntegral $ x
     safeConvert (SqlInt64 x) = return . fromIntegral $ x
     safeConvert (SqlWord32 x) = return . fromIntegral $ x
@@ -799,9 +796,6 @@ instance (Convertible a SqlValue) => Convertible (Maybe a) SqlValue where
 instance (Convertible SqlValue a) => Convertible SqlValue (Maybe a) where
     safeConvert SqlNull = return Nothing
     safeConvert a = safeConvert a >>= (return . Just)
-
-byteString2String :: B.ByteString -> String
-byteString2String = map (toEnum . fromEnum) . B.unpack
 
 viaInteger' :: (Convertible SqlValue a, Bounded a, Show a, Convertible a Integer,
                Typeable a) => SqlValue -> (Integer -> ConvertResult a) -> ConvertResult a
