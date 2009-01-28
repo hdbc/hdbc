@@ -53,8 +53,6 @@ return value.  Otherwise, proceed as normal. -}
 catchSql :: IO a -> (SqlError -> IO a) -> IO a
 catchSql action handler = 
     catchJust sqlExceptions action handler
-    where selector :: SqlError -> Maybe SqlError
-          selector e = Just e
 
 {- | Like 'catchSql', with the order of arguments reversed. -}
 handleSql :: (SqlError -> IO a) -> IO a -> IO a
