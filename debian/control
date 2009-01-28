@@ -35,21 +35,21 @@ Description: Haskell Database Connectivity, GHC6 profiling data
  relational databases. This package provides profiling information for using
  HDBC with GHC6.
 
-Package: libhugs-hdbc
-Section: libs
-Architecture: all
-Depends: ${haskell:Depends}, libhugs-convertible (>= 1.0.1), libhugs-time-bundled
-Description: Haskell Database Connectivity, Hugs package
- HDBC provides an abstraction layer between Haskell programs and SQL
- relational databases. This lets you write database code once, in
- Haskell, and have it work with any number of backend SQL databases
- (MySQL, Oracle, PostgreSQL, ODBC-compliant databases, etc.)
- .
- HDBC is modeled loosely on Perl's DBI interface, though it has also been
- influenced by Python's DB-API v2, JDBC in Java, and HSQL in Haskell.
- .
- To use HDBC, you'll need both this package, and a driver package such
- as libhugs-hdbc-postgresql.
+#Package: libhugs-hdbc
+#Section: libs
+#Architecture: all
+#Depends: ${haskell:Depends}, libhugs-convertible (>= 1.0.1), libhugs-time-bundled
+#Description: Haskell Database Connectivity, Hugs package
+# HDBC provides an abstraction layer between Haskell programs and SQL
+# relational databases. This lets you write database code once, in
+# Haskell, and have it work with any number of backend SQL databases
+# (MySQL, Oracle, PostgreSQL, ODBC-compliant databases, etc.)
+# .
+# HDBC is modeled loosely on Perl's DBI interface, though it has also been
+# influenced by Python's DB-API v2, JDBC in Java, and HSQL in Haskell.
+# .
+# To use HDBC, you'll need both this package, and a driver package such
+# as libhugs-hdbc-postgresql.
 
 Package: haskell-hdbc-doc
 Section: doc

@@ -45,7 +45,7 @@ build-stamp: configure-stamp
 	#$(MAKE)
 	#$(MAKE) doc
 
-	$(MAKE) test
+	$(MAKE) test-ghc
 
 	touch build-stamp
 
