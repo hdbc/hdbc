@@ -1,11 +1,7 @@
 This is hdbc, written and maintained by John Goerzen <jgoerzen@complete.org>
-on Tue, 27 Dec 2005 10:22:53 -0600.
 
 The original source can always be found at:
 	http://software.complete.org/hdbc
-
-The Darcs repository for this program can be accessed with:
-   git clone git://git.complete.org/hdbc
 
 Copyright (C) 2005-2009 John Goerzen <jgoerzen@complete.org>
 
