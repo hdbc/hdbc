@@ -134,6 +134,23 @@ and generic code in HDBC or its backends cannot possibly accomodate
 every possible situation.  In some cases, you may be best served by converting your
 Haskell type to a String, and passing that to the database.
 
+/UNICODE AND BYTESTRINGS/
+
+Beginning with HDBC v2.0, whenever a ByteString must be converted to or from a String,
+the ByteString is assumed to be in UTF-8 encoding, and will be decoded or encoded
+as appropriate.  Database drivers will generally present text/string data they have
+received from the database as a SqlValue holding a ByteString, which 'fromSql' will
+automatically convert to a String -- and thus automatically decode UTF-8 -- when
+you need it.
+
+If you are handling some sort of binary data that is not in UTF-8, you can of course
+work with the ByteString directly.
+
+Due to lack of support by database engines, lazy ByteStrings are not passed to database
+drivers.  When you use 'toSql' on a lazy ByteString, it will be converted to a strict
+ByteString for storage.  Similarly, 'fromSql' will convert a strict ByteString to
+a lazy ByteString if you demand it.
+
 /EQUALITY OF SQLVALUE/
 
 Two SqlValues are considered to be equal if one of these hold.  The
