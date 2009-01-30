@@ -199,6 +199,7 @@ data SqlValue = SqlString String
               | SqlRational Rational
               | SqlLocalDate Day            -- ^ Local YYYY-MM-DD (no timezone)
               | SqlLocalTimeOfDay TimeOfDay -- ^ Local HH:MM:SS (no timezone)
+              | SqlZonedLocalTimeOfDay TimeOfDay TimeZone -- ^ Local HH:MM:SS -HHMM.  Converts to and from (TimeOfDay, TimeZone).
               | SqlLocalTime LocalTime      -- ^ Local YYYY-MM-DD HH:MM:SS (no timezone)
               | SqlZonedTime ZonedTime      -- ^ Local YYYY-MM-DD HH:MM:SS -HHMM.  Considered equal if both convert to the same UTC time.
               | SqlUTCTime UTCTime          -- ^ UTC YYYY-MM-DD HH:MM:SS
@@ -225,6 +226,7 @@ instance Eq SqlValue where
     SqlDouble a == SqlDouble b = a == b
     SqlRational a == SqlRational b = a == b
     SqlLocalTimeOfDay a == SqlLocalTimeOfDay b = a == b
+    SqlZonedLocalTimeOfDay a b == SqlZonedLocalTimeOfDay c d = a == c && b == d
     SqlLocalTime a == SqlLocalTime b = a == b
     SqlLocalDate a == SqlLocalDate b = a == b
     SqlZonedTime a == SqlZonedTime b = zonedTimeToUTC a == zonedTimeToUTC b
@@ -257,6 +259,9 @@ instance Convertible SqlValue String where
         return . formatTime defaultTimeLocale (iso8601DateFormat Nothing) $ x
     safeConvert (SqlLocalTimeOfDay x) = 
         return . formatTime defaultTimeLocale "%T" $ x
+    safeConvert (SqlZonedLocalTimeOfDay tod tz) = 
+        return $ formatTime defaultTimeLocale "%T " tod ++
+                 formatTime defaultTimeLocale "%z" tz
     safeConvert (SqlLocalTime x) = 
         return . formatTime defaultTimeLocale (iso8601DateFormat (Just "%T")) $ x
     safeConvert (SqlZonedTime x) = 
@@ -305,6 +310,7 @@ instance Convertible SqlValue Int where
     safeConvert (SqlRational x) = safeConvert x
     safeConvert y@(SqlLocalDate _) = viaInteger y fromIntegral
     safeConvert y@(SqlLocalTimeOfDay _) = viaInteger y fromIntegral 
+    safeConvert y@(SqlZonedLocalTimeOfDay _ _) = quickError y
     safeConvert y@(SqlLocalTime _) = viaInteger y fromIntegral 
     safeConvert y@(SqlZonedTime _) = viaInteger y fromIntegral
     safeConvert (SqlUTCTime x) = safeConvert x
@@ -330,6 +336,7 @@ instance Convertible SqlValue Int32 where
     safeConvert (SqlRational x) = safeConvert x
     safeConvert y@(SqlLocalDate _) = viaInteger y fromIntegral
     safeConvert y@(SqlLocalTimeOfDay _) = viaInteger y fromIntegral
+    safeConvert y@(SqlZonedLocalTimeOfDay _ _) = quickError y
     safeConvert y@(SqlLocalTime _) = viaInteger y fromIntegral
     safeConvert y@(SqlZonedTime _) = viaInteger y fromIntegral
     safeConvert y@(SqlUTCTime _) = viaInteger y fromIntegral
@@ -355,6 +362,7 @@ instance Convertible SqlValue Int64 where
     safeConvert (SqlRational x) = safeConvert x
     safeConvert y@(SqlLocalDate _) = viaInteger y fromIntegral
     safeConvert y@(SqlLocalTimeOfDay _) = viaInteger y fromIntegral
+    safeConvert y@(SqlZonedLocalTimeOfDay _ _) = quickError y
     safeConvert y@(SqlLocalTime _) = viaInteger y fromIntegral
     safeConvert y@(SqlZonedTime _) = viaInteger y fromIntegral
     safeConvert y@(SqlUTCTime _) = viaInteger y fromIntegral
@@ -380,6 +388,7 @@ instance Convertible SqlValue Word32 where
     safeConvert (SqlRational x) = safeConvert x
     safeConvert y@(SqlLocalDate _) = viaInteger y fromIntegral
     safeConvert y@(SqlLocalTimeOfDay _) = viaInteger y fromIntegral
+    safeConvert y@(SqlZonedLocalTimeOfDay _ _) = quickError y
     safeConvert y@(SqlLocalTime _) = viaInteger y fromIntegral
     safeConvert y@(SqlZonedTime _) = viaInteger y fromIntegral
     safeConvert y@(SqlUTCTime _) = viaInteger y fromIntegral
@@ -405,6 +414,7 @@ instance Convertible SqlValue Word64 where
     safeConvert (SqlRational x) = safeConvert x
     safeConvert y@(SqlLocalDate _) = viaInteger y fromIntegral
     safeConvert y@(SqlLocalTimeOfDay _) = viaInteger y fromIntegral
+    safeConvert y@(SqlZonedLocalTimeOfDay _ _) = quickError y
     safeConvert y@(SqlLocalTime _) = viaInteger y fromIntegral
     safeConvert y@(SqlZonedTime _) = viaInteger y fromIntegral
     safeConvert y@(SqlUTCTime _) = viaInteger y fromIntegral
@@ -431,6 +441,7 @@ instance Convertible SqlValue Integer where
     safeConvert (SqlLocalDate x) = return . toModifiedJulianDay $ x
     safeConvert (SqlLocalTimeOfDay x) = 
         return . fromIntegral . fromEnum . timeOfDayToTime $ x
+    safeConvert y@(SqlZonedLocalTimeOfDay _ _) = quickError y
     safeConvert y@(SqlLocalTime _) = quickError y
     safeConvert (SqlZonedTime x) = 
         return . truncate . utcTimeToPOSIXSeconds . zonedTimeToUTC $ x
@@ -465,6 +476,7 @@ instance Convertible SqlValue Bool where
     safeConvert (SqlRational x) = numToBool x
     safeConvert y@(SqlLocalDate _) = quickError y
     safeConvert y@(SqlLocalTimeOfDay _) = quickError y
+    safeConvert y@(SqlZonedLocalTimeOfDay _ _) = quickError y
     safeConvert y@(SqlLocalTime _) = quickError y
     safeConvert y@(SqlZonedTime _) = quickError y
     safeConvert y@(SqlUTCTime _) = quickError y
@@ -497,6 +509,7 @@ instance Convertible SqlValue Char where
     safeConvert y@(SqlRational _) = quickError y
     safeConvert y@(SqlLocalDate _) = quickError y
     safeConvert y@(SqlLocalTimeOfDay _) = quickError y
+    safeConvert y@(SqlZonedLocalTimeOfDay _ _) = quickError y
     safeConvert y@(SqlLocalTime _) = quickError y
     safeConvert y@(SqlZonedTime _) = quickError y
     safeConvert y@(SqlUTCTime _) = quickError y
@@ -524,6 +537,7 @@ instance Convertible SqlValue Double where
                                      (return . fromIntegral)
     safeConvert (SqlLocalTimeOfDay x) = 
         return . fromRational . toRational . timeOfDayToTime $ x
+    safeConvert y@(SqlZonedLocalTimeOfDay _ _) = quickError y
     safeConvert y@(SqlLocalTime _) = quickError y
     safeConvert (SqlZonedTime x) = 
         safeConvert . SqlUTCTime . zonedTimeToUTC $ x
@@ -553,6 +567,7 @@ instance Convertible SqlValue Rational where
     safeConvert y@(SqlLocalDate _) = ((safeConvert y)::ConvertResult Integer) >>= 
                                      (return . fromIntegral)
     safeConvert (SqlLocalTimeOfDay x) = return . toRational . timeOfDayToTime $ x
+    safeConvert y@(SqlZonedLocalTimeOfDay _ _) = quickError y
     safeConvert y@(SqlLocalTime _) = quickError y
     safeConvert (SqlZonedTime x) = safeConvert . SqlUTCTime . zonedTimeToUTC $ x
     safeConvert (SqlUTCTime x) = safeConvert x
@@ -576,6 +591,8 @@ instance Typeable ST.TimeDiff where
     typeOf _ = mkTypeName "TimeDiff"
 instance Typeable DiffTime where
     typeOf _ = mkTypeName "DiffTime"
+instance Typeable TimeZone where
+    typeOf _ = mkTypeName "TimeZone"
 
 instance Convertible Day SqlValue where
     safeConvert = return . SqlLocalDate
@@ -599,6 +616,7 @@ instance Convertible SqlValue Day where
     safeConvert (SqlRational x) = safeConvert . SqlDouble . fromRational $ x
     safeConvert (SqlLocalDate x) = return x
     safeConvert y@(SqlLocalTimeOfDay _) = quickError y
+    safeConvert y@(SqlZonedLocalTimeOfDay _ _) = quickError y
     safeConvert (SqlLocalTime x) = return . localDay $ x
     safeConvert y@(SqlZonedTime _) = safeConvert y >>= return . localDay
     safeConvert y@(SqlUTCTime _) = safeConvert y >>= return . localDay
@@ -625,12 +643,45 @@ instance Convertible SqlValue TimeOfDay where
     safeConvert (SqlRational x) = safeConvert . SqlDouble . fromRational $ x
     safeConvert y@(SqlLocalDate _) = quickError y
     safeConvert (SqlLocalTimeOfDay x) = return x
+    safeConvert (SqlZonedLocalTimeOfDay tod _) = return tod
     safeConvert (SqlLocalTime x) = return . localTimeOfDay $ x
     safeConvert y@(SqlZonedTime _) = safeConvert y >>= return . localTimeOfDay
     safeConvert y@(SqlUTCTime _) = safeConvert y >>= return . localTimeOfDay
     safeConvert y@(SqlDiffTime _) = quickError y
     safeConvert y@(SqlPOSIXTime _) = safeConvert y >>= return . localTimeOfDay
     safeConvert y@(SqlEpochTime _) = safeConvert y >>= return . localTimeOfDay
+    safeConvert y@(SqlTimeDiff _) = quickError y
+    safeConvert y@SqlNull = quickError y
+
+instance Convertible (TimeOfDay, TimeZone) SqlValue where
+    safeConvert (tod, tz) = return (SqlZonedLocalTimeOfDay tod tz)
+instance Convertible SqlValue (TimeOfDay, TimeZone) where
+    safeConvert (SqlString x) = 
+        do tod <- parseTime' "%T %z" x
+           tz <- case parseTime defaultTimeLocale "%T %z" x of
+                      Nothing -> convError "Couldn't extract timezone in" (SqlString x)
+                      Just y -> Right y
+           return (tod, tz)
+    safeConvert (SqlByteString x) = safeConvert (SqlString (BUTF8.toString x))
+    safeConvert y@(SqlInt32 _) = quickError y
+    safeConvert y@(SqlInt64 _) = quickError y
+    safeConvert y@(SqlWord32 _) = quickError y
+    safeConvert y@(SqlWord64 _) = quickError y
+    safeConvert y@(SqlInteger _) = quickError y
+    safeConvert y@(SqlChar _) = quickError y
+    safeConvert y@(SqlBool _) = quickError y
+    safeConvert y@(SqlDouble _) = quickError y
+    safeConvert y@(SqlRational _) = quickError y
+    safeConvert y@(SqlLocalDate _) = quickError y
+    safeConvert y@(SqlLocalTimeOfDay _) = quickError y
+    safeConvert y@(SqlZonedLocalTimeOfDay _ _) = quickError y
+    safeConvert y@(SqlLocalTime _) = quickError y
+    safeConvert (SqlZonedTime x) = return (localTimeOfDay . zonedTimeToLocalTime $ x,
+                                           zonedTimeZone x)
+    safeConvert y@(SqlUTCTime _) = quickError y
+    safeConvert y@(SqlDiffTime _) = quickError y
+    safeConvert y@(SqlPOSIXTime _) = quickError y
+    safeConvert y@(SqlEpochTime _) = quickError y
     safeConvert y@(SqlTimeDiff _) = quickError y
     safeConvert y@SqlNull = quickError y
 
@@ -650,6 +701,7 @@ instance Convertible SqlValue LocalTime where
     safeConvert y@(SqlRational _) = quickError y
     safeConvert y@(SqlLocalDate _) = quickError y
     safeConvert y@(SqlLocalTimeOfDay _) = quickError y
+    safeConvert y@(SqlZonedLocalTimeOfDay _ _) = quickError y
     safeConvert (SqlLocalTime x) = return x
     safeConvert (SqlZonedTime x) = return . zonedTimeToLocalTime $ x
     safeConvert y@(SqlUTCTime _) = safeConvert y >>= return . zonedTimeToLocalTime
@@ -676,6 +728,7 @@ instance Convertible SqlValue ZonedTime where
     safeConvert y@(SqlLocalDate _) = quickError y
     safeConvert y@(SqlLocalTime _) = quickError y
     safeConvert y@(SqlLocalTimeOfDay _) = quickError y
+    safeConvert y@(SqlZonedLocalTimeOfDay _ _) = quickError y
     safeConvert (SqlZonedTime x) = return x
     safeConvert (SqlUTCTime x) = return . utcToZonedTime utc $ x
     safeConvert y@(SqlDiffTime _) = quickError y
@@ -700,6 +753,7 @@ instance Convertible SqlValue UTCTime where
     safeConvert y@(SqlRational _) = safeConvert y >>= return . posixSecondsToUTCTime
     safeConvert y@(SqlLocalDate _) = quickError y
     safeConvert y@(SqlLocalTimeOfDay _) = quickError y
+    safeConvert y@(SqlZonedLocalTimeOfDay _ _) = quickError y
     safeConvert y@(SqlLocalTime _) = quickError y
     safeConvert (SqlZonedTime x) = return . zonedTimeToUTC $ x
     safeConvert (SqlUTCTime x) = return x
@@ -727,6 +781,7 @@ instance Convertible SqlValue NominalDiffTime where
                                toModifiedJulianDay $ x
     safeConvert (SqlLocalTimeOfDay x) = 
         return . fromRational . toRational . timeOfDayToTime $ x
+    safeConvert y@(SqlZonedLocalTimeOfDay _ _) = quickError y
     safeConvert y@(SqlLocalTime _) = quickError y
     safeConvert (SqlZonedTime x) = return . utcTimeToPOSIXSeconds . zonedTimeToUTC $ x
     safeConvert (SqlUTCTime x) = return . utcTimeToPOSIXSeconds $ x
@@ -753,6 +808,7 @@ instance Convertible SqlValue ST.ClockTime where
     safeConvert (SqlRational x) = return $ ST.TOD (truncate x) 0
     safeConvert y@(SqlLocalDate _) = quickError y
     safeConvert y@(SqlLocalTimeOfDay _) = quickError y
+    safeConvert y@(SqlZonedLocalTimeOfDay _ _) = quickError y
     safeConvert y@(SqlLocalTime _) = quickError y
     safeConvert y@(SqlZonedTime _) = safeConvert y >>= (\z -> return $ ST.TOD z 0)
     safeConvert y@(SqlUTCTime _) = safeConvert y >>= (\z -> return $ ST.TOD z 0)
@@ -778,6 +834,7 @@ instance Convertible SqlValue ST.TimeDiff where
     safeConvert (SqlRational x) = secs2td (truncate x)
     safeConvert y@(SqlLocalDate _) = quickError y
     safeConvert y@(SqlLocalTimeOfDay _) = quickError y
+    safeConvert y@(SqlZonedLocalTimeOfDay _ _) = quickError y
     safeConvert y@(SqlLocalTime _) = quickError y
     safeConvert y@(SqlZonedTime _) = quickError y
     safeConvert y@(SqlUTCTime _) = quickError y
@@ -803,6 +860,7 @@ instance Convertible SqlValue DiffTime where
     safeConvert (SqlRational x) = return . fromRational $ x
     safeConvert y@(SqlLocalDate _) = quickError y
     safeConvert y@(SqlLocalTimeOfDay _) = quickError y
+    safeConvert y@(SqlZonedLocalTimeOfDay _ _) = quickError y
     safeConvert y@(SqlLocalTime _) = quickError y
     safeConvert y@(SqlZonedTime _) = quickError y
     safeConvert y@(SqlUTCTime _) = quickError y

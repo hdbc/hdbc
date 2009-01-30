@@ -37,7 +37,8 @@ library
     Database.HDBC.ColTypes, Database.HDBC.Statement, Database.HDBC.SqlValue
   Other-Modules: Database.HDBC.Utils
   Extensions: ExistentialQuantification, CPP, MultiParamTypeClasses,
-    FlexibleContexts, TypeSynonymInstances, TypeOperators, RankNTypes
+    FlexibleContexts, TypeSynonymInstances, TypeOperators, RankNTypes,
+    FlexibleInstances
     
 Executable runtests
    if flag(buildtests)
@@ -51,4 +52,6 @@ Executable runtests
    Hs-Source-Dirs: ., testsrc
    GHC-Options: -O2
    Extensions: ExistentialQuantification, CPP, MultiParamTypeClasses,
-     FlexibleContexts, TypeSynonymInstances, TypeOperators, RankNTypes
+     FlexibleContexts, TypeSynonymInstances, TypeOperators,
+     RankNTypes, FlexibleInstances
+   
