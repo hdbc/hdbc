@@ -140,9 +140,9 @@ Beginning with HDBC v2.0, interactions with a database are presumed to occur in 
 
 To accomplish this, whenever a ByteString must be converted to or from a String,
 the ByteString is assumed to be in UTF-8 encoding, and will be decoded or encoded
-as appropriate.  Database drivers will generally present text/string data they have
+as appropriate.  Database drivers will generally present text or string data they have
 received from the database as a SqlValue holding a ByteString, which 'fromSql' will
-automatically convert to a String -- and thus automatically decode UTF-8 -- when
+automatically convert to a String, and thus automatically decode UTF-8, when
 you need it.  In the other direction, database drivers will generally convert
 a 'SqlString' to a ByteString in UTF-8 encoding before passing it to the
 database engine.
