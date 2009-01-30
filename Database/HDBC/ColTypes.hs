@@ -96,8 +96,10 @@ data SqlTypeId =
     | SqlVarBinaryT             -- ^ Variable-length binary data
     | SqlLongVarBinaryT         -- ^ Variable-length binary data, max length implementation dependant
     | SqlDateT                  -- ^ A date
-    | SqlTimeT                  -- ^ A time
-    | SqlTimestampT             -- ^ Combined date and time
+    | SqlTimeT                  -- ^ A time, no timezone
+    | SqlTimeWithZoneT          -- ^ A time, with timezone
+    | SqlTimestampT             -- ^ Combined date and time, no timezone
+    | SqlTimestampWithZoneT     -- ^ Combined date and time, with timezone
     | SqlUTCDateTimeT           -- ^ UTC date\/time
     | SqlUTCTimeT               -- ^ UTC time
     | SqlIntervalT SqlInterval  -- ^ A time or date difference
