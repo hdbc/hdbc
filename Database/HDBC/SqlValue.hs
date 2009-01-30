@@ -674,7 +674,7 @@ instance Convertible SqlValue (TimeOfDay, TimeZone) where
     safeConvert y@(SqlRational _) = quickError y
     safeConvert y@(SqlLocalDate _) = quickError y
     safeConvert y@(SqlLocalTimeOfDay _) = quickError y
-    safeConvert y@(SqlZonedLocalTimeOfDay _ _) = quickError y
+    safeConvert (SqlZonedLocalTimeOfDay x y) = return (x, y)
     safeConvert y@(SqlLocalTime _) = quickError y
     safeConvert (SqlZonedTime x) = return (localTimeOfDay . zonedTimeToLocalTime $ x,
                                            zonedTimeZone x)
