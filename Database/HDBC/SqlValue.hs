@@ -768,12 +768,27 @@ instance Convertible SqlValue UTCTime where
     safeConvert y@(SqlTimeDiff _) = convError "incompatible types (did you mean SqlPOSIXTime?)" y
     safeConvert y@SqlNull = quickError y
 
+stringToPico :: String -> ConvertResult Pico
+stringToPico s =
+    let (base, fracwithdot) = span (/= '.') s
+        shortfrac = drop 1 fracwithdot -- strip of dot; don't use tail because it may be empty
+        frac = take 12 (rpad 12 '0' shortfrac)
+        rpad :: Int -> a -> [a] -> [a]
+                -- next line lifted from Data.Time
+        rpad n c xs = xs ++ replicate (n - length xs) c
+        mkPico :: Integer -> Integer -> Pico
+                -- next line also lifted from Data.Time
+        mkPico i f = fromInteger i + fromRational (f % 1000000000000)
+    in do parsedBase <- read' base
+          parsedFrac <- read' frac
+          return (mkPico parsedBase parsedFrac)
+
 instance Convertible NominalDiffTime SqlValue where
     safeConvert = return . SqlDiffTime
 instance Convertible SqlValue NominalDiffTime where
-    safeConvert (SqlString x) = ((read' x)::ConvertResult Double) >>= 
+    safeConvert (SqlString x) = stringToPico x >>= 
                                 return . realToFrac
-    safeConvert (SqlByteString x) = ((read' (BUTF8.toString x))::ConvertResult Double) >>=
+    safeConvert (SqlByteString x) = (stringToPico (BUTF8.toString x)) >>=
                                     return . realToFrac
     safeConvert (SqlInt32 x) = return . fromIntegral $ x
     safeConvert (SqlInt64 x) = return . fromIntegral $ x
@@ -828,7 +843,9 @@ instance Convertible SqlValue ST.ClockTime where
 instance Convertible ST.TimeDiff SqlValue where
     safeConvert x = safeConvert x >>= return . SqlDiffTime
 instance Convertible SqlValue ST.TimeDiff where
-    safeConvert (SqlString x) = ((read' x)::ConvertResult Double) >>= safeConvert
+    safeConvert y@(SqlString _) = 
+        do r <- safeConvert y
+           safeConvert (SqlDiffTime r)
     safeConvert (SqlByteString x) = safeConvert . SqlString . BUTF8.toString $ x
     safeConvert (SqlInt32 x) = secs2td (fromIntegral x)
     safeConvert (SqlInt64 x) = secs2td (fromIntegral x)
