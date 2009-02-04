@@ -29,7 +29,7 @@ library
     Build-Depends: base>=3, old-time, time, bytestring, containers, old-locale
   else
     Build-Depends: base<3
-  Build-Depends: mtl, convertible >= 1.0.1, utf8-string
+  Build-Depends: mtl, convertible >= 1.0.2, utf8-string
 
   -- Hack for cabal-install weirdness.  cabal-install forces base 3,
   -- though it works fine for Setup.lhs manually.  Fix.

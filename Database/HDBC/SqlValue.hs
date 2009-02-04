@@ -828,7 +828,7 @@ instance Convertible SqlValue ST.ClockTime where
 instance Convertible ST.TimeDiff SqlValue where
     safeConvert x = safeConvert x >>= return . SqlDiffTime
 instance Convertible SqlValue ST.TimeDiff where
-    safeConvert (SqlString x) = ((read' x)::ConvertResult Integer) >>= safeConvert
+    safeConvert (SqlString x) = ((read' x)::ConvertResult Double) >>= safeConvert
     safeConvert (SqlByteString x) = safeConvert . SqlString . BUTF8.toString $ x
     safeConvert (SqlInt32 x) = secs2td (fromIntegral x)
     safeConvert (SqlInt64 x) = secs2td (fromIntegral x)
