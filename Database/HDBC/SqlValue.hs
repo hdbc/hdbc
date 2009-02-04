@@ -773,7 +773,8 @@ instance Convertible NominalDiffTime SqlValue where
 instance Convertible SqlValue NominalDiffTime where
     safeConvert (SqlString x) = ((read' x)::ConvertResult Double) >>= 
                                 return . realToFrac
-    safeConvert (SqlByteString x) = read' (BUTF8.toString x) >>= return . fromInteger
+    safeConvert (SqlByteString x) = ((read' (BUTF8.toString x))::ConvertResult Double) >>=
+                                    return . realToFrac
     safeConvert (SqlInt32 x) = return . fromIntegral $ x
     safeConvert (SqlInt64 x) = return . fromIntegral $ x
     safeConvert (SqlWord32 x) = return . fromIntegral $ x
