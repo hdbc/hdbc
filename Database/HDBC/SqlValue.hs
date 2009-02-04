@@ -258,16 +258,16 @@ instance Convertible SqlValue String where
     safeConvert (SqlLocalDate x) = 
         return . formatTime defaultTimeLocale (iso8601DateFormat Nothing) $ x
     safeConvert (SqlLocalTimeOfDay x) = 
-        return . formatTime defaultTimeLocale "%T" $ x
+        return . formatTime defaultTimeLocale "%T%Q" $ x
     safeConvert (SqlZonedLocalTimeOfDay tod tz) = 
-        return $ formatTime defaultTimeLocale "%T " tod ++
+        return $ formatTime defaultTimeLocale "%T%Q " tod ++
                  formatTime defaultTimeLocale "%z" tz
     safeConvert (SqlLocalTime x) = 
-        return . formatTime defaultTimeLocale (iso8601DateFormat (Just "%T")) $ x
+        return . formatTime defaultTimeLocale (iso8601DateFormat (Just "%T%Q")) $ x
     safeConvert (SqlZonedTime x) = 
-        return . formatTime defaultTimeLocale (iso8601DateFormat (Just "%T %z")) $ x
+        return . formatTime defaultTimeLocale (iso8601DateFormat (Just "%T%Q %z")) $ x
     safeConvert (SqlUTCTime x) = 
-        return . formatTime defaultTimeLocale (iso8601DateFormat (Just "%T")) $ x
+        return . formatTime defaultTimeLocale (iso8601DateFormat (Just "%T%Q")) $ x
     safeConvert (SqlDiffTime x) = return $ show ((truncate x)::Integer)
     safeConvert (SqlPOSIXTime x) = return $ show ((truncate x)::Integer)
     safeConvert (SqlEpochTime x) = return . show $ x
