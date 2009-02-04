@@ -1,3 +1,10 @@
+hdbc (2.1.0-1) unstable; urgency=low
+
+  * Adjust default String conversions of date/time types to support
+    fractional parts of seconds.
+
+ -- John Goerzen <jgoerzen@complete.org>  Wed, 04 Feb 2009 10:50:47 -0600
+
 hdbc (2.0.0-1) unstable; urgency=low
 
   * New release: 
