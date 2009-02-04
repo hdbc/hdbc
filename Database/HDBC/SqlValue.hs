@@ -629,7 +629,7 @@ instance Convertible SqlValue Day where
 instance Convertible TimeOfDay SqlValue where
     safeConvert = return . SqlLocalTimeOfDay
 instance Convertible SqlValue TimeOfDay where
-    safeConvert (SqlString x) = parseTime' "%T" x
+    safeConvert (SqlString x) = parseTime' "%T%Q" x
     safeConvert (SqlByteString x) = safeConvert (SqlString (BUTF8.toString x))
     safeConvert (SqlInt32 x) = return . timeToTimeOfDay . fromIntegral $ x
     safeConvert (SqlInt64 x) = return . timeToTimeOfDay . fromIntegral $ x
@@ -657,8 +657,8 @@ instance Convertible (TimeOfDay, TimeZone) SqlValue where
     safeConvert (tod, tz) = return (SqlZonedLocalTimeOfDay tod tz)
 instance Convertible SqlValue (TimeOfDay, TimeZone) where
     safeConvert (SqlString x) = 
-        do tod <- parseTime' "%T %z" x
-           tz <- case parseTime defaultTimeLocale "%T %z" x of
+        do tod <- parseTime' "%T%Q %z" x
+           tz <- case parseTime defaultTimeLocale "%T%Q %z" x of
                       Nothing -> convError "Couldn't extract timezone in" (SqlString x)
                       Just y -> Right y
            return (tod, tz)
@@ -688,7 +688,7 @@ instance Convertible SqlValue (TimeOfDay, TimeZone) where
 instance Convertible LocalTime SqlValue where
     safeConvert = return . SqlLocalTime
 instance Convertible SqlValue LocalTime where
-    safeConvert (SqlString x) = parseTime' (iso8601DateFormat (Just "%T")) x
+    safeConvert (SqlString x) = parseTime' (iso8601DateFormat (Just "%T%Q")) x
     safeConvert (SqlByteString x) = safeConvert (SqlString (BUTF8.toString x))
     safeConvert y@(SqlInt32 _) = quickError y
     safeConvert y@(SqlInt64 _) = quickError y
@@ -714,7 +714,7 @@ instance Convertible SqlValue LocalTime where
 instance Convertible ZonedTime SqlValue where
     safeConvert = return . SqlZonedTime
 instance Convertible SqlValue ZonedTime where
-    safeConvert (SqlString x) = parseTime' (iso8601DateFormat (Just "%T %z")) x
+    safeConvert (SqlString x) = parseTime' (iso8601DateFormat (Just "%T%Q %z")) x
     safeConvert (SqlByteString x) = safeConvert (SqlString (BUTF8.toString x))
     safeConvert (SqlInt32 x) = safeConvert (SqlInteger (fromIntegral x))
     safeConvert (SqlInt64 x) = safeConvert (SqlInteger (fromIntegral x))
@@ -740,7 +740,7 @@ instance Convertible SqlValue ZonedTime where
 instance Convertible UTCTime SqlValue where
     safeConvert = return . SqlUTCTime
 instance Convertible SqlValue UTCTime where
-    safeConvert (SqlString x) = parseTime' (iso8601DateFormat (Just "%T")) x
+    safeConvert (SqlString x) = parseTime' (iso8601DateFormat (Just "%T%Q")) x
     safeConvert (SqlByteString x) = safeConvert (SqlString (BUTF8.toString x))
     safeConvert y@(SqlInt32 _) = safeConvert y >>= return . posixSecondsToUTCTime
     safeConvert y@(SqlInt64 _) = safeConvert y >>= return . posixSecondsToUTCTime
