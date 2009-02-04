@@ -22,6 +22,7 @@ import System.Locale
 import Data.Ratio
 import Control.Monad.Error
 import Data.Convertible
+import Data.Fixed
 
 quickError :: (Typeable a, Convertible SqlValue a) => SqlValue -> ConvertResult a
 quickError sv = convError "incompatible types" sv
@@ -268,8 +269,12 @@ instance Convertible SqlValue String where
         return . formatTime defaultTimeLocale (iso8601DateFormat (Just "%T%Q %z")) $ x
     safeConvert (SqlUTCTime x) = 
         return . formatTime defaultTimeLocale (iso8601DateFormat (Just "%T%Q")) $ x
-    safeConvert (SqlDiffTime x) = return $ show ((truncate x)::Integer)
-    safeConvert (SqlPOSIXTime x) = return $ show ((truncate x)::Integer)
+    safeConvert (SqlDiffTime x) = return $ showFixed True fixedval
+            where fixedval :: Pico
+                  fixedval = fromRational . toRational $ x
+    safeConvert (SqlPOSIXTime x) = return $ showFixed True fixedval
+            where fixedval :: Pico
+                  fixedval = fromRational . toRational $ x
     safeConvert (SqlEpochTime x) = return . show $ x
     safeConvert (SqlTimeDiff x) = return . show $ x
     safeConvert y@(SqlNull) = quickError y
@@ -763,10 +768,17 @@ instance Convertible SqlValue UTCTime where
     safeConvert y@(SqlTimeDiff _) = convError "incompatible types (did you mean SqlPOSIXTime?)" y
     safeConvert y@SqlNull = quickError y
 
+rpad :: Int -> a -> [a] -> [a]
+rpad n c xs = xs ++ replicate (n - length xs) c
+
+mkPico :: Integer -> Integer -> Pico
+mkPico i f = fromInteger i + fromRational (f % 1000000000000)
+
 instance Convertible NominalDiffTime SqlValue where
     safeConvert = return . SqlDiffTime
 instance Convertible SqlValue NominalDiffTime where
-    safeConvert (SqlString x) = read' x >>= return . fromInteger
+    safeConvert (SqlString x) = ((read' x)::ConvertResult Double) >>= 
+                                return . realToFrac
     safeConvert (SqlByteString x) = read' (BUTF8.toString x) >>= return . fromInteger
     safeConvert (SqlInt32 x) = return . fromIntegral $ x
     safeConvert (SqlInt64 x) = return . fromIntegral $ x
