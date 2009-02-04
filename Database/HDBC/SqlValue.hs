@@ -768,12 +768,6 @@ instance Convertible SqlValue UTCTime where
     safeConvert y@(SqlTimeDiff _) = convError "incompatible types (did you mean SqlPOSIXTime?)" y
     safeConvert y@SqlNull = quickError y
 
-rpad :: Int -> a -> [a] -> [a]
-rpad n c xs = xs ++ replicate (n - length xs) c
-
-mkPico :: Integer -> Integer -> Pico
-mkPico i f = fromInteger i + fromRational (f % 1000000000000)
-
 instance Convertible NominalDiffTime SqlValue where
     safeConvert = return . SqlDiffTime
 instance Convertible SqlValue NominalDiffTime where
