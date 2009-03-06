@@ -1,3 +1,9 @@
+hdbc (2.1.0-2) unstable; urgency=low
+
+  * Rebuild for GHC 6.10
+
+ -- John Goerzen <jgoerzen@complete.org>  Fri, 06 Mar 2009 08:06:57 -0600
+
 hdbc (2.1.0-1) unstable; urgency=low
 
   * Adjust default String conversions of date/time types to support
