@@ -44,3 +44,19 @@ library
   Extensions: ExistentialQuantification, CPP, MultiParamTypeClasses,
     FlexibleContexts, TypeSynonymInstances, TypeOperators, RankNTypes,
     FlexibleInstances
+    
+Executable runtests
+   if flag(buildtests)
+      Buildable: True
+   else
+      Buildable: False
+   Build-Depends: HUnit, QuickCheck, testpack
+   Main-Is: runtests.hs
+   Other-Modules: TestSqlValue
+                  TestInfrastructure
+   Hs-Source-Dirs: ., testsrc
+   GHC-Options: -O2
+   Extensions: ExistentialQuantification, CPP, MultiParamTypeClasses,
+     FlexibleContexts, TypeSynonymInstances, TypeOperators,
+     RankNTypes, FlexibleInstances
+   
