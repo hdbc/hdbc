@@ -1,3 +1,9 @@
+hdbc (2.1.0-3) unstable; urgency=low
+
+  * Rebuild for newer utf8-string and Makefile fix.
+
+ -- John Goerzen <jgoerzen@complete.org>  Thu, 02 Jul 2009 14:57:45 -0500
+
 hdbc (2.1.0-2) unstable; urgency=low
 
   * Rebuild for GHC 6.10
