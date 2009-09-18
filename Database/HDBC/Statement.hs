@@ -32,6 +32,13 @@ data Statement = Statement
         -}
      execute :: [SqlValue] -> IO Integer,
 
+     {- | Execute the statement as-is, without supplying any
+        positional parameters.  This is intended for statements for
+        which the prepare operation is undesirable (e.g., DDL or DML
+        commands).  If your query contains placeholders, this will
+        certainly fail; use 'execute' instead. -}
+     executeRaw :: IO (),
+
      {- | Execute the query with many rows. 
         The return value is the return value from the final row 
         as if you had called 'execute' on it.
