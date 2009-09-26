@@ -34,8 +34,8 @@ data Statement = Statement
 
      {- | Execute the statement as-is, without supplying any
         positional parameters.  This is intended for statements for
-        which the prepare operation is undesirable (e.g., DDL or DML
-        commands).  If your query contains placeholders, this will
+        which the results aren't interesting or present (e.g., DDL or
+        DML commands).  If your query contains placeholders, this will
         certainly fail; use 'execute' instead. -}
      executeRaw :: IO (),
 
