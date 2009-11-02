@@ -1,13 +1,14 @@
 Source: hdbc
 Priority: optional
-Maintainer: John Goerzen <jgoerzen@complete.org>
+Uploaders: John Goerzen <jgoerzen@complete.org>
+Maintainer: Maintainer: Debian Haskell Group <pkg-haskell-maintainers@lists.alioth.debian.org>
 Build-Depends: debhelper (>= 4.0.0), ghc6 (>= 6.10), haskell-devscripts (>= 0.6.15), cpphs, haddock, libghc6-mtl-dev, libghc6-time-dev, libghc6-time-prof, libghc6-convertible-dev (>= 1.0.1-2), libghc6-convertible-prof (>= 1.0.1-2), libghc6-mtl-prof, libghc6-utf8-string-prof, libghc6-testpack-dev
 Build-Depends-Indep: debhelper (>= 4.0.0), haddock, hugs (>= 98.200503.08), haskell-devscripts (>= 0.6.15), ghc6 (>= 6.10), cpphs, libghc6-mtl-doc, libghc6-time-doc, ghc6-doc, haskell-convertible-doc, libhugs-convertible (>= 1.0.1-2), libhugs-time-bundled, libghc6-utf8-string-doc, libghc6-testpack-dev
 Standards-Version: 3.6.2
 Section: libs
 Homepage: http://software.complete.org/hdbc
-Vcs-Browser: http://git.complete.org/hdbc
-Vcs-Git: git://git.complete.org/hdbc
+Vcs-Git: git://git.debian.org/git/pkg-haskell/hdbc.git
+Vcs-Browser: http://git.debian.org/?p=pkg-haskell/hdbc.git;a=summary
 
 Package: libghc6-hdbc-dev
 Section: libdevel

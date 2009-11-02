@@ -582,9 +582,6 @@ instance Convertible SqlValue Rational where
     safeConvert (SqlTimeDiff x) = return . fromIntegral $ x
     safeConvert y@(SqlNull) = quickError y
 
-#if __GLASGOW_HASKELL__ >= 610
--- instances added in GHC 6.10.3
-#else
 instance Typeable Day where
     typeOf _ = mkTypeName "Day"
 instance Typeable TimeOfDay where
@@ -597,7 +594,6 @@ instance Typeable DiffTime where
     typeOf _ = mkTypeName "DiffTime"
 instance Typeable TimeZone where
     typeOf _ = mkTypeName "TimeZone"
-#endif
 
 instance Typeable ST.ClockTime where
     typeOf _ = mkTypeName "ClockTime"
