@@ -1,3 +1,10 @@
+hdbc (2.2.0) unstable; urgency=low
+
+  * New upstream release.
+  * Switch to team maintenance.
+
+ -- John Goerzen <jgoerzen@complete.org>  Mon, 02 Nov 2009 16:39:33 -0600
+
 hdbc (2.1.0-2) unstable; urgency=low
 
   * Rebuild for GHC 6.10
