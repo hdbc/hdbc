@@ -48,6 +48,7 @@ where
 import Database.HDBC.Statement
 import Database.HDBC.SqlValue
 import Database.HDBC.ColTypes
+import Control.Exception ( finally )
 
 {- | Main database handle object.
 
@@ -91,6 +92,15 @@ and vary by database.  So don't do it.
                 {- | Roll back to the state the database was in prior to the
                    last 'commit' or 'rollback'. -}
                 rollback :: conn -> IO ()
+                {- | Execute an SQL string, which may contain multiple
+                   queries. This is intended for situations where you
+                   need to run DML or DDL queries and aren't
+                   interested in results. -}
+                runRaw :: conn -> String -> IO ()
+                runRaw conn sql = do
+                  sth <- prepare conn sql
+                  execute sth [] `finally` finish sth
+                  return ()
                 {- | Execute a single SQL query.  Returns the number
                    of rows modified (see 'execute' for details).
                    The second parameter is a list

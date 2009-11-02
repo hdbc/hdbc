@@ -51,7 +51,7 @@ module Database.HDBC
      -- ** Wrapped Connections
      ConnWrapper(..), withWConn,
      -- ** Preparing Queries
-     run, sRun, prepare, quickQuery', quickQuery,
+     run, runRaw, sRun, prepare, quickQuery', quickQuery,
 
      -- ** Transaction Handling
      -- $transactions
@@ -65,7 +65,7 @@ module Database.HDBC
      -- * Statements
      Statement,
      -- ** Execution
-     execute, sExecute, executeMany, sExecuteMany,
+     execute, executeRaw, sExecute, executeMany, sExecuteMany,
      -- ** Fetching Results
      fetchRow, fetchRowAL, fetchRowMap, sFetchRow, 
      fetchAllRows, fetchAllRows', fetchAllRowsAL, fetchAllRowsAL',
