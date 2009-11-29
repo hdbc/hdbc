@@ -582,6 +582,7 @@ instance Convertible SqlValue Rational where
     safeConvert (SqlTimeDiff x) = return . fromIntegral $ x
     safeConvert y@(SqlNull) = quickError y
 
+#ifndef TIME_GT_113
 instance Typeable Day where
     typeOf _ = mkTypeName "Day"
 instance Typeable TimeOfDay where
@@ -594,6 +595,7 @@ instance Typeable DiffTime where
     typeOf _ = mkTypeName "DiffTime"
 instance Typeable TimeZone where
     typeOf _ = mkTypeName "TimeZone"
+#endif
 
 instance Typeable ST.ClockTime where
     typeOf _ = mkTypeName "ClockTime"
