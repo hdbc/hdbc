@@ -1,3 +1,9 @@
+hdbc (2.2.0-2) unstable; urgency=low
+
+  * Convert to using hlibrary.mk (Closes: #556815)
+
+ -- Joachim Breitner <nomeata@debian.org>  Sat, 05 Dec 2009 18:22:51 +0100
+
 hdbc (2.2.0-1) unstable; urgency=low
 
   * New upstream release.
