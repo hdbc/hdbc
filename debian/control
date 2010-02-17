@@ -5,7 +5,7 @@ Uploaders: John Goerzen <jgoerzen@complete.org>
 Build-Depends:
  cdbs,
  debhelper (>= 7),
- ghc6 (>= 6.10),
+ ghc6 (>= 6.12),
  haskell-devscripts (>= 0.6.18),
  cpphs,
  haddock,
@@ -15,16 +15,12 @@ Build-Depends:
  libghc6-time-prof,
  libghc6-convertible-dev (>= 1.0.1-2),
  libghc6-convertible-prof,
- libghc6-utf8-string-dev,
- libghc6-utf8-string-prof,
- libghc6-testpack-dev,
  ghc6-doc,
  haddock,
  hscolour,
  libghc6-mtl-doc,
  libghc6-time-doc,
- haskell-convertible-doc,
- libghc6-utf8-string-doc
+ haskell-convertible-doc
 Standards-Version: 3.8.3
 Section: haskell
 Homepage: http://software.complete.org/hdbc
