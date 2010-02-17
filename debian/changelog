@@ -1,3 +1,11 @@
+hdbc (2.2.3-1) unstable; urgency=low
+
+  * New upstream release.
+  * Rebuild for GHC 6.12.
+  * Drop dep on utf8-string as it's part of GHC 6.12.
+
+ -- John Goerzen <jgoerzen@complete.org>  Wed, 17 Feb 2010 14:28:22 -0600
+
 hdbc (2.2.0-2) unstable; urgency=low
 
   * Convert to using hlibrary.mk (Closes: #556815)
