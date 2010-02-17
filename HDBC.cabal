@@ -1,9 +1,9 @@
 Name: HDBC
-Version: 2.2.2
+Version: 2.2.3
 License: LGPL
 Maintainer: John Goerzen <jgoerzen@complete.org>
 Author: John Goerzen
-Copyright: Copyright (c) 2005-2009 John Goerzen
+Copyright: Copyright (c) 2005-2010 John Goerzen
 license-file: COPYRIGHT
 extra-source-files: COPYING
 homepage: http://software.complete.org/hdbc
@@ -56,9 +56,9 @@ library
 Executable runtests
    if flag(buildtests)
       Buildable: True
+      Build-Depends: HUnit, QuickCheck, testpack
    else
       Buildable: False
-   Build-Depends: HUnit, QuickCheck, testpack
    Main-Is: runtests.hs
    Other-Modules: TestSqlValue
                   TestInfrastructure
