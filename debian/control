@@ -68,7 +68,10 @@ Description: Haskell Database Connectivity, GHC6 profiling data
 # To use HDBC, you'll need both this package, and a driver package such
 # as libhugs-hdbc-postgresql.
 
-Package: haskell-hdbc-doc
+Package: libghc6-hdbc-doc
+Replaces: haskell-hdbc-doc
+Conflicts: haskell-hdbc-doc
+Provides: haskell-hdbc-doc
 Section: doc
 Architecture: all
 Depends: ${haskell:Depends}, ${misc:Depends}

@@ -1,3 +1,9 @@
+hdbc (2.2.3-2) UNRELEASED; urgency=low
+
+  * debian/control: Rename -doc package.
+
+ -- Marco Túlio Gontijo e Silva <marcot@debian.org>  Wed, 17 Mar 2010 19:53:21 -0300
+
 hdbc (2.2.3-1) unstable; urgency=low
 
   * New upstream release.
