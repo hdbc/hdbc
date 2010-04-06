@@ -14,7 +14,7 @@ import qualified Test.HUnit as HU
 import Database.HDBC
 import Data.Time.Format
 import Data.Time.LocalTime
-import System.Locale
+import Database.HDBC.Locale (defaultTimeLocale, iso8601DateFormat)
 import Data.Maybe
 
 instance Eq ZonedTime where

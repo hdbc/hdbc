@@ -18,7 +18,7 @@ import qualified System.Time as ST
 import Data.Time
 import Data.Time.Clock
 import Data.Time.Clock.POSIX
-import System.Locale
+import Database.HDBC.Locale (defaultTimeLocale, iso8601DateFormat)
 import Data.Ratio
 import Control.Monad.Error
 import Data.Convertible
