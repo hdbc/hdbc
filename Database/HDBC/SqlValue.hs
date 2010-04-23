@@ -299,8 +299,8 @@ instance Convertible SqlValue BSL.ByteString where
 
 instance Convertible Int SqlValue where
     safeConvert x = 
-        do i <- ((safeConvert x)::ConvertResult Int32)
-           return $ SqlInt32 i
+        do i <- ((safeConvert x)::ConvertResult Int64)
+           return $ SqlInt64 i
 instance Convertible SqlValue Int where
     safeConvert (SqlString x) = read' x
     safeConvert (SqlByteString x) = (read' . BUTF8.toString) x
