@@ -56,7 +56,7 @@ library
 Executable runtests
    if flag(buildtests)
       Buildable: True
-      Build-Depends: HUnit, QuickCheck, testpack
+      Build-Depends: HUnit, QuickCheck (>= 2.0), testpack (>= 2.0)
 
       if flag(splitBase)
         Build-Depends: base>=3 && <5, old-time, time>=1.1.2.4 && <=1.1.4, bytestring, containers, old-locale
