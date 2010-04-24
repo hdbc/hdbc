@@ -8,7 +8,8 @@ For license and copyright information, see the file COPYRIGHT
 
 module TestSqlValue where
 import TestInfrastructure
-import Test.QuickCheck
+import Test.QuickCheck hiding (Result)
+import Test.QuickCheck.Property (Result)
 import Test.QuickCheck.Tools
 import qualified Test.HUnit as HU
 import Database.HDBC
@@ -22,11 +23,11 @@ instance Eq ZonedTime where
              zonedTimeZone a == zonedTimeZone b
 
 toSql_Int :: Int -> Result
-toSql_Int x = toSql x @?= SqlInt32 (fromIntegral x)
+toSql_Int x = toSql x @?= SqlInt64 (fromIntegral x)
 
 fromSql_Int :: Int -> Result
 fromSql_Int x = 
-    Right x @=? safeFromSql (SqlInt32 (fromIntegral x))
+    Right x @=? safeFromSql (SqlInt64 (fromIntegral x))
 
 testZonedTimeStr = "1989-08-01 15:33:01 -0500"
 testZonedTime :: ZonedTime
