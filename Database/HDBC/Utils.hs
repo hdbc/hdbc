@@ -203,7 +203,7 @@ in memory. -}
 fetchAllRows' :: Statement -> IO [[SqlValue]]
 fetchAllRows' sth =
     do res <- fetchAllRows sth
-       evalAll res
+       _ <- evalAll res
        return res
 
 {- | Like 'fetchAllRows', but return Maybe Strings instead of 'SqlValue's. -}
@@ -216,7 +216,7 @@ sFetchAllRows sth =
 sFetchAllRows' :: Statement -> IO [[Maybe String]]
 sFetchAllRows' sth =
     do res <- sFetchAllRows sth
-       evalAll res
+       _ <- evalAll res
        return res
 
 {- | Like 'fetchRow', but instead of returning a list, return an association
@@ -239,9 +239,9 @@ fetchRowAL sth =
 fetchRowAL' :: Statement -> IO (Maybe [(String, SqlValue)])
 fetchRowAL' sth =
     do res <- fetchRowAL sth
-       case res of
-            Nothing -> return 0
-            Just x -> evaluate ((genericLength x)::Integer)
+       _ <- case res of
+         Nothing -> return 0
+         Just x -> evaluate ((genericLength x)::Integer)
        return res
 
 {- | Similar to 'fetchRowAL', but return a Map instead of an association list.
@@ -257,7 +257,7 @@ fetchRowMap sth =
 fetchRowMap' :: Statement -> IO (Maybe (Map.Map String SqlValue))
 fetchRowMap' sth = 
     do res <- fetchRowMap sth
-       case res of
+       _ <- case res of
             Nothing -> return 0
             Just x -> evaluate ((genericLength (Map.toList x))::Integer)
        return res
@@ -277,7 +277,7 @@ fetchAllRowsAL sth =
 fetchAllRowsAL' :: Statement -> IO [[(String, SqlValue)]]
 fetchAllRowsAL' sth =
     do res <- fetchAllRowsAL sth
-       evalAll res
+       _ <- evalAll res
        return res
 
 {- | Like 'fetchAllRowsAL', but return a list of Maps instead of a list of
@@ -289,7 +289,7 @@ fetchAllRowsMap sth = fetchAllRowsAL sth >>= (return . map Map.fromList)
 fetchAllRowsMap' :: Statement -> IO [Map.Map String SqlValue]
 fetchAllRowsMap' sth = 
     do res <- fetchAllRowsMap sth
-       evaluate ((genericLength res)::Integer)
+       _ <- evaluate ((genericLength res)::Integer)
        return res
 
 {- | A quick way to do a query.  Similar to preparing, executing, and
@@ -297,14 +297,14 @@ then calling 'fetchAllRows' on a statement. See also 'quickQuery'' -}
 quickQuery :: IConnection conn => conn -> String -> [SqlValue] -> IO [[SqlValue]]
 quickQuery conn qrystr args =
     do sth <- prepare conn qrystr
-       execute sth args
+       _ <- execute sth args
        fetchAllRows sth
 
 {- | Strict version of 'quickQuery'. -}
 quickQuery' :: IConnection conn => conn -> String -> [SqlValue] -> IO [[SqlValue]]
 quickQuery' conn qrystr args =
     do res <- quickQuery conn qrystr args
-       evalAll res
+       _ <- evalAll res
        return res
 
 {- | A utility function to throw a 'SqlError'.  The mechanics of throwing
