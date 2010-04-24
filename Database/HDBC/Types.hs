@@ -46,7 +46,6 @@ module Database.HDBC.Types
 
 where
 import Database.HDBC.Statement
-import Database.HDBC.SqlValue
 import Database.HDBC.ColTypes
 import Control.Exception ( finally )
 
@@ -99,7 +98,7 @@ and vary by database.  So don't do it.
                 runRaw :: conn -> String -> IO ()
                 runRaw conn sql = do
                   sth <- prepare conn sql
-                  execute sth [] `finally` finish sth
+                  _ <- execute sth [] `finally` finish sth
                   return ()
                 {- | Execute a single SQL query.  Returns the number
                    of rows modified (see 'execute' for details).
