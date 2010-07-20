@@ -16,7 +16,7 @@ Description: HDBC provides an abstraction layer between Haskell programs and SQL
 Stability: Stable
 Build-Type: Simple
 
-Cabal-Version: >=1.2.3
+Cabal-Version: >=1.8
 
 flag splitBase
   description: Choose the new smaller, split-up base package.
