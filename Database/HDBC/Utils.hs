@@ -39,7 +39,6 @@ module Database.HDBC.Utils where
 import Database.HDBC.Types
 import qualified Data.Map as Map
 import Control.Exception
-import Data.Char
 import System.IO.Unsafe
 import Data.List(genericLength)
 
@@ -231,8 +230,7 @@ fetchRowAL sth =
     do row <- fetchRow sth
        case row of
         Nothing -> return Nothing
-        Just r -> do names_raw <- getColumnNames sth
-                     let names = map (map toLower) names_raw
+        Just r -> do names <- getColumnNames sth
                      return $ Just $ zip names r
 
 {- | Strict version of 'fetchRowAL' -}
@@ -268,8 +266,7 @@ row, return an association list for each row, from column name to value.
 See 'fetchRowAL' for more details. -}
 fetchAllRowsAL :: Statement -> IO [[(String, SqlValue)]]
 fetchAllRowsAL sth =
-    do names_raw <- getColumnNames sth
-       let names = map (map toLower) names_raw
+    do names <- getColumnNames sth
        rows <- fetchAllRows sth
        return $ map (zip names) rows
 
