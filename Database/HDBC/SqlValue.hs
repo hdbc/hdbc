@@ -21,6 +21,8 @@ import Database.HDBC.Locale (defaultTimeLocale, iso8601DateFormat)
 import Data.Ratio
 import Data.Convertible
 import Data.Fixed
+import qualified Data.Text as TS
+import qualified Data.Text.Lazy as TL
 
 quickError :: (Typeable a, Convertible SqlValue a) => SqlValue -> ConvertResult a
 quickError sv = convError "incompatible types" sv
@@ -276,6 +278,18 @@ instance Convertible SqlValue String where
     safeConvert (SqlEpochTime x) = return . show $ x
     safeConvert (SqlTimeDiff x) = return . show $ x
     safeConvert y@(SqlNull) = quickError y
+
+instance Convertible TS.Text SqlValue where
+    safeConvert = return . SqlString . TS.unpack
+
+instance Convertible SqlValue TS.Text where
+    safeConvert = fmap TS.pack . safeConvert
+
+instance Convertible TL.Text SqlValue where
+    safeConvert = return . SqlString . TL.unpack
+
+instance Convertible SqlValue TL.Text where
+    safeConvert = fmap TL.pack . safeConvert
 
 #ifdef __HUGS__
 instance Typeable B.ByteString where
