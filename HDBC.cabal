@@ -68,7 +68,7 @@ Executable runtests
           Build-Depends: time<1.1.3
       else
         Build-Depends: base<3
-      Build-Depends: mtl, convertible >= 1.0.9.1, utf8-string
+      Build-Depends: mtl, convertible >= 1.0.9.1, utf8-string, text
 
       -- Hack for cabal-install weirdness.  cabal-install forces base 3,
       -- though it works fine for Setup.lhs manually.  Fix.
