@@ -18,6 +18,10 @@ Build-Type: Simple
 
 Cabal-Version: >=1.8
 
+source-repository head
+  type:            git
+  location:        https://github.com/jgoerzen/hdbc.git
+
 flag splitBase
   description: Choose the new smaller, split-up base package.
 flag buildtests
