@@ -6,7 +6,7 @@ Author: John Goerzen
 Copyright: Copyright (c) 2005-2010 John Goerzen
 license-file: COPYRIGHT
 extra-source-files: COPYING, Makefile, Memory.txt, README.txt
-homepage: http://software.complete.org/hdbc
+homepage: https://github.com/jgoerzen/hdbc/wiki
 Category: Database
 synopsis: Haskell Database Connectivity
 Description: HDBC provides an abstraction layer between Haskell programs and SQL
@@ -17,6 +17,10 @@ Stability: Stable
 Build-Type: Simple
 
 Cabal-Version: >=1.8
+
+source-repository head
+  type:            git
+  location:        https://github.com/jgoerzen/hdbc.git
 
 flag splitBase
   description: Choose the new smaller, split-up base package.
