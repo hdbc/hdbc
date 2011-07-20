@@ -1,12 +1,12 @@
 Name: HDBC
-Version: 2.2.7.0
-License: LGPL
+Version: 2.3.0.0
+License: BSD3
 Maintainer: John Goerzen <jgoerzen@complete.org>
 Author: John Goerzen
-Copyright: Copyright (c) 2005-2010 John Goerzen
-license-file: COPYRIGHT
-extra-source-files: COPYING, Makefile, Memory.txt, README.txt
 homepage: https://github.com/jgoerzen/hdbc/wiki
+Copyright: Copyright (c) 2005-2011 John Goerzen
+license-file: LICENSE
+extra-source-files: Makefile, Memory.txt, README.txt
 Category: Database
 synopsis: Haskell Database Connectivity
 Description: HDBC provides an abstraction layer between Haskell programs and SQL
