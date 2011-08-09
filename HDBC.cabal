@@ -1,7 +1,7 @@
 Name: HDBC
-Version: 2.3.0.0
+Version: 2.3.1.0
 License: BSD3
-Maintainer: John Goerzen <jgoerzen@complete.org>
+Maintainer: Nicolas Wu <nick@well-typed.com>
 Author: John Goerzen
 homepage: https://github.com/jgoerzen/hdbc/wiki
 Copyright: Copyright (c) 2005-2011 John Goerzen
