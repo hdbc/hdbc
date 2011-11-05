@@ -242,6 +242,9 @@ instance Eq SqlValue where
     a == b = ((safeFromSql a)::ConvertResult String) == 
              ((safeFromSql b)::ConvertResult String)
 
+instance Convertible SqlValue SqlValue where
+    safeConvert = return
+
 instance Convertible String SqlValue where
     safeConvert = return . SqlString
 instance Convertible SqlValue String where
