@@ -506,7 +506,7 @@ instance Convertible SqlValue Bool where
     safeConvert (SqlTimeDiff x) = numToBool x
     safeConvert y@(SqlNull) = quickError y
 
-numToBool :: Num a => a -> ConvertResult Bool
+numToBool :: (Eq a, Num a) => a -> ConvertResult Bool
 numToBool x = Right (x /= 0)
 
 instance Convertible Char SqlValue where
