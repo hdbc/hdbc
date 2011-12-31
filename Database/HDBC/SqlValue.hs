@@ -514,7 +514,7 @@ instance Convertible Char SqlValue where
 instance Convertible SqlValue Char where
     safeConvert (SqlString [x]) = return x
     safeConvert y@(SqlString _) = convError "String length /= 1" y
-    safeConvert y@(SqlByteString x) = 
+    safeConvert (SqlByteString x) =
           safeConvert . SqlString . BUTF8.toString $ x
     safeConvert y@(SqlInt32 _) = quickError y
     safeConvert y@(SqlInt64 _) = quickError y
