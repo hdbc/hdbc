@@ -199,6 +199,7 @@ instance IConnection ConnWrapper where
     disconnect w = withWConn w disconnect
     commit w = withWConn w commit
     rollback w = withWConn w rollback
+    runRaw w = withWConn w runRaw
     run w = withWConn w run
     prepare w = withWConn w prepare
     clone w = withWConn w (\dbh -> clone dbh >>= return . ConnWrapper)
