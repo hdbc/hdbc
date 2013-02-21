@@ -20,7 +20,7 @@ module Database.HDBC.Types
     (IConnection(..),
     Statement(..),
     SqlError(..),
-    nToSql, iToSql, posixToSql, fromSql, safeFromSql, toSql,
+    nToSql, iToSql, fromSql, safeFromSql, toSql,
     SqlValue(..),
     ConnWrapper(..),
     withWConn

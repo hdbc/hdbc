@@ -24,7 +24,7 @@ module Database.HDBC
 
      -- * Typing of transfer data
      SqlValue(..),
-     toSql, fromSql, safeFromSql, nToSql, iToSql, posixToSql, 
+     toSql, fromSql, safeFromSql, nToSql, iToSql,
 
      -- * Database Connections
      IConnection,
