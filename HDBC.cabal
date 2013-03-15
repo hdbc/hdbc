@@ -1,5 +1,5 @@
 Name: HDBC
-Version: 2.3.1.2
+Version: 3.0.0
 License: BSD3
 Maintainer: Nicolas Wu <nicolas.wu@gmail.com>
 Author: John Goerzen
@@ -13,6 +13,7 @@ Description: HDBC provides an abstraction layer between Haskell programs and SQL
  relational databases. This lets you write database code once, in
  Haskell, and have it work with any number of backend SQL databases
  (MySQL, Oracle, PostgreSQL, ODBC-compliant databases, etc.)
+ 
 Stability: Stable
 Build-Type: Simple
 
@@ -22,15 +23,17 @@ source-repository head
   type:            git
   location:        https://github.com/hdbc/hdbc.git
 
-flag splitBase
-  description: Choose the new smaller, split-up base package.
 
 library
-  if flag(splitBase)
-    Build-Depends: base>=3 && <5, old-time, time>=1.1.2.4 && <=1.5, bytestring, containers, old-locale
-  else
-    Build-Depends: base<3
-  Build-Depends: mtl, convertible >= 1.0.10.0, text, utf8-string, Decimal >= 0.2.1, uuid >= 1.0.0
+
+  Build-Depends: base>=3 && <5
+               , time>=1.1.2.4 && <=1.5
+               , bytestring
+               , old-locale
+               , convertible >= 1.0.10.0
+               , text
+               , Decimal >= 0.2.1
+               , uuid >= 1.0.0
 
   -- Hack for cabal-install weirdness.  cabal-install forces base 3,
   -- though it works fine for Setup.lhs manually.  Fix.
@@ -39,14 +42,11 @@ library
 
   GHC-Options: -O2 -Wall -fno-warn-orphans
 
-  Exposed-Modules: Database.HDBC, Database.HDBC.Types, Database.HDBC.DriverUtils,
-    Database.HDBC.ColTypes, Database.HDBC.Statement, Database.HDBC.SqlValue,
-    Database.HDBC.Locale
-  Other-Modules: Database.HDBC.Utils
-  Extensions: ExistentialQuantification, CPP, MultiParamTypeClasses,
-    FlexibleContexts, TypeSynonymInstances, TypeOperators, RankNTypes,
-    FlexibleInstances
-    
+  Exposed-Modules: Database.HDBC
+                 , Database.HDBC.DriverUtils
+                 , Database.HDBC.SqlValue
+                 , Database.HDBC.Types
+                 
 Test-Suite sqlvalues
   Type:             exitcode-stdio-1.0
   Main-Is:          sqlvalues.hs
@@ -61,5 +61,4 @@ Test-Suite sqlvalues
                   , bytestring
                   , time
                   , convertible
-                  , old-time
                   , Decimal

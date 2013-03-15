@@ -17,18 +17,25 @@ Written by John Goerzen, jgoerzen\@complete.org
 -}
 
 module Database.HDBC.DriverUtils (
-                                  ChildList,
-                                  closeAllChildren,
-                                  addChild
-                                 )
+  ChildList
+  , closeAllChildren
+  , addChild
+  , newChildList
+  )
 
 where
 import Control.Concurrent.MVar
 import System.Mem.Weak
-import Database.HDBC.Types
 import Control.Monad
+import Database.HDBC.Types (Statement(..))
 
-type ChildList = MVar [Weak Statement]
+-- | List of weak pointers to childs with concurrent access
+type ChildList stmt = MVar [Weak stmt]
+
+
+-- | new empty child list
+newChildList :: IO (ChildList stmt)
+newChildList = newMVar []
 
 {- | Close all children.  Intended to be called by the 'disconnect' function
 in 'Connection'. 
@@ -36,10 +43,10 @@ in 'Connection'.
 There may be a potential race condition wherein a call to newSth at the same
 time as a call to this function may result in the new child not being closed.
 -}
-closeAllChildren :: ChildList -> IO ()
-closeAllChildren mcl = 
-    do children <- readMVar mcl
-       mapM_ closefunc children
+closeAllChildren :: (Statement stmt) => (ChildList stmt) -> IO ()
+closeAllChildren mcl = modifyMVar_ mcl $ \ls -> do
+  mapM_ closefunc ls
+  return ls
     where closefunc child =
               do c <- deRefWeak child
                  case c of
@@ -48,8 +55,8 @@ closeAllChildren mcl =
 
 {- | Adds a new child to the existing list.  Also takes care of registering
 a finalizer for it, to remove it from the list when possible. -}
-addChild :: ChildList -> Statement -> IO ()
-addChild mcl stmt =
+addChild :: (Statement stmt) => (ChildList stmt) -> stmt -> IO ()
+addChild mcl stmt = 
     do weakptr <- mkWeakPtr stmt (Just (childFinalizer mcl))
        modifyMVar_ mcl (\l -> return (weakptr : l))
 
@@ -59,16 +66,15 @@ It is simply a filter that removes any finalized weak pointers from the parent.
 
 If the MVar is locked at the start, does nothing to avoid deadlock.  Future
 runs would probably catch it anyway. -}
-childFinalizer :: ChildList -> IO ()
-childFinalizer mcl = 
-    do c <- tryTakeMVar mcl
-       case c of
-         Nothing -> return ()
-         Just cl ->
-             do newlist <- filterM filterfunc cl
-                putMVar mcl newlist
-    where filterfunc c =
-              do dc <- deRefWeak c
-                 case dc of
-                   Nothing -> return False
-                   Just _ -> return True
+childFinalizer :: ChildList a -> IO ()
+childFinalizer mcl = do
+  c <- tryTakeMVar mcl
+  case c of
+    Nothing -> return ()
+    Just _ -> modifyMVar_ mcl (filterM filterfunc)
+    
+  where filterfunc c = do
+          dc <- deRefWeak c
+          case dc of
+            Nothing -> return False
+            Just _ -> return True

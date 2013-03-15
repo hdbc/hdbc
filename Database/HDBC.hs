@@ -13,77 +13,13 @@ Written by John Goerzen, jgoerzen\@complete.org
 -}
 
 module Database.HDBC 
-    (-- * Introduction
-     -- $introduction
-
-     -- ** Features
-     -- $features
-
-     -- ** Available Drivers
-     -- $drivers
-
-     -- * Typing of transfer data
-     SqlValue(..),
-     toSql, fromSql, safeFromSql, nToSql, iToSql,
-
-     -- * Database Connections
-     IConnection,
-     disconnect, clone,
-     -- ** Wrapped Connections
-     ConnWrapper(..), withWConn,
-     -- ** Preparing Queries
-     run, runRaw, sRun, prepare, quickQuery', quickQuery,
-
-     -- ** Transaction Handling
-     -- $transactions
-     commit, rollback, withTransaction,
-
-     -- ** Connection Inquiries
-     hdbcDriverName, hdbcClientVer, proxiedClientName,
-     proxiedClientVer, dbServerVer, dbTransactionSupport,
-     getTables, describeTable,
-
-     -- * Statements
-     Statement,
-     -- ** Execution
-     execute, executeRaw, sExecute, executeMany, sExecuteMany,
-     -- ** Fetching Results
-     fetchRow, fetchRowAL, fetchRowMap, sFetchRow, 
-     fetchAllRows, fetchAllRows', fetchAllRowsAL, fetchAllRowsAL',
-     fetchAllRowsMap, fetchAllRowsMap', sFetchAllRows, sFetchAllRows',
-     getColumnNames,
-     -- ** Statement Inquires
-     describeResult,
-     -- ** Miscellaneous
-     finish, originalQuery,
-
-     -- * Exceptions
-     SqlError(..),
-     throwSqlError,
-     catchSql, handleSql, sqlExceptions, handleSqlError,
-
-     -- * Column Types
-     -- | These are defined in "Database.HDBC.ColTypes" but are
-     -- available to programs importing "Database.HDBC" by default as well.
-     -- See "Database.HDBC.ColTypes" for documentation.
-     module Database.HDBC.ColTypes
-
-     -- * Threading
-     -- $threading
-    )
-
-where
-import Database.HDBC.Utils(catchSql, handleSql, sqlExceptions,
-                           handleSqlError, withTransaction,
-                           sFetchAllRows, fetchAllRows,
-                           sFetchAllRows', fetchAllRows',
-                           sRun, sExecute, sExecuteMany, sFetchRow,
-                           quickQuery, fetchRowMap, fetchAllRowsMap,
-                           quickQuery', fetchAllRowsMap',
-                           fetchRowAL, fetchAllRowsAL,
-                           fetchAllRowsAL', throwSqlError)
+       (
+         module Database.HDBC.SqlValue
+       , module Database.HDBC.Types
+       ) where
+  
+import Database.HDBC.SqlValue
 import Database.HDBC.Types
-import Database.HDBC.ColTypes
 
 {- $introduction
 

@@ -1,33 +1,45 @@
+{-# LANGUAGE
+    CPP
+  , DeriveDataTypeable
+  , MultiParamTypeClasses
+  , FlexibleInstances
+  , FlexibleContexts
+  , OverloadedStrings
+
+ #-}
+
+#if ! (MIN_VERSION_time(1,1,3))
+{-# LANGUAGE
+    StandaloneDeriving #-} 
+#endif
+
 module Database.HDBC.SqlValue
     (
-     -- * SQL value marshalling
-     SqlValue(..),
-     safeFromSql, toSql, fromSql,
-     nToSql, iToSql
+      -- * Convertion functions
+      toSql
+    , safeFromSql
+    , fromSql
+      -- * SQL value marshalling
+    , SqlValue(..)
     )
 
 where
 import Data.Dynamic
-import qualified Data.ByteString.UTF8 as BUTF8
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BSL
-import Data.Char(ord,toUpper)
 import Data.Word
 import Data.Int
 import Data.Decimal
 import Data.UUID
-import qualified System.Time as ST
 import Data.Time
-import Data.Time.Clock.POSIX
-import Database.HDBC.Locale (defaultTimeLocale, iso8601DateFormat)
-import Data.Ratio
+import System.Locale (defaultTimeLocale)
 import Data.Convertible
-import Data.Fixed
 import qualified Data.Text as TS
 import qualified Data.Text.Lazy as TL
 
 quickError :: (Typeable a, Convertible SqlValue a) => SqlValue -> ConvertResult a
 quickError sv = convError "incompatible types" sv
+
 
 {- | Convert a value to an 'SqlValue'.  This function is simply
 a restricted-type wrapper around 'convert'.  See extended notes on 'SqlValue'. -}
@@ -47,112 +59,107 @@ safeFromSql = safeConvert
    'convert'.  See extended notes on 'SqlValue'. -}
 fromSql :: Convertible SqlValue a => SqlValue -> a
 fromSql = convert
+                
 
-{- | Converts any Integral type to a 'SqlValue' by using toInteger. -}
-nToSql :: Integral a => a -> SqlValue
-nToSql n = SqlInteger (toInteger n)
+{- | 'SqlValue' is the main type for expressing Haskell values to SQL databases.
 
-{- | Convenience function for using numeric literals in your program. -}
-iToSql :: Int -> SqlValue
-iToSql = toSql
+/WHAT IS SQLVALUE/
 
+SqlValue is an intermediate type to store/recevie data to/from the
+database. Every database driver will do it's best to properly convert any
+SqlValue to the database record's field, and properly convert the record's field
+to SqlValue back.
 
-{- | 'SqlValue' is he main type for expressing Haskell values to SQL databases.
+The 'SqlValue' has predefined 'Convertible' instances for many Haskell's
+types. Any Haskell's type can be converted to the 'SqlValue' with
+'Database.HDBC.Utils.toSql' function. There is no safeToSql function because
+toSql never fails. Also, any 'SqlValue' type can be converted to almost any
+Haskell's type as well. Not any 'SqlValue' can be converted back to Haskell's
+type, so there is 'Database.HDBC.Utils.safeFromSql' function to do that
+safely. There is unsafe 'Database.HDBC.Utils.toSql' function of caurse.
 
-/INTRODUCTION TO SQLVALUE/
+You can sure, that @fromSql . toSql == id@
 
-This type is used to marshall Haskell data to and from database APIs.
-HDBC driver interfaces will do their best to use the most accurate and
-efficient way to send a particular value to the database server.
+/SQLVALUE CONSTRUCTORS/
 
-Values read back from the server are constructed with the most appropriate 'SqlValue'
-constructor.  'fromSql' or 'safeFromSql'
-can then be used to convert them into whatever type
-is needed locally in Haskell.
+SqlValue constructors is the MINIMAL set of constructors, required to represent
+the most wide range of native database types.
 
-Most people will use 'toSql' and 'fromSql' instead of manipulating
-'SqlValue's directly.
+For example, there is FLOAT native database type and DOUBLE, but any DOUBLE can
+carry any FLOAT value, so there is no need to create 'SqlValue' constructor to
+represent FLOAT type, we can do it with Double. But there is DECIMAL database
+type, representing arbitrary precision value which can be carried just by
+'Decimal' Haskell's type, so we need a constructor for it.
 
-/EASY CONVERSIONS BETWEEN HASKELL TYPES/
+There is no SqlRational any more, because there is no one database which have
+native Rational type. This is the key idea: if database can not store this type
+natively we will not create 'SqlValue' clause for it.
 
-Conversions are powerful; for instance, you can call 'fromSql' on a SqlInt32
-and get a String or a Double out of it.  This class attempts to Do
-The Right Thing whenever possible, and will raise an error when asked to
-do something incorrect.  In particular, when converting to any type
-except a Maybe, 'SqlNull' as the input will cause an error to be raised.
+Each SqlValue constructor is documented or self-explaining to understand what it
+is needed for.
 
-Conversions are implemented in terms of the "Data.Convertible" module, part of the
-convertible package.  You can refer to its documentation, and import that module,
-if you wish to parse the Left result from 'safeFromSql' yourself, or write your
-own conversion instances.
+/CONVERTIBLE INSTANCES/
 
-Here are some notes about conversion:
-
- * Fractions of a second are not preserved on time values
-
- * There is no @safeToSql@ because 'toSql' never fails.
-
-See also 'toSql', 'safeFromSql', 'fromSql', 'nToSql', 'iToSql', 'posixToSql'.
+The key idea is to do the most obvious conversion between types only if it is
+not ambiguous. For example, the most obvious conversion of Double to Int32 is
+just truncate the Double, the most obvious conversion of String to UTCTime is to
+try read the String as date and time. But there is no obvious way to convert
+Int32 to UTCTime, so if you will try to convert (SqlInt32 44) to date you will
+fail. User must handle this cases properly converting values with right way, it
+is not very good idea to silently perform strange and ambiguous convertions
+between absolutely different data types.
 
 /ERROR CONDITIONS/
 
 There may sometimes be an error during conversion.  For instance, if you have a
-'SqlString' and are attempting to convert it to an Integer, but it doesn't parse as
-an Integer, you will get an error.  This will be indicated as an exception if using
-'fromSql', or a Left result if using 'safeFromSql'.
+'SqlString' and are attempting to convert it to an Integer, but it doesn't parse
+as an Integer, you will get an error.  This will be indicated as an exception if
+using 'Database.HDBC.Utils.fromSql', or a Left result if using
+'Database.HDBC.Utils.safeFromSql'.
 
-/SPECIAL NOTE ON POSIXTIME/
 
-Note that a 'NominalDiffTime' or 'POSIXTime' is converted to 'SqlDiffTime' by
-'toSql'.  HDBC cannot differentiate between 'NominalDiffTime' and 'POSIXTime'
-since they are the same underlying type.  You must construct 'SqlPOSIXTime'
-manually or via 'posixToSql', or use 'SqlUTCTime'.
+/STORING SQLVALUE TO DATABASE/
 
-/DETAILS ON SQL TYPES/
+Any SqlValue can be converted to Text and then readed from Text back. This is
+guaranteed by tests, so the database driver's author can use it to store and
+read data through Text for types which is not supported by the database
+natively.
 
-HDBC database backends are expected to marshal date and time data back and
-forth using the appropriate representation for the underlying database engine.
-Databases such as PostgreSQL with builtin date and time types should see automatic
-conversion between these Haskell types to database types.  Other databases will be
-presented with an integer or a string.  Care should be taken to use the same type on
-the Haskell side as you use on the database side.  For instance, if your database
-type lacks timezone information, you ought not to use ZonedTime, but
-instead LocalTime or UTCTime.  Database type systems are not always as rich
-as Haskell.  For instance, for data stored in a TIMESTAMP
-WITHOUT TIME ZONE column, HDBC may not be able to tell if it is intended
-as UTCTime or LocalTime data, and will happily convert it to both,
-upon your request.  It is
-your responsibility to ensure that you treat timezone issues with due care.
+/TEXT AND BYTESTRINGS/
 
-This behavior also exists for other types.  For instance, many databases do not
-have a Rational type, so they will just use the show function and
-store a Rational as a string.
+We are using lazy Text everywhere because it is faster than String and has
+builders. Strict text can be converted to one-chanked lazy text with O(1)
+complexity, but lazy to strict converts with O(n) complexity, so it is logical
+to use lazy Text.
 
-The conversion between Haskell types and database types is complex,
-and generic code in HDBC or its backends cannot possibly accomodate
-every possible situation.  In some cases, you may be best served by converting your
-Haskell type to a String, and passing that to the database.
+We are not using ByteString as text encoded in UTF-8, ByteStrings are just
+sequences of bytes. We are using strict ByteStrings because HDBC drivers uses
+them to pass the ByteString to the C library as CString, so it must be strict.
 
-/UNICODE AND BYTESTRINGS/
+We are not using String as data of query or as query itself because it is not
+effective by memory and cpu.
 
-Beginning with HDBC v2.0, interactions with a database are presumed to occur in UTF-8.
+/DATE AND TIME/
 
-To accomplish this, whenever a ByteString must be converted to or from a String,
-the ByteString is assumed to be in UTF-8 encoding, and will be decoded or encoded
-as appropriate.  Database drivers will generally present text or string data they have
-received from the database as a SqlValue holding a ByteString, which 'fromSql' will
-automatically convert to a String, and thus automatically decode UTF-8, when
-you need it.  In the other direction, database drivers will generally convert
-a 'SqlString' to a ByteString in UTF-8 encoding before passing it to the
-database engine.
+We are not using time with timezone, because there is no one database working
+with it natively except PostgreSQL, but the documentations of PostgreSQL says
 
-If you are handling some sort of binary data that is not in UTF-8, you can of course
-work with the ByteString directly, which will bypass any conversion.
+/To address these difficulties, we recommend using date/time types that contain
+both date and time when using time zones. We do not recommend using the type
+time with time zone (though it is supported by PostgreSQL for legacy
+applications and for compliance with the SQL standard). PostgreSQL assumes your
+local time zone for any type containing only date or time./
 
-Due to lack of support by database engines, lazy ByteStrings are not passed to database
-drivers.  When you use 'toSql' on a lazy ByteString, it will be converted to a strict
-ByteString for storage.  Similarly, 'fromSql' will convert a strict ByteString to
-a lazy ByteString if you demand it.
+This is not recomended to use time with timezone.
+
+We are using UTCTime instead of TimeWithTimezone because no one database
+actually save timezone information. All databases just convert datetime to
+UTCTime when save data and convert UTCTime back to LOCAL SERVER TIMEZONE when
+returning the data. So it is logical to work with timezones on the haskell side.
+
+Time intervals are not widely supported, actually just PostgreSQL and
+Oracle. So, if you need them you can serialize throgh SqlText by hands, or write
+your own Convertible instances to do that more convenient.
 
 /EQUALITY OF SQLVALUE/
 
@@ -167,26 +174,9 @@ comparisons can be made, then they are not equal:
 
  * The values of each, when converted to a string, are equal.
 
-/STRING VERSIONS OF TIMES/
-
-Default string representations are given as comments below where such are non-obvious.
-These are used for 'fromSql' when a 'String' is desired.  They are also defaults for
-representing data to SQL backends, though individual backends may override them
-when a different format is demanded by the underlying database.  Date and time formats
-use ISO8601 date format, with HH:MM:SS added for time, and -HHMM added for timezone
-offsets.
-
-/DEPRECATED CONSTRUCTORS/
-
-'SqlEpochTime' and 'SqlTimeDiff' are no longer created automatically by any
-'toSql' or 'fromSql' functions or database backends.  They may still be manually
-constructed, but are
-expected to be removed in a future version.  Although these two constructures will
-be removed, support for marshalling to and from the old System.Time data will be
-maintained as long as System.Time is, simply using the newer data types for conversion.
 -}
 data SqlValue =
-  {- | Arbitrary precision value -}
+  {- | Arbitrary precision DECIMAL value -}
   SqlDecimal Decimal
   | SqlWord32 Word32
   | SqlWord64 Word64
@@ -194,8 +184,11 @@ data SqlValue =
   | SqlInt64 Int64
   | SqlInteger Integer
   | SqlDouble Double
-  | SqlString String
-  | SqlByteString B.ByteString
+  | SqlText TL.Text
+    -- | Blob field in the database. This field can not be implicitly converted
+    -- to any other type because it is just an array of bytes, not an UTF-8
+    -- encoded string.
+  | SqlBlob B.ByteString
   | SqlBool Bool
     {- | Represent bit field with 64 bits -}
   | SqlBitField Word64
@@ -213,10 +206,7 @@ data SqlValue =
     -}
   | SqlNow
   | SqlNull         -- ^ NULL in SQL or Nothing in Haskell
-  deriving (Show)
-
-instance Typeable SqlValue where
-    typeOf _ = mkTypeName "SqlValue"
+  deriving (Show, Typeable)
 
 instance Eq SqlValue where
 
@@ -227,8 +217,8 @@ instance Eq SqlValue where
     (SqlInt64 a)          == (SqlInt64 b)           = a == b
     (SqlInteger a)        == (SqlInteger b)         = a == b
     (SqlDouble a)         == (SqlDouble b)          = a == b
-    (SqlString a)         == (SqlString b)          = a == b
-    (SqlByteString a)     == (SqlByteString b)      = a == b
+    (SqlText a)           == (SqlText b)            = a == b
+    (SqlBlob a)           == (SqlBlob b)            = a == b
     (SqlBool a)           == (SqlBool b)            = a == b
     (SqlBitField a)       == (SqlBitField b)        = a == b
     (SqlUUID a)           == (SqlUUID b)            = a == b
@@ -247,16 +237,16 @@ instance Eq SqlValue where
       Right r -> r
       where
         convres = do
-          x <- ((safeFromSql a)::ConvertResult String)
-          y <- ((safeFromSql b)::ConvertResult String)
+          x <- (safeConvert a) :: ConvertResult String
+          y <- (safeConvert b) :: ConvertResult String
           return $ x == y
 
 instance Convertible SqlValue SqlValue where
     safeConvert = return
 
-instance Convertible String SqlValue where
-    safeConvert = return . SqlString
-instance Convertible SqlValue String where
+instance Convertible [Char] SqlValue where
+    safeConvert = return . SqlText . TL.pack
+instance Convertible SqlValue [Char] where
 
   safeConvert (SqlDecimal a)        = return $ show a
   safeConvert (SqlWord32 a)         = return $ show a
@@ -265,8 +255,8 @@ instance Convertible SqlValue String where
   safeConvert (SqlInt64 a)          = return $ show a
   safeConvert (SqlInteger a)        = return $ show a
   safeConvert (SqlDouble a)         = return $ show a
-  safeConvert (SqlString a)         = return a
-  safeConvert (SqlByteString x)     = return . BUTF8.toString $ x
+  safeConvert (SqlText a)           = return $ TL.unpack a
+  safeConvert x@(SqlBlob _)         = quickError x -- bytes is not a text
   safeConvert (SqlBool a)           = return $ show a
   safeConvert (SqlBitField a)       = return $ show a
   safeConvert (SqlUUID a)           = return $ show a
@@ -278,34 +268,30 @@ instance Convertible SqlValue String where
   safeConvert x@SqlNull = quickError x
 
 instance Convertible TS.Text SqlValue where
-    safeConvert = return . SqlString . TS.unpack
+    safeConvert = return . SqlText . TL.fromChunks . (:[])
 
 instance Convertible SqlValue TS.Text where
-    safeConvert = fmap TS.pack . safeConvert
+  safeConvert (SqlText t) = return $ TL.toStrict t
+  safeConvert x = fmap TS.pack $ safeConvert x
 
 instance Convertible TL.Text SqlValue where
-    safeConvert = return . SqlString . TL.unpack
+    safeConvert = return . SqlText 
 
 instance Convertible SqlValue TL.Text where
-    safeConvert = fmap TL.pack . safeConvert
-
-#ifdef __HUGS__
-instance Typeable B.ByteString where
-    typeOf _ = mkTypeName "ByteString"
-#endif
+  safeConvert (SqlText t) = return t
+  safeConvert x = fmap (TL.fromChunks . (:[]) . TS.pack) $ safeConvert x
 
 instance Convertible B.ByteString SqlValue where
-    safeConvert = return . SqlByteString
+    safeConvert = return . SqlBlob
 instance Convertible SqlValue B.ByteString where
-    safeConvert (SqlByteString x) = return x
-    safeConvert y@(SqlNull) = quickError y
-    safeConvert x = safeConvert x >>= return . BUTF8.fromString
+    safeConvert (SqlBlob x) = return x
+    safeConvert x = quickError x -- there is no sense to convert something to bytes except bytes
 
 instance Convertible BSL.ByteString SqlValue where
-    safeConvert = return . SqlByteString . B.concat . BSL.toChunks
+    safeConvert = fmap SqlBlob . safeConvert
 instance Convertible SqlValue BSL.ByteString where
-    safeConvert x = do bs <- safeConvert x
-                       return (BSL.fromChunks [bs])
+    safeConvert (SqlBlob x) = safeConvert x
+    safeConvert x = quickError x
 
 instance Convertible Int SqlValue where
     safeConvert x = fmap SqlInt64 $ safeConvert x
@@ -317,8 +303,8 @@ instance Convertible SqlValue Int where
   safeConvert (SqlInt64 a)            = safeConvert a
   safeConvert (SqlInteger a)          = safeConvert a
   safeConvert (SqlDouble a)           = safeConvert a
-  safeConvert (SqlString a)           = read' a
-  safeConvert (SqlByteString x)       = (read' . BUTF8.toString) x
+  safeConvert (SqlText a)             = read' a
+  safeConvert x@(SqlBlob _)           = quickError x -- Why should we read this bytes as UTF-8 ?
   safeConvert (SqlBool a)             = return $ if a then 1 else 0
   safeConvert (SqlBitField a)         = safeConvert a
   safeConvert x@(SqlUUID _)           = quickError x -- converting time or date to int has no sense
@@ -339,8 +325,8 @@ instance Convertible SqlValue Int32 where
   safeConvert (SqlInt64 a)            = safeConvert a
   safeConvert (SqlInteger a)          = safeConvert a
   safeConvert (SqlDouble a)           = safeConvert a
-  safeConvert (SqlString a)           = read' a
-  safeConvert (SqlByteString x)       = (read' . BUTF8.toString) x
+  safeConvert (SqlText a)             = read' a
+  safeConvert x@(SqlBlob _)           = quickError x
   safeConvert (SqlBool a)             = return $ if a then 1 else 0
   safeConvert (SqlBitField a)         = safeConvert a
   safeConvert x@(SqlUUID _)           = quickError x -- converting time or date to int has no sense
@@ -361,8 +347,8 @@ instance Convertible SqlValue Int64 where
   safeConvert (SqlInt64 a)            = return a
   safeConvert (SqlInteger a)          = safeConvert a
   safeConvert (SqlDouble a)           = safeConvert a
-  safeConvert (SqlString a)           = read' a
-  safeConvert (SqlByteString x)       = (read' . BUTF8.toString) x
+  safeConvert (SqlText a)             = read' a
+  safeConvert x@(SqlBlob _)           = quickError x
   safeConvert (SqlBool a)             = return $ if a then 1 else 0
   safeConvert (SqlBitField a)         = safeConvert a
   safeConvert x@(SqlUUID _)           = quickError x -- converting time or date to int has no sense
@@ -383,8 +369,8 @@ instance Convertible SqlValue Word32 where
   safeConvert (SqlInt64 a)            = safeConvert a
   safeConvert (SqlInteger a)          = safeConvert a
   safeConvert (SqlDouble a)           = safeConvert a
-  safeConvert (SqlString a)           = read' a
-  safeConvert (SqlByteString x)       = (read' . BUTF8.toString) x
+  safeConvert (SqlText a)             = read' a
+  safeConvert x@(SqlBlob _)           = quickError x
   safeConvert (SqlBool a)             = return $ if a then 1 else 0
   safeConvert (SqlBitField a)         = safeConvert a
   safeConvert x@(SqlUUID _)           = quickError x -- converting time or date to int has no sense
@@ -405,8 +391,8 @@ instance Convertible SqlValue Word64 where
   safeConvert (SqlInt64 a)            = safeConvert a
   safeConvert (SqlInteger a)          = safeConvert a
   safeConvert (SqlDouble a)           = safeConvert a
-  safeConvert (SqlString a)           = read' a
-  safeConvert (SqlByteString x)       = (read' . BUTF8.toString) x
+  safeConvert (SqlText a)             = read' a
+  safeConvert x@(SqlBlob _)           = quickError x
   safeConvert (SqlBool a)             = return $ if a then 1 else 0
   safeConvert (SqlBitField a)         = return a
   safeConvert x@(SqlUUID _)           = quickError x -- converting time or date to int has no sense
@@ -427,8 +413,8 @@ instance Convertible SqlValue Integer where
   safeConvert (SqlInt64 a)            = safeConvert a
   safeConvert (SqlInteger a)          = return a
   safeConvert (SqlDouble a)           = safeConvert a
-  safeConvert (SqlString a)           = read' a
-  safeConvert (SqlByteString x)       = (read' . BUTF8.toString) x
+  safeConvert (SqlText a)             = read' a
+  safeConvert x@(SqlBlob _)           = quickError x
   safeConvert (SqlBool a)             = return $ if a then 1 else 0
   safeConvert (SqlBitField a)         = safeConvert a
   safeConvert x@(SqlUUID _)           = quickError x -- converting time or date to int has no sense
@@ -449,16 +435,16 @@ instance Convertible SqlValue Bool where
   safeConvert (SqlInt64 a)            = numToBool a
   safeConvert (SqlInteger a)          = numToBool a
   safeConvert (SqlDouble a)           = numToBool a
-  safeConvert y@(SqlString x) =
-    case map toUpper x of
-      "TRUE" -> Right True
-      "T" -> Right True
+  safeConvert y@(SqlText x) =
+    case TL.toUpper x of
+      "TRUE"  -> Right True
+      "T"     -> Right True
       "FALSE" -> Right False
-      "F" -> Right False
-      "0" -> Right False
-      "1" -> Right True
-      _ -> convError "Cannot parse given String as Bool" y
-  safeConvert (SqlByteString x)       = (safeConvert . SqlString . BUTF8.toString) x
+      "F"     -> Right False
+      "0"     -> Right False
+      "1"     -> Right True
+      _       -> convError "Cannot parse given String as Bool" y
+  safeConvert x@(SqlBlob _)           = quickError x
   safeConvert (SqlBool a)             = return a
   safeConvert (SqlBitField a)         = numToBool a
   safeConvert x@(SqlUUID _)           = quickError x -- converting time or date to Bool has no sense
@@ -482,8 +468,8 @@ instance Convertible SqlValue Double where
   safeConvert (SqlInt64 a)            = safeConvert a
   safeConvert (SqlInteger a)          = safeConvert a
   safeConvert (SqlDouble a)           = return a
-  safeConvert (SqlString a)           = read' a
-  safeConvert (SqlByteString x)       = (read' . BUTF8.toString) x
+  safeConvert (SqlText a)             = read' a
+  safeConvert x@(SqlBlob _)           = quickError x
   safeConvert (SqlBool a)             = return $ if a then 1 else 0
   safeConvert (SqlBitField a)         = safeConvert a
   safeConvert x@(SqlUUID _)           = quickError x -- converting time or date to Double has no sense
@@ -504,8 +490,8 @@ instance Convertible SqlValue Decimal where
   safeConvert (SqlInt64 a)            = safeConvert a
   safeConvert (SqlInteger a)          = safeConvert a
   safeConvert (SqlDouble a)           = safeConvert a
-  safeConvert (SqlString a)           = read' a
-  safeConvert (SqlByteString x)       = (read' . BUTF8.toString) x
+  safeConvert (SqlText a)             = read' a
+  safeConvert x@(SqlBlob _)           = quickError x
   safeConvert (SqlBool a)             = return $ if a then 1 else 0
   safeConvert (SqlBitField a)         = safeConvert a
   safeConvert x@(SqlUUID _)           = quickError x -- converting time or date to Double has no sense
@@ -515,36 +501,14 @@ instance Convertible SqlValue Decimal where
   safeConvert x@(SqlLocalTime _)      = quickError x
   safeConvert x@SqlNow                = quickError x
   safeConvert y@(SqlNull)             = quickError y
-  
 
-readMay :: Read a => String -> Maybe a
-readMay s = case reads s of
-  [(a, "")] -> Just a
-  _         -> Nothing
 
-readRational :: String -> ConvertResult Rational -- more smart reader for Rationals
-readRational s = case reads s of
-  [(a, "")] -> return a
-  _ -> case decread of
-    Just a -> return a
-    Nothing -> convError "Could not read as Rational: " s
-  where
-    decread = do
-      h <- readMay $ high ++ low
-      return $ h % (10^lowdecs)
-    (high, loW) = span (/= '.') s
-    low = case drop 1 loW of
-      "" -> "0"
-      x -> x
-    lowdecs = length $ dropWhile (== '0') $ reverse low -- drop tail zeros
 
 #if ! (MIN_VERSION_time(1,1,3))
-instance Typeable Day where
-    typeOf _ = mkTypeName "Day"
-instance Typeable TimeOfDay where
-    typeOf _ = mkTypeName "TimeOfDay"
-instance Typeable LocalTime where
-    typeOf _ = mkTypeName "LocalTime"
+    -- older versions if time had no Typeable instances
+deriving instance Typeable Day
+deriving instance Typeable TimeOfDay
+deriving instance Typeable LocalTime
 #endif
 
 instance Convertible Day SqlValue where
@@ -557,8 +521,8 @@ instance Convertible SqlValue Day where
   safeConvert x@(SqlInt64 _)                     = quickError x
   safeConvert x@(SqlInteger _)                   = quickError x
   safeConvert x@(SqlDouble _)                    = quickError x
-  safeConvert (SqlString x)                      = parseTime' (iso8601DateFormat Nothing) x
-  safeConvert (SqlByteString x)                  = safeConvert (SqlString (BUTF8.toString x))
+  safeConvert (SqlText x)                        = parseTime' (iso8601DateFormat Nothing) $ TL.unpack x
+  safeConvert x@(SqlBlob _)                      = quickError x
   safeConvert x@(SqlBool _)                      = quickError x
   safeConvert x@(SqlBitField _)                  = quickError x
   safeConvert x@(SqlUUID _)                      = quickError x
@@ -579,8 +543,8 @@ instance Convertible SqlValue TimeOfDay where
   safeConvert x@(SqlInt64 _)                           = quickError x
   safeConvert x@(SqlInteger _)                         = quickError x
   safeConvert x@(SqlDouble _)                          = quickError x
-  safeConvert (SqlString x)                            = parseTime' "%T%Q" x
-  safeConvert (SqlByteString x)                        = safeConvert (SqlString (BUTF8.toString x))
+  safeConvert (SqlText x)                              = parseTime' "%T%Q" $ TL.unpack x
+  safeConvert x@(SqlBlob _)                            = quickError x
   safeConvert x@(SqlBool _)                            = quickError x
   safeConvert x@(SqlBitField _)                        = quickError x
   safeConvert x@(SqlUUID _)                            = quickError x
@@ -601,8 +565,8 @@ instance Convertible SqlValue LocalTime where
   safeConvert x@(SqlInt64 _)          = quickError x
   safeConvert x@(SqlInteger _)        = quickError x
   safeConvert x@(SqlDouble _)         = quickError x
-  safeConvert (SqlString x)           = parseTime' (iso8601DateFormat (Just "%T%Q")) x
-  safeConvert (SqlByteString x)       = safeConvert (SqlString (BUTF8.toString x))
+  safeConvert (SqlText x)             = parseTime' (iso8601DateFormat (Just "%T%Q")) $ TL.unpack x
+  safeConvert x@(SqlBlob _)           = quickError x
   safeConvert x@(SqlBool _)           = quickError x
   safeConvert x@(SqlBitField _)       = quickError x
   safeConvert x@(SqlUUID _)           = quickError x
@@ -623,8 +587,8 @@ instance Convertible SqlValue UTCTime where
   safeConvert x@(SqlInt64 _)          = quickError x
   safeConvert x@(SqlInteger _)        = quickError x
   safeConvert x@(SqlDouble _)         = quickError x
-  safeConvert (SqlString x)           = parseTime' (iso8601DateFormat (Just "%T%Q")) x
-  safeConvert (SqlByteString x)       = safeConvert (SqlString (BUTF8.toString x))
+  safeConvert (SqlText x)             = parseTime' (iso8601DateFormat (Just "%T%Q")) $ TL.unpack x
+  safeConvert x@(SqlBlob _)           = quickError x
   safeConvert x@(SqlBool _)           = quickError x
   safeConvert x@(SqlBitField _)       = quickError x
   safeConvert x@(SqlUUID _)           = quickError x
@@ -635,40 +599,22 @@ instance Convertible SqlValue UTCTime where
   safeConvert x@SqlNow                = quickError x
   safeConvert y@SqlNull               = quickError y
 
-stringToFixed :: (HasResolution r) => String -> ConvertResult (Fixed r)
-stringToFixed s = fmap fromRational $ readRational s
-
-stringToPico :: String -> ConvertResult Pico
-stringToPico = stringToFixed
-
 instance (Convertible a SqlValue) => Convertible (Maybe a) SqlValue where
     safeConvert Nothing = return SqlNull
     safeConvert (Just a) = safeConvert a
 instance (Convertible SqlValue a) => Convertible SqlValue (Maybe a) where
     safeConvert SqlNull = return Nothing
-    safeConvert a = safeConvert a >>= (return . Just)
-
-viaInteger' :: (Convertible SqlValue a, Bounded a, Show a, Convertible a Integer,
-               Typeable a) => SqlValue -> (Integer -> ConvertResult a) -> ConvertResult a
-viaInteger' sv func =
-    do i <- ((safeConvert sv)::ConvertResult Integer)
-       boundedConversion func i
-
-viaInteger :: (Convertible SqlValue a, Bounded a, Show a, Convertible a Integer,
-               Typeable a) => SqlValue -> (Integer -> a) -> ConvertResult a
-viaInteger sv func = viaInteger' sv (return . func)
-
-secs2td :: Integer -> ConvertResult ST.TimeDiff
-secs2td x = safeConvert x
-
+    safeConvert a = fmap Just $ safeConvert a
 
 -- | Read a value from a string, and give an informative message
 --   if it fails.
-read' :: (Typeable a, Read a, Convertible SqlValue a) => String -> ConvertResult a
+read' :: (Typeable a, Read a, Convertible SqlValue a) => TL.Text -> ConvertResult a
 read' s =
-    case [x | (x, "") <- reads s] of
+    case [x | (x, t) <- reads rs, ("", "") <- lex t] of
       [x] -> Right x
-      _ -> convError "Cannot read source value as dest type" (SqlString s)
+      _ -> convError "Cannot read source value as dest type" (SqlText s)
+  where
+    rs = TL.unpack s
 
 #ifdef __HUGS__
 parseTime' :: (Typeable t, Convertible SqlValue t) => String -> String -> ConvertResult t
@@ -679,6 +625,15 @@ parseTime' :: (Typeable t, Convertible SqlValue t, ParseTime t) => String -> Str
 parseTime' fmtstr inpstr =
     case parseTime defaultTimeLocale fmtstr inpstr of
       Nothing -> convError ("Cannot parse using default format string " ++ show fmtstr)
-                 (SqlString inpstr)
+                 (SqlText $ TL.pack inpstr)
       Just x -> Right x
 #endif
+
+-- | As the semantic of System.Locale.iso8601DateFormat has changed with
+--   old-locale-1.0.0.2 in a non-compatible way, we now define our own
+--   (compatible) version of it.
+iso8601DateFormat :: Maybe String -> String
+iso8601DateFormat mTimeFmt =
+    "%Y-%m-%d" ++ case mTimeFmt of
+             Nothing  -> ""
+             Just fmt -> ' ' : fmt
