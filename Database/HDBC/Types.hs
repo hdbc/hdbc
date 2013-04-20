@@ -4,7 +4,7 @@
   , ExistentialQuantification
   , FlexibleContexts
   , ScopedTypeVariables
- #-}
+  #-}
 
 {- |
    Module     : Database.HDBC.Types
@@ -46,10 +46,15 @@ import Data.Typeable
 
 
 -- | Error throwing by driver when database operation fails
-data SqlError = SqlError { seNativeError :: Int -- ^ Low level database-specific error code
-                         , seErrorMsg :: String -- ^ Error description from the database driver
-                         }
-              deriving (Eq, Show, Read, Typeable)
+data SqlError =
+  -- | Internal database error
+  SqlError { seNativeError :: String -- ^ Low level database-specific error code
+           , seErrorMsg :: String -- ^ Error description from the database client library
+           }
+  -- | Driver-specific operational error
+  | SqlDriverError { seErrorMsg :: String -- ^ Error description
+                 }
+  deriving (Eq, Show, Read, Typeable)
 
 instance Exception SqlError
 
@@ -58,7 +63,8 @@ instance Exception SqlError
 data ConnStatus = ConnOK           -- ^ Successfully connected
                 | ConnDisconnected -- ^ Successfully disconnected, all
                                    -- statements must be closed at this state
-                | ConnBad          -- ^ Some bad situation
+                | ConnBad          -- ^ Connection is in some bad state
+                  deriving (Typeable, Show, Read, Eq)
 
 -- | Typeclass to abstract the working with connection.                  
 class (Typeable conn, (Statement (ConnStatement conn))) => Connection conn where
@@ -76,7 +82,7 @@ class (Typeable conn, (Statement (ConnStatement conn))) => Connection conn where
   --
   -- This is not recomended to use 'start' by hands, use
   -- 'Database.HDBC.Utils.withTransaction' instead
-  start :: conn -> IO ()
+  begin :: conn -> IO ()
 
   -- | Explicitly commit started transaction. You must 'start' the transaction
   -- before 'commit'
@@ -130,25 +136,6 @@ class (Typeable conn, (Statement (ConnStatement conn))) => Connection conn where
   -- tightly to HDBC
   hdbcDriverName :: conn -> String
 
-  -- | The version of the C (or whatever) client library that the HDBC driver
-  -- module is bound to.  The meaning of this is driver-specific.  For an ODBC
-  -- or similar proxying driver, this should be the version of the ODBC library,
-  -- not the eventual DB client driver.
-  hdbcClientVer :: conn -> String
-
-  -- | In the case of a system such as ODBC, the name of the database
-  -- client\/server in use, if available. For others, identical to
-  -- 'hdbcDriverName'.
-  proxiedClientName :: conn -> String
-
-  -- | In the case of a system such as ODBC, the version of the database client
-  -- in use, if available.  For others, identical to 'hdbcClientVer'. This is
-  -- the next layer out past the HDBC driver.
-  proxiedClientVer :: conn -> String
-
-  -- | The version of the database server, if available.
-  dbServerVer :: conn -> String
-
   -- | Whether or not the current database supports transactions. If False, then
   -- 'commit' and 'rollback' should be expected to raise errors.
   dbTransactionSupport :: conn -> Bool
@@ -164,18 +151,17 @@ instance Connection ConnWrapper where
   type ConnStatement ConnWrapper = StmtWrapper
 
   disconnect (ConnWrapper conn) = disconnect conn
-  start (ConnWrapper conn) = start conn
+  begin (ConnWrapper conn) = begin conn
   commit (ConnWrapper conn) = commit conn
   rollback (ConnWrapper conn) = rollback conn
   inTransaction (ConnWrapper conn) = inTransaction conn
   connStatus (ConnWrapper conn) = connStatus conn
   prepare (ConnWrapper conn) str = (prepare conn str) >>= (\s -> return $ StmtWrapper s)
+  run (ConnWrapper conn) = run conn
+  runRaw (ConnWrapper conn) = runRaw conn
+  runMany (ConnWrapper conn) = runMany conn
   clone (ConnWrapper conn) = (clone conn) >>= (\c -> return $ ConnWrapper c)
   hdbcDriverName (ConnWrapper conn) = hdbcDriverName conn
-  hdbcClientVer (ConnWrapper conn) = hdbcClientVer conn
-  proxiedClientName (ConnWrapper conn) = proxiedClientName conn
-  proxiedClientVer (ConnWrapper conn) = proxiedClientVer conn
-  dbServerVer (ConnWrapper conn) = dbServerVer conn
   dbTransactionSupport (ConnWrapper conn) = dbTransactionSupport conn
 
 -- | Cast wrapped connection to the specific connection type using 'cast' of
@@ -189,7 +175,9 @@ castConnection (ConnWrapper conn) = cast conn
 -- | Statement's status returning by function 'statementStatus'.
 data StatementStatus = StatementNew      -- ^ Newly created statement
                      | StatementExecuted -- ^ Expression executed
-                     | StatementFinished -- ^ Finished, fetching rows will return 'Nothing'
+                     | StatementFetched  -- ^ Fetching is done, no more rows can be queried
+                     | StatementFinished -- ^ Finished, no more actions with this statement
+                       deriving (Typeable, Show, Read, Eq)
 
                        
 class (Typeable stmt) => Statement stmt where
@@ -216,6 +204,7 @@ class (Typeable stmt) => Statement stmt where
 
   -- | Return the count of rows affected by INSERT, UPDATE or DELETE
   -- query. After executing SELECT query it will return 0 every time.
+  -- It is also undefined result after executing 'executeMany'
   affectedRows :: stmt -> IO Integer
 
   -- | Finish statement and remove database-specific pointer. No any actions may
@@ -236,10 +225,14 @@ class (Typeable stmt) => Statement stmt where
   fetchRow :: stmt -> IO (Maybe [SqlValue])
 
   -- | Return list of column names of the result.
-  getColumnNames :: stmt -> IO [String]
+  getColumnNames :: stmt -> IO [TL.Text]
+
+  -- | Return the number of columns representing the result
+  getColumnsCount :: stmt -> IO Int
+  getColumnsCount stmt = fmap length $ getColumnNames stmt
 
   -- | Return the original executed query.
-  originalQuery :: stmt -> String
+  originalQuery :: stmt -> TL.Text
 
 -- | Wrapper around some specific 'Statement' instance to write
 -- database-independent code
@@ -256,6 +249,7 @@ instance Statement StmtWrapper where
   reset (StmtWrapper stmt) = reset stmt
   fetchRow (StmtWrapper stmt) = fetchRow stmt
   getColumnNames (StmtWrapper stmt) = getColumnNames stmt
+  getColumnsCount (StmtWrapper stmt) = getColumnsCount stmt
   originalQuery (StmtWrapper stmt) = originalQuery stmt
 
 
@@ -283,9 +277,10 @@ reported since the original exception will be propogated back.  (You'd probably
 like to know about the root cause for all of this anyway.)  Feedback
 on this behavior is solicited.
 -}
-withTransaction :: Connection conn => conn -> (conn -> IO a) -> IO a
+withTransaction :: Connection conn => conn -> IO a -> IO a
 withTransaction conn func = do
-  r <- try (func conn)
+  begin conn
+  r <- try func
   case r of
     Right x -> do
       commit conn

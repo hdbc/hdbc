@@ -4,8 +4,8 @@
 
 module Main where
 
-import Test.Hspec
-import Test.Hspec.QuickCheck
+import Test.Framework
+import Test.Framework.Providers.QuickCheck2
 import Test.QuickCheck (Gen(..), Arbitrary(..))
 import Test.QuickCheck.Property
 import Test.QuickCheck.Instances ()
@@ -43,27 +43,24 @@ commonChecks x = (partialChecks x) .&&.
 partialChecks x = x ==? (fromSql $ toSql x)
 
   
-sqlvalues :: Spec
-sqlvalues = describe "SqlValue should be convertible" $ do
-  prop "with string" $ \(s::String) -> commonChecks s
-  prop "with text" $ \(t::T.Text) -> commonChecks t
-  prop "with lazy text" $ \(t::TL.Text) -> commonChecks t
-  prop "with bytestring" $ \(b::B.ByteString) -> partialChecks b
-  prop "with lazy bytestring" $ \(b::BL.ByteString) -> partialChecks b
-  prop "with int" $ \(i :: Int) -> commonChecks i
-  prop "with int32" $ \(i :: Int32) -> commonChecks i
-  prop "with int64" $ \(i :: Int64) -> commonChecks i 
-  prop "with word32" $ \(w :: Word32) -> commonChecks w 
-  prop "with word64" $ \(w :: Word64) -> commonChecks w 
-  prop "with Integer" $ \(i :: Integer) -> commonChecks i 
-  prop "with Bool" $ \(b :: Bool) -> commonChecks b 
-  prop "with Double" $ \(d :: Double) -> commonChecks d
-  prop "with Decimal" $ \(d :: Decimal) -> commonChecks d
-  prop "with Day" $ \(d :: Day) -> commonChecks d
-  prop "with TimeOfDay" $ \(tod :: TimeOfDay) -> commonChecks tod
-  prop "with LocalTime" $ \(lt :: LocalTime) -> commonChecks lt
-  prop "with UTCTime" $ \(ut :: UTCTime) -> commonChecks ut
-  prop "with Maybe Int" $ \(mi :: Maybe Int) -> mi == (fromSql $ toSql mi) -- can not represent Null as ByteString
+main = defaultMain [ testProperty "with string" $ \(s::String) -> commonChecks s
+                   , testProperty "with text" $ \(t::T.Text) -> commonChecks t
+                   , testProperty "with lazy text" $ \(t::TL.Text) -> commonChecks t
+                   , testProperty "with bytestring" $ \(b::B.ByteString) -> partialChecks b
+                   , testProperty "with lazy bytestring" $ \(b::BL.ByteString) -> partialChecks b
+                   , testProperty "with int" $ \(i :: Int) -> commonChecks i
+                   , testProperty "with int32" $ \(i :: Int32) -> commonChecks i
+                   , testProperty "with int64" $ \(i :: Int64) -> commonChecks i 
+                   , testProperty "with word32" $ \(w :: Word32) -> commonChecks w 
+                   , testProperty "with word64" $ \(w :: Word64) -> commonChecks w 
+                   , testProperty "with Integer" $ \(i :: Integer) -> commonChecks i 
+                   , testProperty "with Bool" $ \(b :: Bool) -> commonChecks b 
+                   , testProperty "with Double" $ \(d :: Double) -> commonChecks d
+                   , testProperty "with Decimal" $ \(d :: Decimal) -> commonChecks d
+                   , testProperty "with Day" $ \(d :: Day) -> commonChecks d
+                   , testProperty "with TimeOfDay" $ \(tod :: TimeOfDay) -> commonChecks tod
+                   , testProperty "with LocalTime" $ \(lt :: LocalTime) -> commonChecks lt
+                   , testProperty "with UTCTime" $ \(ut :: UTCTime) -> commonChecks ut
+                   , testProperty "with Maybe Int" $ \(mi :: Maybe Int) -> mi == (fromSql $ toSql mi) -- can not represent Null as ByteString
+                   ]
 
-main = do
-  hspec $ sqlvalues

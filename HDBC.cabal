@@ -6,7 +6,7 @@ Author: John Goerzen
 homepage: https://github.com/hdbc/hdbc
 Copyright: Copyright (c) 2005-2011 John Goerzen
 license-file: LICENSE
-extra-source-files: LICENSE, Makefile, README.md
+extra-source-files: LICENSE, README.md
 Category: Database
 synopsis: Haskell Database Connectivity
 Description: HDBC provides an abstraction layer between Haskell programs and SQL
@@ -40,7 +40,7 @@ library
   if impl(ghc >= 6.9)
      build-depends: base >= 4
 
-  GHC-Options: -O2 -Wall -fno-warn-orphans
+  GHC-Options: -Wall -fno-warn-orphans
 
   Exposed-Modules: Database.HDBC
                  , Database.HDBC.DriverUtils
@@ -51,14 +51,31 @@ Test-Suite sqlvalues
   Type:             exitcode-stdio-1.0
   Main-Is:          sqlvalues.hs
   Hs-Source-Dirs:   testsrc
-  Build-Depends:    base
+  Build-Depends:    base >= 4
                   , QuickCheck
                   , quickcheck-instances
                   , quickcheck-assertions
-                  , hspec
+                  , test-framework
+                  , test-framework-quickcheck2
                   , HDBC
                   , text
                   , bytestring
                   , time
                   , convertible
                   , Decimal
+
+Test-Suite dummydriver
+  Type:             exitcode-stdio-1.0
+  Main-Is:          dummydriver.hs
+  Hs-Source-Dirs:   testsrc
+  Build-Depends:    base
+                  , HDBC 
+                  , text
+                  , bytestring
+                  , time
+                  , convertible
+                  , Decimal
+                  , test-framework
+                  , test-framework-hunit
+                  , hspec-expectations
+                 

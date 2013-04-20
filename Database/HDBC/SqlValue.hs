@@ -5,8 +5,7 @@
   , FlexibleInstances
   , FlexibleContexts
   , OverloadedStrings
-
- #-}
+  #-}
 
 #if ! (MIN_VERSION_time(1,1,3))
 {-# LANGUAGE
