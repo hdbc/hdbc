@@ -4,6 +4,7 @@
   , ExistentialQuantification
   , FlexibleContexts
   , ScopedTypeVariables
+  , GeneralizedNewtypeDeriving
   #-}
 
 {- |
@@ -26,6 +27,7 @@ module Database.HDBC.Types
          Connection(..)
        , Statement(..)
          -- * Data types
+       , Query(..)
        , ConnStatus(..)
        , ConnWrapper(..)
        , StatementStatus(..)
@@ -42,22 +44,27 @@ import qualified Data.Text.Lazy as TL
 import Database.HDBC.SqlValue (SqlValue)
 
 import Control.Exception (Exception(..), SomeException, try, catch, throwIO, bracket)
+import Control.DeepSeq (NFData(..))
 import Data.Typeable
-
+import Data.String (IsString(..))
+import Data.Data (Data(..))
+import Data.Monoid (Monoid(..))
 
 -- | Error throwing by driver when database operation fails
 data SqlError =
   -- | Internal database error
-  SqlError { seNativeError :: String -- ^ Low level database-specific error code
+  SqlError { seErrorCode :: String -- ^ Low level database-specific error code
            , seErrorMsg :: String -- ^ Error description from the database client library
            }
   -- | Driver-specific operational error
   | SqlDriverError { seErrorMsg :: String -- ^ Error description
-                 }
-  deriving (Eq, Show, Read, Typeable)
+                   }
+  deriving (Eq, Read, Show, Typeable)
 
 instance Exception SqlError
 
+newtype Query = Query { unQuery :: TL.Text }
+              deriving (Eq, Data, Ord, Read, Show, IsString, Typeable, Monoid, NFData)
 
 -- | Connection status
 data ConnStatus = ConnOK           -- ^ Successfully connected
@@ -109,19 +116,19 @@ class (Typeable conn, (Statement (ConnStatement conn))) => Connection conn where
   -- | Prepare the statement. Some databases has no feature of preparing
   -- statements (PostgreSQL can just prepare named statements), so each driver
   -- behaves it's own way.
-  prepare :: conn -> TL.Text -> IO (ConnStatement conn)
+  prepare :: conn -> Query -> IO (ConnStatement conn)
 
   -- | Run query and safely finalize statement after that
-  run :: conn -> TL.Text -> [SqlValue] -> IO ()
+  run :: conn -> Query -> [SqlValue] -> IO ()
   run conn query values = withStatement conn query $
                           \s -> execute s values
 
   -- | Run raw query without parameters and safely finalize statement
-  runRaw :: conn -> TL.Text -> IO ()
+  runRaw :: conn -> Query -> IO ()
   runRaw conn query = withStatement conn query executeRaw
   
   -- | run executeMany and safely finalize statement 
-  runMany :: conn -> TL.Text -> [[SqlValue]] -> IO ()
+  runMany :: conn -> Query -> [[SqlValue]] -> IO ()
   runMany conn query values = withStatement conn query $
                               \s -> executeMany s values
   
@@ -232,7 +239,7 @@ class (Typeable stmt) => Statement stmt where
   getColumnsCount stmt = fmap length $ getColumnNames stmt
 
   -- | Return the original executed query.
-  originalQuery :: stmt -> TL.Text
+  originalQuery :: stmt -> Query
 
 -- | Wrapper around some specific 'Statement' instance to write
 -- database-independent code
@@ -294,7 +301,7 @@ it. Safely finalize Statement after action is done.
 -}
 withStatement :: (Connection conn, Statement stmt, stmt ~ (ConnStatement conn))
                  => conn          -- ^ Connection
-                 -> TL.Text       -- ^ Query string
+                 -> Query         -- ^ Query string
                  -> (stmt -> IO a) -- ^ Action around statement
                  -> IO a          -- ^ Result of action
 withStatement conn query = bracket

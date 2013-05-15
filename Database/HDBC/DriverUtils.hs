@@ -68,10 +68,10 @@ If the MVar is locked at the start, does nothing to avoid deadlock.  Future
 runs would probably catch it anyway. -}
 childFinalizer :: ChildList a -> IO ()
 childFinalizer mcl = do
-  c <- tryTakeMVar mcl
+  c <- isEmptyMVar mcl
   case c of
-    Nothing -> return ()
-    Just _ -> modifyMVar_ mcl (filterM filterfunc)
+    True   -> return ()
+    False  -> modifyMVar_ mcl (filterM filterfunc)
     
   where filterfunc c = do
           dc <- deRefWeak c

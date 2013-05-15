@@ -40,7 +40,7 @@ data DummyConnection =
 
 data DummyStatement =
   DummyStatement { dsConnection :: DummyConnection
-                 , dsQuery :: TL.Text
+                 , dsQuery :: Query
                  , dsStatus :: MVar StatementStatus
                  }
   deriving (Typeable, Eq)
