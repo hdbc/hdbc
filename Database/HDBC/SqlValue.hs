@@ -29,7 +29,7 @@ import qualified Data.ByteString.Lazy as BSL
 import Data.Word
 import Data.Int
 import Data.Decimal
-import Data.UUID
+import Data.UUID (UUID, fromString, toString)
 import Data.Time
 import System.Locale (defaultTimeLocale)
 import Data.Convertible
@@ -177,8 +177,6 @@ comparisons can be made, then they are not equal:
 data SqlValue =
   {- | Arbitrary precision DECIMAL value -}
   SqlDecimal Decimal
-  | SqlWord32 Word32
-  | SqlWord64 Word64
   | SqlInt32 Int32
   | SqlInt64 Int64
   | SqlInteger Integer
@@ -210,8 +208,6 @@ data SqlValue =
 instance Eq SqlValue where
 
     (SqlDecimal a)        == (SqlDecimal b)         = a == b
-    (SqlWord32 a)         == (SqlWord32 b)          = a == b
-    (SqlWord64 a)         == (SqlWord64 b)          = a == b
     (SqlInt32 a)          == (SqlInt32 b)           = a == b
     (SqlInt64 a)          == (SqlInt64 b)           = a == b
     (SqlInteger a)        == (SqlInteger b)         = a == b
@@ -248,8 +244,6 @@ instance Convertible [Char] SqlValue where
 instance Convertible SqlValue [Char] where
 
   safeConvert (SqlDecimal a)        = return $ show a
-  safeConvert (SqlWord32 a)         = return $ show a
-  safeConvert (SqlWord64 a)         = return $ show a
   safeConvert (SqlInt32 a)          = return $ show a
   safeConvert (SqlInt64 a)          = return $ show a
   safeConvert (SqlInteger a)        = return $ show a
@@ -258,7 +252,7 @@ instance Convertible SqlValue [Char] where
   safeConvert x@(SqlBlob _)         = quickError x -- bytes is not a text
   safeConvert (SqlBool a)           = return $ show a
   safeConvert (SqlBitField a)       = return $ show a
-  safeConvert (SqlUUID a)           = return $ show a
+  safeConvert (SqlUUID a)           = return $ toString a
   safeConvert (SqlUTCTime a)        = return . formatTime defaultTimeLocale (iso8601DateFormat (Just "%T%Q")) $ a
   safeConvert (SqlLocalDate a)      = return . formatTime defaultTimeLocale (iso8601DateFormat Nothing) $ a
   safeConvert (SqlLocalTimeOfDay a) = return . formatTime defaultTimeLocale "%T%Q" $ a
@@ -292,12 +286,20 @@ instance Convertible SqlValue BSL.ByteString where
     safeConvert (SqlBlob x) = safeConvert x
     safeConvert x = quickError x
 
+instance Convertible UUID SqlValue where
+  safeConvert x = return $ SqlUUID x
+
+instance Convertible SqlValue UUID where
+  safeConvert (SqlUUID u) = return u
+  safeConvert (SqlText t) = case fromString $ TL.unpack t of
+    Nothing  -> convError ("Could not convert " ++ (TL.unpack t) ++ " to UUID") t
+    Just r -> return r
+  safeConvert x = quickError x
+
 instance Convertible Int SqlValue where
     safeConvert x = fmap SqlInt64 $ safeConvert x
 instance Convertible SqlValue Int where
   safeConvert (SqlDecimal a)          = safeConvert a
-  safeConvert (SqlWord32 a)           = safeConvert a
-  safeConvert (SqlWord64 a)           = safeConvert a
   safeConvert (SqlInt32 a)            = safeConvert a
   safeConvert (SqlInt64 a)            = safeConvert a
   safeConvert (SqlInteger a)          = safeConvert a
@@ -318,8 +320,6 @@ instance Convertible Int32 SqlValue where
     safeConvert = return . SqlInt32
 instance Convertible SqlValue Int32 where
   safeConvert (SqlDecimal a)          = safeConvert a
-  safeConvert (SqlWord32 a)           = safeConvert a
-  safeConvert (SqlWord64 a)           = safeConvert a
   safeConvert (SqlInt32 a)            = return a
   safeConvert (SqlInt64 a)            = safeConvert a
   safeConvert (SqlInteger a)          = safeConvert a
@@ -340,8 +340,6 @@ instance Convertible Int64 SqlValue where
     safeConvert = return . SqlInt64
 instance Convertible SqlValue Int64 where
   safeConvert (SqlDecimal a)          = safeConvert a
-  safeConvert (SqlWord32 a)           = safeConvert a
-  safeConvert (SqlWord64 a)           = safeConvert a
   safeConvert (SqlInt32 a)            = safeConvert a
   safeConvert (SqlInt64 a)            = return a
   safeConvert (SqlInteger a)          = safeConvert a
@@ -358,56 +356,10 @@ instance Convertible SqlValue Int64 where
   safeConvert x@SqlNow                = quickError x
   safeConvert y@(SqlNull)             = quickError y
 
-instance Convertible Word32 SqlValue where
-    safeConvert = return . SqlWord32
-instance Convertible SqlValue Word32 where
-  safeConvert (SqlDecimal a)          = safeConvert a
-  safeConvert (SqlWord32 a)           = return a
-  safeConvert (SqlWord64 a)           = safeConvert a
-  safeConvert (SqlInt32 a)            = safeConvert a
-  safeConvert (SqlInt64 a)            = safeConvert a
-  safeConvert (SqlInteger a)          = safeConvert a
-  safeConvert (SqlDouble a)           = safeConvert a
-  safeConvert (SqlText a)             = read' a
-  safeConvert x@(SqlBlob _)           = quickError x
-  safeConvert (SqlBool a)             = return $ if a then 1 else 0
-  safeConvert (SqlBitField a)         = safeConvert a
-  safeConvert x@(SqlUUID _)           = quickError x -- converting time or date to int has no sense
-  safeConvert x@(SqlUTCTime _)        = quickError x
-  safeConvert x@(SqlLocalDate _)      = quickError x
-  safeConvert x@(SqlLocalTimeOfDay _) = quickError x
-  safeConvert x@(SqlLocalTime _)      = quickError x
-  safeConvert x@SqlNow                = quickError x
-  safeConvert y@(SqlNull)             = quickError y
-
-instance Convertible Word64 SqlValue where
-    safeConvert = return . SqlWord64
-instance Convertible SqlValue Word64 where
-  safeConvert (SqlDecimal a)          = safeConvert a
-  safeConvert (SqlWord32 a)           = safeConvert a
-  safeConvert (SqlWord64 a)           = return a
-  safeConvert (SqlInt32 a)            = safeConvert a
-  safeConvert (SqlInt64 a)            = safeConvert a
-  safeConvert (SqlInteger a)          = safeConvert a
-  safeConvert (SqlDouble a)           = safeConvert a
-  safeConvert (SqlText a)             = read' a
-  safeConvert x@(SqlBlob _)           = quickError x
-  safeConvert (SqlBool a)             = return $ if a then 1 else 0
-  safeConvert (SqlBitField a)         = return a
-  safeConvert x@(SqlUUID _)           = quickError x -- converting time or date to int has no sense
-  safeConvert x@(SqlUTCTime _)        = quickError x
-  safeConvert x@(SqlLocalDate _)      = quickError x
-  safeConvert x@(SqlLocalTimeOfDay _) = quickError x
-  safeConvert x@(SqlLocalTime _)      = quickError x
-  safeConvert x@SqlNow                = quickError x
-  safeConvert y@(SqlNull)             = quickError y
-
 instance Convertible Integer SqlValue where
     safeConvert = return . SqlInteger
 instance Convertible SqlValue Integer where
   safeConvert (SqlDecimal a)          = safeConvert a
-  safeConvert (SqlWord32 a)           = safeConvert a
-  safeConvert (SqlWord64 a)           = safeConvert a
   safeConvert (SqlInt32 a)            = safeConvert a
   safeConvert (SqlInt64 a)            = safeConvert a
   safeConvert (SqlInteger a)          = return a
@@ -428,8 +380,6 @@ instance Convertible Bool SqlValue where
     safeConvert = return . SqlBool
 instance Convertible SqlValue Bool where
   safeConvert (SqlDecimal a)          = numToBool a
-  safeConvert (SqlWord32 a)           = numToBool a
-  safeConvert (SqlWord64 a)           = numToBool a
   safeConvert (SqlInt32 a)            = numToBool a
   safeConvert (SqlInt64 a)            = numToBool a
   safeConvert (SqlInteger a)          = numToBool a
@@ -461,8 +411,6 @@ instance Convertible Double SqlValue where
     safeConvert = return . SqlDouble
 instance Convertible SqlValue Double where
   safeConvert (SqlDecimal a)          = safeConvert a
-  safeConvert (SqlWord32 a)           = safeConvert a
-  safeConvert (SqlWord64 a)           = safeConvert a
   safeConvert (SqlInt32 a)            = safeConvert a
   safeConvert (SqlInt64 a)            = safeConvert a
   safeConvert (SqlInteger a)          = safeConvert a
@@ -483,8 +431,6 @@ instance Convertible Decimal SqlValue where
   safeConvert = return . SqlDecimal
 instance Convertible SqlValue Decimal where
   safeConvert (SqlDecimal a)          = return a
-  safeConvert (SqlWord32 a)           = safeConvert a
-  safeConvert (SqlWord64 a)           = safeConvert a
   safeConvert (SqlInt32 a)            = safeConvert a
   safeConvert (SqlInt64 a)            = safeConvert a
   safeConvert (SqlInteger a)          = safeConvert a
@@ -514,8 +460,6 @@ instance Convertible Day SqlValue where
     safeConvert = return . SqlLocalDate
 instance Convertible SqlValue Day where
   safeConvert x@(SqlDecimal _)                   = quickError x -- converting number to date has no sense
-  safeConvert x@(SqlWord32 _)                    = quickError x
-  safeConvert x@(SqlWord64 _)                    = quickError x
   safeConvert x@(SqlInt32 _)                     = quickError x
   safeConvert x@(SqlInt64 _)                     = quickError x
   safeConvert x@(SqlInteger _)                   = quickError x
@@ -536,8 +480,6 @@ instance Convertible TimeOfDay SqlValue where
     safeConvert = return . SqlLocalTimeOfDay
 instance Convertible SqlValue TimeOfDay where
   safeConvert x@(SqlDecimal _)                         = quickError x -- converting number to time has no sense
-  safeConvert x@(SqlWord32 _)                          = quickError x
-  safeConvert x@(SqlWord64 _)                          = quickError x
   safeConvert x@(SqlInt32 _)                           = quickError x
   safeConvert x@(SqlInt64 _)                           = quickError x
   safeConvert x@(SqlInteger _)                         = quickError x
@@ -558,8 +500,6 @@ instance Convertible LocalTime SqlValue where
     safeConvert = return . SqlLocalTime
 instance Convertible SqlValue LocalTime where
   safeConvert x@(SqlDecimal _)        = quickError x -- converting number to time of day has no sense
-  safeConvert x@(SqlWord32 _)         = quickError x
-  safeConvert x@(SqlWord64 _)         = quickError x
   safeConvert x@(SqlInt32 _)          = quickError x
   safeConvert x@(SqlInt64 _)          = quickError x
   safeConvert x@(SqlInteger _)        = quickError x
@@ -580,8 +520,6 @@ instance Convertible UTCTime SqlValue where
     safeConvert = return . SqlUTCTime
 instance Convertible SqlValue UTCTime where
   safeConvert x@(SqlDecimal _)        = quickError x -- converting number to UTC has no sense
-  safeConvert x@(SqlWord32 _)         = quickError x
-  safeConvert x@(SqlWord64 _)         = quickError x
   safeConvert x@(SqlInt32 _)          = quickError x
   safeConvert x@(SqlInt64 _)          = quickError x
   safeConvert x@(SqlInteger _)        = quickError x

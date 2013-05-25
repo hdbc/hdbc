@@ -61,6 +61,7 @@ Test-Suite sqlvalues
                   , HDBC
                   , text
                   , bytestring
+                  , uuid
                   , time
                   , convertible
                   , Decimal
