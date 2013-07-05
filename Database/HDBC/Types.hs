@@ -48,7 +48,7 @@ import Control.DeepSeq (NFData(..))
 import Data.Typeable
 import Data.String (IsString(..))
 import Data.Data (Data(..))
-import Data.Monoid (Monoid(..))
+import Data.Monoid (Monoid(..), Endo(..))
 
 -- | Error throwing by driver when database operation fails
 data SqlError =
@@ -231,6 +231,18 @@ class (Typeable stmt) => Statement stmt where
   -- Nothing, unlike with old HDBC interface.
   fetchRow :: stmt -> IO (Maybe [SqlValue])
 
+  -- | Optional method to strictly fetch all rows from statement
+  fetchAllRows :: stmt -> IO [[SqlValue]]
+  fetchAllRows stmt = do
+    e <- f mempty
+    return $ (appEndo e) []
+    where
+      f acc = do
+        res <- fetchRow stmt
+        case res of
+          Just r -> f ((Endo (r:)) `mappend` acc)
+          Nothing -> return acc
+
   -- | Return list of column names of the result.
   getColumnNames :: stmt -> IO [TL.Text]
 
@@ -255,6 +267,7 @@ instance Statement StmtWrapper where
   finish (StmtWrapper stmt) = finish stmt
   reset (StmtWrapper stmt) = reset stmt
   fetchRow (StmtWrapper stmt) = fetchRow stmt
+  fetchAllRows (StmtWrapper stmt) = fetchAllRows stmt
   getColumnNames (StmtWrapper stmt) = getColumnNames stmt
   getColumnsCount (StmtWrapper stmt) = getColumnsCount stmt
   originalQuery (StmtWrapper stmt) = originalQuery stmt

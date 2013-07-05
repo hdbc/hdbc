@@ -196,14 +196,8 @@ data SqlValue =
   | SqlLocalDate Day            -- ^ Local YYYY-MM-DD (no timezone)
   | SqlLocalTimeOfDay TimeOfDay -- ^ Local HH:MM:SS (no timezone)
   | SqlLocalTime LocalTime      -- ^ Local YYYY-MM-DD HH:MM:SS (no timezone)
-
-    {- | The value of current datetime on the server.
-      Different database drivers will convert it to the appropriate literal/function.
-      Not used for retriving data from the database, just for writing to.
-    -}
-  | SqlNow
   | SqlNull         -- ^ NULL in SQL or Nothing in Haskell
-  deriving (Show, Typeable)
+  deriving (Show, Typeable, Ord)
 
 instance Eq SqlValue where
 
@@ -221,9 +215,6 @@ instance Eq SqlValue where
     (SqlLocalDate a)      == (SqlLocalDate b)       = a == b
     (SqlLocalTimeOfDay a) == (SqlLocalTimeOfDay b)  = a == b
     (SqlLocalTime a)      == (SqlLocalTime b)       = a == b
-    SqlNow == SqlNow = False     -- Concrete value will be determined on the database
-    _ == SqlNow = False
-    SqlNow == _ = False
     SqlNull == SqlNull = True
     SqlNull == _ = False
     _ == SqlNull = False
@@ -257,7 +248,6 @@ instance Convertible SqlValue [Char] where
   safeConvert (SqlLocalDate a)      = return . formatTime defaultTimeLocale (iso8601DateFormat Nothing) $ a
   safeConvert (SqlLocalTimeOfDay a) = return . formatTime defaultTimeLocale "%T%Q" $ a
   safeConvert (SqlLocalTime a)      = return . formatTime defaultTimeLocale (iso8601DateFormat (Just "%T%Q")) $ a
-  safeConvert x@SqlNow  = quickError x
   safeConvert x@SqlNull = quickError x
 
 instance Convertible TS.Text SqlValue where
@@ -313,7 +303,6 @@ instance Convertible SqlValue Int where
   safeConvert x@(SqlLocalDate _)      = quickError x
   safeConvert x@(SqlLocalTimeOfDay _) = quickError x
   safeConvert x@(SqlLocalTime _)      = quickError x
-  safeConvert x@SqlNow                = quickError x
   safeConvert y@(SqlNull)             = quickError y
 
 instance Convertible Int32 SqlValue where
@@ -333,7 +322,6 @@ instance Convertible SqlValue Int32 where
   safeConvert x@(SqlLocalDate _)      = quickError x
   safeConvert x@(SqlLocalTimeOfDay _) = quickError x
   safeConvert x@(SqlLocalTime _)      = quickError x
-  safeConvert x@SqlNow                = quickError x
   safeConvert y@(SqlNull)             = quickError y
 
 instance Convertible Int64 SqlValue where
@@ -353,7 +341,6 @@ instance Convertible SqlValue Int64 where
   safeConvert x@(SqlLocalDate _)      = quickError x
   safeConvert x@(SqlLocalTimeOfDay _) = quickError x
   safeConvert x@(SqlLocalTime _)      = quickError x
-  safeConvert x@SqlNow                = quickError x
   safeConvert y@(SqlNull)             = quickError y
 
 instance Convertible Integer SqlValue where
@@ -373,7 +360,6 @@ instance Convertible SqlValue Integer where
   safeConvert x@(SqlLocalDate _)      = quickError x
   safeConvert x@(SqlLocalTimeOfDay _) = quickError x
   safeConvert x@(SqlLocalTime _)      = quickError x
-  safeConvert x@SqlNow                = quickError x
   safeConvert y@(SqlNull)             = quickError y
 
 instance Convertible Bool SqlValue where
@@ -401,7 +387,6 @@ instance Convertible SqlValue Bool where
   safeConvert x@(SqlLocalDate _)      = quickError x
   safeConvert x@(SqlLocalTimeOfDay _) = quickError x
   safeConvert x@(SqlLocalTime _)      = quickError x
-  safeConvert x@SqlNow                = quickError x
   safeConvert y@(SqlNull)             = quickError y
 
 numToBool :: (Eq a, Num a) => a -> ConvertResult Bool
@@ -424,7 +409,6 @@ instance Convertible SqlValue Double where
   safeConvert x@(SqlLocalDate _)      = quickError x
   safeConvert x@(SqlLocalTimeOfDay _) = quickError x
   safeConvert x@(SqlLocalTime _)      = quickError x
-  safeConvert x@SqlNow                = quickError x
   safeConvert y@(SqlNull)             = quickError y
 
 instance Convertible Decimal SqlValue where
@@ -444,7 +428,6 @@ instance Convertible SqlValue Decimal where
   safeConvert x@(SqlLocalDate _)      = quickError x
   safeConvert x@(SqlLocalTimeOfDay _) = quickError x
   safeConvert x@(SqlLocalTime _)      = quickError x
-  safeConvert x@SqlNow                = quickError x
   safeConvert y@(SqlNull)             = quickError y
 
 
@@ -473,7 +456,6 @@ instance Convertible SqlValue Day where
   safeConvert (SqlLocalDate a)                   = return a
   safeConvert x@(SqlLocalTimeOfDay _)            = quickError x
   safeConvert (SqlLocalTime (LocalTime {localDay = a})) = return a
-  safeConvert x@SqlNow                           = quickError x
   safeConvert y@(SqlNull)                        = quickError y
 
 instance Convertible TimeOfDay SqlValue where
@@ -493,7 +475,6 @@ instance Convertible SqlValue TimeOfDay where
   safeConvert x@(SqlLocalDate _)                       = quickError x
   safeConvert (SqlLocalTimeOfDay a)                    = return a
   safeConvert (SqlLocalTime (LocalTime {localTimeOfDay = a})) = return a
-  safeConvert x@SqlNow                                 = quickError x
   safeConvert y@(SqlNull)                              = quickError y
 
 instance Convertible LocalTime SqlValue where
@@ -513,7 +494,6 @@ instance Convertible SqlValue LocalTime where
   safeConvert (SqlLocalDate d)        = return $ LocalTime d midnight
   safeConvert x@(SqlLocalTimeOfDay _) = quickError x
   safeConvert (SqlLocalTime a)        = return a
-  safeConvert x@SqlNow                = quickError x
   safeConvert y@SqlNull               = quickError y
 
 instance Convertible UTCTime SqlValue where
@@ -533,7 +513,6 @@ instance Convertible SqlValue UTCTime where
   safeConvert x@(SqlLocalDate _)      = quickError x
   safeConvert x@(SqlLocalTimeOfDay _) = quickError x
   safeConvert x@(SqlLocalTime _)      = quickError x
-  safeConvert x@SqlNow                = quickError x
   safeConvert y@SqlNull               = quickError y
 
 instance (Convertible a SqlValue) => Convertible (Maybe a) SqlValue where

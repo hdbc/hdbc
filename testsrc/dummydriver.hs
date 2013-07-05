@@ -33,6 +33,7 @@ data TStatus = TIdle | TInTransaction
 data DummyConnection =
   DummyConnection { dcState :: MVar ConnStatus
                   , dcTrans :: MVar TStatus
+                  , dcData :: MVar [[SqlValue]]
                   , dcChilds :: ChildList DummyStatement
                   , dcTransSupport :: Bool
                   }
@@ -41,6 +42,7 @@ data DummyConnection =
 data DummyStatement =
   DummyStatement { dsConnection :: DummyConnection
                  , dsQuery :: Query
+                 , dsSelecting :: MVar (Maybe Int)
                  , dsStatus :: MVar StatementStatus
                  }
   deriving (Typeable, Eq)
@@ -49,6 +51,7 @@ data DummyStatement =
 newConnection transSupport = DummyConnection
                              <$> newMVar ConnOK
                              <*> newMVar TIdle
+                             <*> newMVar []
                              <*> newChildList
                              <*> return transSupport
 
@@ -97,12 +100,14 @@ instance Connection DummyConnection where
     st <- DummyStatement
           <$> return conn
           <*> return query
+          <*> newMVar Nothing
           <*> newMVar StatementNew
     addChild (dcChilds conn) st
     return st
   clone conn = DummyConnection
                <$> (newMVar ConnOK)
                <*> (newMVar TIdle)
+               <*> newMVar []
                <*> newChildList
                <*> (return $ dcTransSupport conn)
   hdbcDriverName = const "DummyDriver"
@@ -110,12 +115,14 @@ instance Connection DummyConnection where
 
   
 instance Statement DummyStatement where
-  execute stmt _ = modifyMVar_ (dsStatus stmt) $ \st -> do
+  execute stmt params = modifyMVar_ (dsStatus stmt) $ \st -> do
     case st of
       StatementNew -> do
-        if (originalQuery stmt) == "throw"
-          then throwIO $ SqlError "5" "Throwed query exception"
-          else return StatementExecuted
+        case originalQuery stmt of
+          "throw" -> throwIO $ SqlError "5" "Throwed query exception"
+          "insert" -> modifyMVar (dcData $ dsConnection stmt) $ \d -> return (d ++ [params], StatementExecuted)
+          "select" -> modifyMVar (dsSelecting stmt) $ const $ return (Just 0, StatementExecuted)
+          _ -> return StatementExecuted
       _ -> throwIO $ SqlError "6" $ "Statement has wrong status to execute query " ++ show st
     
   statementStatus = readMVar . dsStatus
@@ -123,7 +130,15 @@ instance Statement DummyStatement where
   affectedRows = const $ return 0
   finish stmt = modifyMVar_ (dsStatus stmt) $ const $ return StatementFinished
   reset stmt = modifyMVar_ (dsStatus stmt) $ const $ return StatementNew
-  fetchRow = const $ return Nothing
+  fetchRow stmt = modifyMVar (dsSelecting stmt) $ \slct -> case slct of
+    Nothing -> return (Nothing, Nothing)
+    Just sl -> do
+      dt <- readMVar $ dcData $ dsConnection stmt
+      if (length dt) > sl
+        then return (Just $ sl+1, Just $ dt !! sl)
+        else return (Nothing, Nothing)
+    
+    
   getColumnNames = const $ return []
   originalQuery = dsQuery
 
@@ -192,6 +207,28 @@ test5 = do
   disconnect c2
   stt2 <- statementStatus st2
   stt2 `shouldBe` StatementFinished
+
+testFetchAllRows :: Assertion
+testFetchAllRows = do
+  c <- newConnection True
+  let indt = [ [SqlInt32 10, SqlText "hello"]
+             , [SqlDouble 45.4, SqlNull]
+             , [SqlText "sdf", SqlText "efef"]
+             ]
+  s <- prepare c "insert"
+  execute s $ indt !! 0
+  finish s
+  s2 <- prepare c "insert"
+  execute s2 $ indt !! 1
+  finish s2
+  s3 <- prepare c "insert"
+  execute s3 $ indt !! 2
+  finish s3
+  ss <- prepare c "select"
+  executeRaw ss
+  outdt <- fetchAllRows ss
+  outdt `shouldBe` indt
+  
   
   
 main :: IO ()
@@ -200,4 +237,5 @@ main = defaultMain [ testCase "Transaction exception handling" test1
                    , testCase "Child statements" test3
                    , testCase "Childs closed when disconnect" test4
                    , testCase "Each connection has it's own childs" test5
+                   , testCase "Fetch all rows preserve order" testFetchAllRows
                    ]
