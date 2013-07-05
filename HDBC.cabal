@@ -50,8 +50,9 @@ library
                  
 Test-Suite sqlvalues
   Type:             exitcode-stdio-1.0
-  Main-Is:          sqlvalues.hs
-  Hs-Source-Dirs:   testsrc
+  Main-Is:          testsrc/sqlvalues.hs
+  other-modules: Database.HDBC
+  GHC-Options: -Wall -main-is SqlValues -fno-warn-orphans
   Build-Depends:    base >= 4
                   , QuickCheck
                   , quickcheck-instances
@@ -64,12 +65,16 @@ Test-Suite sqlvalues
                   , uuid
                   , time
                   , convertible
+                  , deepseq
+                  , old-locale
                   , Decimal
 
 Test-Suite dummydriver
   Type:             exitcode-stdio-1.0
-  Main-Is:          dummydriver.hs
-  Hs-Source-Dirs:   testsrc
+  Main-Is:          testsrc/dummydriver.hs
+  other-modules: Database.HDBC
+               , Database.HDBC.DriverUtils
+  GHC-Options: -Wall -main-is DummyDriver -fno-warn-orphans
   Build-Depends:    base
                   , HDBC 
                   , text
@@ -77,7 +82,11 @@ Test-Suite dummydriver
                   , time
                   , convertible
                   , Decimal
+                  , deepseq
+                  , old-locale
+                  , uuid
                   , test-framework
                   , test-framework-hunit
                   , hspec-expectations
+                  , HUnit
                  

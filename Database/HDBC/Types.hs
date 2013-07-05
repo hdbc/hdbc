@@ -240,7 +240,7 @@ class (Typeable stmt) => Statement stmt where
       f acc = do
         res <- fetchRow stmt
         case res of
-          Just r -> f ((Endo (r:)) `mappend` acc)
+          Just r -> f (acc `mappend` (Endo (r:)))
           Nothing -> return acc
 
   -- | Return list of column names of the result.

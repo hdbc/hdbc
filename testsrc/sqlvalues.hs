@@ -2,11 +2,11 @@
            , FlexibleContexts
            , CPP #-}
 
-module Main where
+module SqlValues where
 
 import Test.Framework
 import Test.Framework.Providers.QuickCheck2
-import Test.QuickCheck (Gen(..), Arbitrary(..))
+import Test.QuickCheck (Arbitrary(..))
 import Test.QuickCheck.Property
 import Test.QuickCheck.Instances ()
 import Test.QuickCheck.Assertions
@@ -19,16 +19,11 @@ import qualified Data.Text.Lazy as TL
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BL
 import Data.Int
-import Data.Word
 import Data.Decimal
 import Data.Time
-import Data.Fixed
 import Data.UUID
 import Data.Convertible (Convertible(..))
 
-import Debug.Trace(trace)
-
-ts s = trace (show s) s
 
 #if MIN_VERSION_Decimal(0,3,1)
 -- Decimal-0.2.4 has no Arbitrary instance in library any more
@@ -48,9 +43,11 @@ commonChecks :: (Convertible a SqlValue, Convertible SqlValue a, Eq a, Show a) =
 commonChecks x = (partialChecks x) .&&. 
                  (x ==? (fromSql $ toSql (fromSql $ toSql x :: TL.Text))) -- convert to Text and back
 
+partialChecks :: (Eq a, Show a, Convertible a SqlValue, Convertible SqlValue a) => a -> Result
 partialChecks x = x ==? (fromSql $ toSql x)
 
-  
+
+mainTestGroup :: Test
 mainTestGroup = testGroup "can convert to SqlValue and back"
                 [ testProperty "with string" $ \(s::String) -> commonChecks s
                 , testProperty "with text" $ \(t::T.Text) -> commonChecks t
@@ -72,4 +69,5 @@ mainTestGroup = testGroup "can convert to SqlValue and back"
                 , testProperty "with Maybe Int" $ \(mi :: Maybe Int) -> mi == (fromSql $ toSql mi) -- can not represent Null as ByteString
                 ]
 
+main :: IO ()
 main = defaultMain [mainTestGroup]

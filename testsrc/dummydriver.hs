@@ -5,11 +5,12 @@
 , ScopedTypeVariables
   #-}
 
-module Main where
+module DummyDriver where
 
 import System.Mem
 import System.Mem.Weak
 
+import Test.HUnit (Assertion)
 import Test.Framework
 import Test.Framework.Providers.HUnit
 import Test.Hspec.Expectations
@@ -18,11 +19,8 @@ import Control.Applicative
 import Control.Concurrent.MVar
 import Control.Exception
 import Control.Monad
-import Data.Functor
 import Data.Typeable
 import Data.Maybe
-
-import qualified Data.Text.Lazy as TL
 
 import Database.HDBC
 import Database.HDBC.DriverUtils
@@ -48,6 +46,7 @@ data DummyStatement =
   deriving (Typeable, Eq)
   
 
+newConnection :: Bool -> IO DummyConnection
 newConnection transSupport = DummyConnection
                              <$> newMVar ConnOK
                              <*> newMVar TIdle
@@ -143,7 +142,7 @@ instance Statement DummyStatement where
   originalQuery = dsQuery
 
 
-
+test1 :: Assertion
 test1 = do
   c <- newConnection True
   (withTransaction c $ do
@@ -155,6 +154,7 @@ test1 = do
   intr <- inTransaction c
   intr `shouldBe` False         -- after rollback
 
+test2 :: Assertion
 test2 = do
   c <- newConnection True
   intr1 <- inTransaction c
@@ -167,6 +167,7 @@ test2 = do
   intr <- inTransaction c
   intr `shouldBe` False         -- after commit
 
+test3 :: Assertion
 test3 = do
   c <- newConnection False
   sub c
@@ -183,6 +184,7 @@ test3 = do
         prts <- readMVar $ dcChilds c
         (length prts) `shouldBe` 2
 
+test4 :: Assertion
 test4 = do
   c <- newConnection False
   stmt <- prepare c "query 1"
@@ -190,6 +192,7 @@ test4 = do
   ss <- statementStatus stmt
   ss `shouldBe` StatementFinished
 
+test5 :: Assertion
 test5 = do
   c <- newConnection True
   c2 <- clone c
