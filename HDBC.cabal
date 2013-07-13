@@ -42,6 +42,7 @@ library
      build-depends: base >= 4
 
   GHC-Options: -Wall -fno-warn-orphans
+  ghc-prof-options: -fprof-auto
 
   Exposed-Modules: Database.HDBC
                  , Database.HDBC.DriverUtils

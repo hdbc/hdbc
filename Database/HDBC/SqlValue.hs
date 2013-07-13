@@ -36,6 +36,7 @@ import Data.Convertible
 import qualified Data.Text as TS
 import qualified Data.Text.Lazy as TL
 
+
 quickError :: (Typeable a, Convertible SqlValue a) => SqlValue -> ConvertResult a
 quickError sv = convError "incompatible types" sv
 
@@ -70,19 +71,18 @@ SqlValue to the database record's field, and properly convert the record's field
 to SqlValue back.
 
 The 'SqlValue' has predefined 'Convertible' instances for many Haskell's
-types. Any Haskell's type can be converted to the 'SqlValue' with
-'Database.HDBC.Utils.toSql' function. There is no safeToSql function because
-toSql never fails. Also, any 'SqlValue' type can be converted to almost any
-Haskell's type as well. Not any 'SqlValue' can be converted back to Haskell's
-type, so there is 'Database.HDBC.Utils.safeFromSql' function to do that
-safely. There is unsafe 'Database.HDBC.Utils.toSql' function of caurse.
+types. Any Haskell's type can be converted to the 'SqlValue' with 'toSql'
+function. There is no safeToSql function because 'toSql' never fails. Also, any
+'SqlValue' type can be converted to almost any Haskell's type as well. Not any
+'SqlValue' can be converted back to Haskell's type, so there is 'safeFromSql'
+function to do that safely. There is also unsafe 'toSql' function of caurse.
 
 You can sure, that @fromSql . toSql == id@
 
 /SQLVALUE CONSTRUCTORS/
 
-SqlValue constructors is the MINIMAL set of constructors, required to represent
-the most wide range of native database types.
+'SqlValue' constructors is the MINIMAL set of constructors, required to
+represent the most wide range of native database types.
 
 For example, there is FLOAT native database type and DOUBLE, but any DOUBLE can
 carry any FLOAT value, so there is no need to create 'SqlValue' constructor to
@@ -94,48 +94,47 @@ There is no SqlRational any more, because there is no one database which have
 native Rational type. This is the key idea: if database can not store this type
 natively we will not create 'SqlValue' clause for it.
 
-Each SqlValue constructor is documented or self-explaining to understand what it
-is needed for.
+Each 'SqlValue' constructor is documented or self-explaining to understand what
+it is needed for.
 
 /CONVERTIBLE INSTANCES/
 
 The key idea is to do the most obvious conversion between types only if it is
-not ambiguous. For example, the most obvious conversion of Double to Int32 is
-just truncate the Double, the most obvious conversion of String to UTCTime is to
-try read the String as date and time. But there is no obvious way to convert
-Int32 to UTCTime, so if you will try to convert (SqlInt32 44) to date you will
-fail. User must handle this cases properly converting values with right way, it
-is not very good idea to silently perform strange and ambiguous convertions
-between absolutely different data types.
+not ambiguous. For example, the most obvious conversion of 'Double' to 'Int32'
+is just truncate the 'Double', the most obvious conversion of String to
+'UTCTime' is to try read the 'String' as date and time. But there is no obvious
+way to convert 'Int32' to 'UTCTime', so if you will try to convert ('SqlInt32'
+44) to date you will fail. User must handle this cases properly converting
+values with right way. It is not very good idea to silently perform strange and
+ambiguous convertions between absolutely different data types.
 
 /ERROR CONDITIONS/
 
 There may sometimes be an error during conversion.  For instance, if you have a
-'SqlString' and are attempting to convert it to an Integer, but it doesn't parse
-as an Integer, you will get an error.  This will be indicated as an exception if
-using 'Database.HDBC.Utils.fromSql', or a Left result if using
-'Database.HDBC.Utils.safeFromSql'.
+'SqlText' and attempting to convert it to an 'Integer', but it doesn't parse as
+an 'Integer', you will get an error.  This will be indicated as an exception if
+using 'fromSql', or a Left result if using 'safeFromSql'.
 
 
 /STORING SQLVALUE TO DATABASE/
 
-Any SqlValue can be converted to Text and then readed from Text back. This is
-guaranteed by tests, so the database driver's author can use it to store and
-read data through Text for types which is not supported by the database
+Any 'SqlValue' can be converted to 'Text' and then readed from 'Text' back. This
+is guaranteed by tests, so the database driver's author can use it to store and
+read data through 'Text' for types which is not supported by the database
 natively.
 
 /TEXT AND BYTESTRINGS/
 
-We are using lazy Text everywhere because it is faster than String and has
+We are using lazy Text everywhere because it is faster than 'String' and has
 builders. Strict text can be converted to one-chanked lazy text with O(1)
 complexity, but lazy to strict converts with O(n) complexity, so it is logical
 to use lazy Text.
 
 We are not using ByteString as text encoded in UTF-8, ByteStrings are just
 sequences of bytes. We are using strict ByteStrings because HDBC drivers uses
-them to pass the ByteString to the C library as CString, so it must be strict.
+them to pass the ByteString to the C library as 'CString', so it must be strict.
 
-We are not using String as data of query or as query itself because it is not
+We are not using 'String' as data of query or as query itself because it is not
 effective by memory and cpu.
 
 /DATE AND TIME/
@@ -151,14 +150,14 @@ local time zone for any type containing only date or time./
 
 This is not recomended to use time with timezone.
 
-We are using UTCTime instead of TimeWithTimezone because no one database
+We are using 'UTCTime' instead of 'TimeWithTimezone' because no one database
 actually save timezone information. All databases just convert datetime to
-UTCTime when save data and convert UTCTime back to LOCAL SERVER TIMEZONE when
+'UTCTime' when save data and convert UTCTime back to LOCAL SERVER TIMEZONE when
 returning the data. So it is logical to work with timezones on the haskell side.
 
-Time intervals are not widely supported, actually just PostgreSQL and
-Oracle. So, if you need them you can serialize throgh SqlText by hands, or write
-your own Convertible instances to do that more convenient.
+Time intervals are not widely supported, actually just in PostgreSQL and
+Oracle. So, if you need them you can serialize throgh 'SqlText' by hands, or
+write your own Convertible instances to do that more convenient.
 
 /EQUALITY OF SQLVALUE/
 
@@ -171,7 +170,7 @@ comparisons can be made, then they are not equal:
  * Both represent the same type and the encapsulated values are considered equal
    by applying (==) to them
 
- * The values of each, when converted to a string, are equal.
+ * The values of each, when converted to a 'String', are equal.
 
 -}
 data SqlValue =
