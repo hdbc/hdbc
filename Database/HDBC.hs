@@ -6,232 +6,251 @@
    Maintainer : John Goerzen <jgoerzen@complete.org>
    Stability  : provisional
    Portability: portable
+ -}
 
-Welcome to HDBC, the Haskell Database Connectivity library.
+module Database.HDBC
+       (
 
-Written by John Goerzen, jgoerzen\@complete.org
--}
+-- | Welcome to HDBC, the Haskell Database Connectivity library.
+-- Written by John Goerzen, jgoerzen\@complete.org
 
-module Database.HDBC 
-    (-- * Introduction
-     -- $introduction
+-- * Introduction
 
-     -- ** Features
-     -- $features
+-- |HDBC provides an abstraction layer between Haskell programs and SQL
+-- relational databases.  This lets you write database code once, in Haskell,
+-- and have it work with any number of backend SQL databases (MySQL, Oracle,
+-- PostgreSQL, ODBC-compliant databases, etc.)
 
-     -- ** Available Drivers
-     -- $drivers
+-- * Design notes
 
-     -- * Typing of transfer data
-     SqlValue(..),
-     toSql, fromSql, safeFromSql, nToSql, iToSql, posixToSql, 
+-- | There is two typeclasses 'Connection' and 'Statement'. Each database driver
+-- must provide it's own types (e.g. PostgreConnection and PostgreStatement in
+-- HDBC-postgresql driver) and instances for them. Driver can provide additional
+-- low-level functions not covered by these typeclasses.
+--
+-- There is also database-independent wrappers 'StmtWrapper' and 'ConnWrapper'
+-- which are instances of 'Statement' and 'Connection' respectively. These
+-- wrappers can hold database-specific type and call it's instance methods to
+-- interact with database. You can still use low-level functions provided for
+-- wrapped type by casting the wrapper back to the specific type by functions
+-- 'castStatement' and 'castConnection'. Here is how it's look like:
+--
+-- @
+--genericStmtLen :: StmtWrapper -> IO Int
+--genericStmtLen stmt = do
+--   executeRaw stmt
+--   case castStatement stmt of
+--     Nothing -> wrapperLen stmt
+--     Just pgstmt -> pgLen pgstmt
+--
+--wrapperLen :: StmtWrapper -> IO Int
+--wrapperLen stmt = length \<$\> fetchAllRows stmt
+--
+--pgLen :: PostgreStatement -> IO Int
+--pgLen = undefined -- assume implementation is provided by driver, the fast
+--                  -- PostgreSQL-specific way by ''ntuples'' low-level function. This
+--                  -- feature is not included to 'Statement' typeclass because some
+--                  -- databases have no such posibility.
+-- @
+--
+-- You can see, that 'StmtWrapper' is still can be converted safely to
+-- PostgreStatement, and if you pass PostgreStatement wrapped in StmtWrapper
+-- function ''genericStmtLen'' will automatically use fast PostgreSQL
+-- implementation. If it could not cast statement to specific type it will use
+-- slow implementation based on 'Statement' methods.
+--
+-- There is also 'SqlValue' representing value from database's columns. This
+-- type has a set of constructors each of them holds value of some type. There
+-- is 'SqlUTCTime' for saving and fetching 'UTCTime' value from the database,
+-- and 'SqlText' to save and get the text from database fields. You can execute
+-- queries like this:
+--
+-- @
+-- {-# LANGUAGE
+--   OverloadedStrings
+--  #-}
+--
+--module Main where
+--
+--import Database.HDBC
+--import Database.HDBC.PostgreSQL
+--import Control.Applicative
+--import Data.Time
+--import qualified Data.ByteString as B
+--import qualified Data.Text.Lazy as TL
+--
+--insertTuples :: (Connection conn) => [(Int, TL.Text, UTCTime, B.ByteString)] -> conn -> IO ()
+--insertTuples x conn = runMany conn
+--                      \"insert into tupletbl (ifield, tfield, dtfield, bsfield) values (?,?,?,?)\"
+--                      $ map (\(a, b, c, d) -> [ toSql a , toSql b , toSql c , toSql d]) x
+-- @
+--
+-- Note, that you can still safely use ''?'' parameter placeholders inside the
+-- query even with PostgreSQL, which use ''$1'' like placeholders.
+--
+-- There is also 'Query' type which is type-safe newtype wrapper around simple
+-- lazy Text. You can write it literal, using ''-XOverloadedStrings'' extension.
+--
+-- We do not use String except inside 'SqlError', not 'Query' nor 'SqlText' does
+-- not use String inside.
 
-     -- * Database Connections
-     IConnection,
-     disconnect, clone,
-     -- ** Wrapped Connections
-     ConnWrapper(..), withWConn,
-     -- ** Preparing Queries
-     run, runRaw, sRun, prepare, quickQuery', quickQuery,
+-- * Some kind of roadmap
 
-     -- ** Transaction Handling
-     -- $transactions
-     commit, rollback, withTransaction,
+-- |* Finish other hdbc drivers, like mysql and sqlite
+--
+-- * Unify the testing and benchmarking with one package.
+--
+-- * Create package hdbc-introspect with common interface to introspect and
+-- change the schema. Also it will be necessary to create packages
+-- hdbc-introspect-postgresql, hdbc-introspect-mysql and so on for each database
+-- using specific methods to introspect and change the schema. This is the base
+-- package for doing migrations like in Ruby on Rails.
+--
+-- * Create hdbc-resourcet and hdbc-conduit to provide convenient and reliable
+-- way for finalizing statements and streaming processing the query results.
+--
+-- * Port other high-level database interfaces, like ''persistent'' and
+-- ''haskelldb''. This will posibly lead to need to patch ''persistent'' and/or
+-- ''haskelldb'' to support Decimal for example, or not. This is too earnly to
+-- plan this in detail.
 
-     -- ** Connection Inquiries
-     hdbcDriverName, hdbcClientVer, proxiedClientName,
-     proxiedClientVer, dbServerVer, dbTransactionSupport,
-     getTables, describeTable,
+-- * Project scope
 
-     -- * Statements
-     Statement,
-     -- ** Execution
-     execute, executeRaw, sExecute, executeMany, sExecuteMany,
-     -- ** Fetching Results
-     fetchRow, fetchRowAL, fetchRowMap, sFetchRow, 
-     fetchAllRows, fetchAllRows', fetchAllRowsAL, fetchAllRowsAL',
-     fetchAllRowsMap, fetchAllRowsMap', sFetchAllRows, sFetchAllRows',
-     getColumnNames,
-     -- ** Statement Inquires
-     describeResult,
-     -- ** Miscellaneous
-     finish, originalQuery,
+-- |* Provide common interface to execute queries and send/fetch data to/from
+-- the database.
+--
+--  * Provide the type (''SqlValue'') to represent data which can be sent or fetched
+--    from the database.
+--
+--  * Provide convenient way to convert Haskell-side data to database-side data
+--  and vice versa. This is done with 'Convertible' instances.
+--
+--  * Give the most wide set of supported types, such as Decimal (arbitrary
+--    precision values), Integer, Date and Time
+--
+--  * Safe interface with protection from re-release of resources. There must
+--  not be errors, the more segafults, if you try to finish the statement when
+--  the connection is already closed.
+--
+--  * Thread-safety.
+--
+--  * Concurrency. If database's low level client library provides concurrent
+--  acces to one connection and/or statement then driver must support it. As
+--  well as protect connection/statement from concurrent access if database does
+--  not support it.
+--
+--  * To be clean, minimalistic, well-tested and correct base for other
+--  higher-level packages.
 
-     -- * Exceptions
-     SqlError(..),
-     throwSqlError,
-     catchSql, handleSql, sqlExceptions, handleSqlError,
+-- * Out of scope
 
-     -- * Column Types
-     -- | These are defined in "Database.HDBC.ColTypes" but are
-     -- available to programs importing "Database.HDBC" by default as well.
-     -- See "Database.HDBC.ColTypes" for documentation.
-     module Database.HDBC.ColTypes
+-- | * Database introspection: HDBC must not know how to introspect the
+--    database. This problem must be solved with separate package
+--    e.g. hdbc-introspect providing the common interface to introspect the
+--    schema and drivers hdbc-introspect-postgresql, hdbc-introspect-mysql and
+--    so on to provide database-specific implementation of this
+--    interface. Current HDBC architecture allows to acces to low-levl
+--    connection and statement functions. The mandatory Typeable instance for
+--    any Connection and Statement instance allows to downcast any polymorphic
+--    type to specific type and do whatever you need.
+--
+--  * Implicit transactions: if you want to work in transaction you must use
+--    withTransaction function which correctly rollback the transaction on
+--    exceptions.
+--
+--  * Lazy IO and resource management: to be short Conduit and ResourceT
+--
+--  * Any other things not related to query execution.
 
-     -- * Threading
-     -- $threading
-    )
+-- * Difference between HDBC-2 and HDBC-3.
 
-where
-import Database.HDBC.Utils(catchSql, handleSql, sqlExceptions,
-                           handleSqlError, withTransaction,
-                           sFetchAllRows, fetchAllRows,
-                           sFetchAllRows', fetchAllRows',
-                           sRun, sExecute, sExecuteMany, sFetchRow,
-                           quickQuery, fetchRowMap, fetchAllRowsMap,
-                           quickQuery', fetchAllRowsMap',
-                           fetchRowAL, fetchAllRowsAL,
-                           fetchAllRowsAL', throwSqlError)
+-- |This is the rewritten HDBC with new features and better design. Here is the
+-- difference between HDBC-2 and HDBC-3:
+--
+--  * typeclass IConnection renamed to 'Connection' to be more Haskell-specific
+--
+--  * removed methods getTables and describeTable because they are not
+--    compatible with project's goals.
+--
+--  * 'Statement' is not data but typeclass for now
+--
+--  * 'Connection' and 'Statement' instances must be 'Typeable' instances as
+--    well. 'Typeable' let you to write database-independent code with
+--    'ConnWrapper' and 'StmtWrapper' wrappers.
+--
+--  * 'ConnWrapper' and 'StmtWrapper' wrappers which can be downcasted to
+--    specific 'Connection' or 'Statement' instance or used
+--    directly. 'ConnWrapper' and 'StmtWrapper' are 'Connection' and 'Statement'
+--    instances too
+--
+--  * 'SqlValue' constructors set is reduced.
+--
+--  * Removed any lazy IO operations.
+
+-- ** Differences in SqlValue
+
+-- |New 'SqlValue' has just the munimum set of posible types which can be stored
+-- on database side or fetched from the database.
+--
+--  * SqlString is replaced with SqlText which stores lazy text instead of
+--    String. String is ineffective in memory and speed.
+--
+--  * SqlByteString is renamed to SqlBlob to be more verbal.
+--
+--  * SqlWord32 and SqlWord64 is removed because they have the same type on
+--    database side as Int. E.g. there is no unsigned integer type in
+--    PostgreSql.
+--
+--  * SqlChar is removed because this is the same as Text with one character,
+--    and there is no special ''one char'' type.
+--
+--  * SqlRational is replaced with SqlDecimal because there is no one database
+--    which has native Rational support. You can not to save any Rational value
+--    to database and get back just the same. Decimal is more proper type to
+--    represent database-level arbitrary precision value.
+--
+--  * SqlZonedLocalTimeOfDay is removed because there is no native support of
+--    this type on database-level except the PostgreSQL. But the documentation
+--    says, that this type is deprecated, difficult to use and must not be used
+--    in new applications.
+--
+--  * SqlZonedTime, SqlPOSIXTime and SqlEpochTime are removed. They has
+--    absolutely the same type on database side as SqlUTCTime. You can convert
+--    PosixTime to UTCTime and vice versa using the instances from `convertible`
+--    package, so there is no need in this consturctors. No one database has
+--    native type storing ZoneInfo directly, every database convert zoned
+--    datetime to utc format and apply local server's timezone to convert utc
+--    back to zoned datetime when you select this value. So SqlZonedTime is just
+--    the same as SqlUTCTime on database side.
+--
+--  * SqlZonedTime and SqlDiffTime removed because no wide support of this types on
+--    database level. In fact just PostgreSql. But maybe I am wrong.
+--
+--  * 'SqlUUID' is added because there is many databases supporting UUID
+--  natively.
+
+-- * Drivers
+
+-- |Drivers must be implemented using clean and safe bindings. You must not use
+-- C-hacks to interact with database client library, this is the binding's goal.
+--
+--  * HDBC-postgresql: use postgresql-libpq and postgresql-simple
+--    bindings. PostgreSQL use @$n@ (where @n@ is parameter index) placeholder
+--    for query parameters, but you can safely use @?@ placeholder like in other
+--    databases. HDBC-postgresql replaces @?@ with sequential @$n@ placeholders
+--    before passing the query to database. You can also use @$n@ directly but
+--    will break portablility.
+
+-- * Thread-safety
+
+-- |All HDBC drivers must use thread safe MVars to store data, which can be
+-- shared between threads.
+
+-- * Reimported modules
+         module Database.HDBC.SqlValue
+       , module Database.HDBC.Types
+       ) where
+
+
+import Database.HDBC.SqlValue
 import Database.HDBC.Types
-import Database.HDBC.ColTypes
-
-{- $introduction
-
-Welcome to HDBC, Haskell Database Connectivity.
-
-HDBC provides an abstraction layer between Haskell programs and SQL
-relational databases.  This lets you write database code once, in
-Haskell, and have it work with any number of backend SQL databases
-(MySQL, Oracle, PostgreSQL, ODBC-compliant databases, etc.)
-
-HDBC is modeled loosely on Perl's DBI interface
-<http://search.cpan.org/~timb/DBI/DBI.pm>, though it has also
-been influenced by Python's DB-API v2, JDBC in Java, and HSQL in
-Haskell.
-
-HDBC is a from-scratch effort.  It is not a reimplementation of HSQL,
-though its purpose is the same.
--}
-
-{- $features
-
-Features of HDBC include:
-
- * Ability to use replacable parameters to let one query be
-   executed multiple times (eliminates the need for an escape
-   function)
-
- * Ability to access returned rows by column number
-
- * Ability to read data from the SQL server on-demand rather than
-   reading the entire result set up front
-
- * HUnit testsuite for each backend driver
-
- * Well-defined standard API and easy backend driver implementation
-
- * Lazy reading of the entire result set (think hGetContents, but
-   for the results of SELECT) (see 'sFetchAllRows')
-
- * Support for translation between Haskell and SQL types
-
- * Support for querying database server properties
-
- * Add-on package (hdbc-missingh) to integrate with MissingH,
-   providing a database backend for AnyDBM.
-
- * Support for querying metadata such as column names.
-
- * Support for querying additional metadata (column types, etc.)
--}
-
-{- $drivers
-
-Here is a list of known drivers as of January 26, 2009:
-
-[@Sqlite v3@] Available from <http://software.complete.org/hdbc-sqlite3>.  Or, to
-participate in development, use 
-@git clone <git://git.complete.org/hdbc-sqlite3>@
-
-[@PostgreSQL@] Available from <http://software.complete.org/hdbc-postgresql>.  Or, to
-participate in development, use
-@git clone <git://git.complete.org/hdbc-postgresql>@
-
-[@ODBC@] Available from <http://software.complete.org/hdbc-odbc>.  Or, to
-partitipace in development, use
-@git clone <git://git.complete.org/hdbc-odbc>@
-
-[@MySQL@] MySQL users have two choices: the first is the ODBC driver, which works
-and has been tested against MySQL on both Linux\/Unix and Windows platforms.  There is
-also an alpha-quality native MySQL driver available for download at
-<http://hackage.haskell.org/cgi-bin/hackage-scripts/package/HDBC-mysql> with a homepage
-at <http://www.maubi.net/~waterson/hacks/hdbc-mysql.html>.
-
-In addition, there is one integration package: /hdbc-anydbm/.  This
-integrates with the AnyDBM library <http://software.complete.org/anydbm>.
-It lets any HDBC database act as a backend for the
-AnyDBM interface.  Available from <http://software.complete.org/hdbc-anydbm>.  Or,
-to participate in development, use
-@darcs get --partial <http://darcs.complete.org/hdbc-anydbm>@
-
-The latest version of HDBC itself is available from
-<http://software.complete.org/hdbc>.  Or, to participate in development, use
-@git clone <git://git.complete.org/hdbc>@.
--}
-
-{- $transactions
-
-This section concerns itself with writing (updating) a database.
-
-In HDBC, as with many RDBMS implementations, every write to the
-database occurs within a transaction.  No changes are visible (outside
-the current transaction) until a commit operation occurs, in which
-case all changes since the transaction started are atomically
-committed.  Also, there is a rollback operation that can undo all
-changes since the transaction started.
-
-HDBC does everything within a transaction.  A transaction is implicitly entered
-when a connection to a database is established, and a transaction is
-implicitly entered after each call to 'commit' or 'rollback' as well.
-
-The practical effect of this is that you must call 'commit' after making
-changes to a database in order for those changes to become visible.  You don't
-have to call 'commit' after /every/ change, just after a batch of them.
-
-(Exceptions exist for databases that don't offer a high level of transaction
-isolation; but you should always play it safe and commit anyway.)
-
-Database developers will also be experienced with the atomicity benefits
-of transactions, an explanation of which is outside the scope of this manual.
-
-Errors occuring at the database level can leave a transaction in an
-indeterminate state, depending on the database.  Some databases will
-refuse all queries until the next 'commit' or 'rollback'.  The safe thing
-to do is to issue a 'commit' or 'rollback' after trapping any 'SqlError'.
-Alternatively, you could use 'withTransaction', which will automatically
-handle this detail for you.
--}
-
-{- $threading
-
-FIXME: this is draft information
-
-Thread support in a generalized interface such as HDBC can be complicated
-because support for threading varies across database interfaces.
-
-However, applications using HDBC should be able to rely upon at least a few
-basic guarantees:
-
- * The HDBC modules may freely be imported and used across all threads.
-
- * HDBC modules may also freely share database connections and statements;
-   the database or HDBC driver will be responsible for locking if necessary.
-
-I use \"share\" in the same sense as Python's DB-API: multiple threads may use
-the resource without wrapping it in any lock.
-
-However, there are some caveats to the above:
-
- * Not all databases support more than one active statement for a single
-   connection.  Therefore, for maximum portability, you should use
-   a different connection to the database for each simultaneous query you
-   wish to use.
-   FIXME: describe when a statement is active.
-
- * Not all databases may support the level of multithreading described above.
-   For those that don't, safe access will be restriced in the HDBC driver
-   by using locks.  Therefore, you can write portable code, but you 
-   only get real multithreading when databases really support it.
-   Details of thread support should be documented in the HDBC
-   driver for each specific database.
--}
