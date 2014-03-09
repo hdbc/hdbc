@@ -12,6 +12,7 @@ by a column.
 
 Written by John Goerzen, jgoerzen\@complete.org
 -}
+{-# LANGUAGE DeriveDataTypeable #-}
 
 module Database.HDBC.ColTypes (SqlColDesc(..),
                                SqlTypeId(..),
@@ -42,13 +43,7 @@ data SqlColDesc =
               ,colDecDigits :: Maybe Int -- ^ Digits to the right of the period
               ,colNullable :: Maybe Bool -- ^ Whether NULL is acceptable
               }
-   deriving (Eq, Read, Show)
-
-sqlColDescTc :: TyCon
-sqlColDescTc = mkTyCon "Database.HDBC.SqlColDesc"
-
-instance Typeable SqlColDesc where
-    typeOf _ = mkTyConApp sqlColDescTc []
+   deriving (Eq, Read, Show, Typeable)
 
 {- | The type identifier for a given column. 
 
@@ -88,13 +83,7 @@ data SqlTypeId =
     | SqlGUIDT                  -- ^ Global unique identifier
     | SqlUnknownT String        -- ^ A type not represented here; implementation-specific information in the String
 
-  deriving (Eq, Show, Read)
-
-sqlTypeIdTc :: TyCon
-sqlTypeIdTc = mkTyCon "Database.HDBC.SqlTypeId"
-
-instance Typeable SqlTypeId where
-    typeOf _ = mkTyConApp sqlTypeIdTc []
+  deriving (Eq, Show, Read, Typeable)
 
 {- | The different types of intervals in SQL. -}
 data SqlInterval =
@@ -111,10 +100,4 @@ data SqlInterval =
     | SqlIntervalHourToMinuteT  -- ^ Difference in hours+minutes
     | SqlIntervalHourToSecondT  -- ^ Difference in hours+seconds
     | SqlIntervalMinuteToSecondT -- ^ Difference in minutes+seconds
-      deriving (Eq, Show, Read)
-
-sqlIntervalTc :: TyCon
-sqlIntervalTc = mkTyCon "Database.HDBC.SqlInterval"
-
-instance Typeable SqlInterval where
-    typeOf _ = mkTyConApp sqlIntervalTc []
+      deriving (Eq, Show, Read, Typeable)

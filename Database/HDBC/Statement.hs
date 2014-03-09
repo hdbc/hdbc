@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveDataTypeable #-}
 module Database.HDBC.Statement
     (
     Statement(..),
@@ -107,13 +108,8 @@ Errors generated in the Haskell layer will have seNativeError set to -1.
 data SqlError = SqlError {seState :: String,
                           seNativeError :: Int,
                           seErrorMsg :: String}
-                deriving (Eq, Show, Read)
+                deriving (Eq, Show, Read, Typeable)
 
-sqlErrorTc :: TyCon
-sqlErrorTc = mkTyCon "Database.HDBC.SqlError"
-
-instance Typeable SqlError where
-    typeOf _ = mkTyConApp sqlErrorTc []
 
 #if __GLASGOW_HASKELL__ >= 610
 --data SqlException

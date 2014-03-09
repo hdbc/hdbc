@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE StandaloneDeriving #-}
 module Database.HDBC.SqlValue
     (
      -- * SQL value marshalling
@@ -209,10 +211,7 @@ data SqlValue = SqlString String
               | SqlEpochTime Integer      -- ^ DEPRECATED Representation of ClockTime or CalendarTime.  Use SqlPOSIXTime instead.
               | SqlTimeDiff Integer -- ^ DEPRECATED Representation of TimeDiff.  Use SqlDiffTime instead.
               | SqlNull         -- ^ NULL in SQL or Nothing in Haskell
-     deriving (Show)
-
-instance Typeable SqlValue where
-    typeOf _ = mkTypeName "SqlValue"
+     deriving (Show, Typeable)
 
 instance Eq SqlValue where
     SqlString a == SqlString b = a == b
@@ -241,6 +240,9 @@ instance Eq SqlValue where
     _ == SqlNull = False
     a == b = ((safeFromSql a)::ConvertResult String) == 
              ((safeFromSql b)::ConvertResult String)
+
+deriving instance Typeable ST.ClockTime
+deriving instance Typeable ST.TimeDiff
 
 instance Convertible SqlValue SqlValue where
     safeConvert = return
@@ -594,26 +596,6 @@ instance Convertible SqlValue Rational where
     safeConvert (SqlEpochTime x) = return . fromIntegral $ x
     safeConvert (SqlTimeDiff x) = return . fromIntegral $ x
     safeConvert y@(SqlNull) = quickError y
-
-#ifndef TIME_GT_113
-instance Typeable Day where
-    typeOf _ = mkTypeName "Day"
-instance Typeable TimeOfDay where
-    typeOf _ = mkTypeName "TimeOfDay"
-instance Typeable LocalTime where
-    typeOf _ = mkTypeName "LocalTime"
-instance Typeable ZonedTime where
-    typeOf _ = mkTypeName "ZonedTime"
-instance Typeable DiffTime where
-    typeOf _ = mkTypeName "DiffTime"
-instance Typeable TimeZone where
-    typeOf _ = mkTypeName "TimeZone"
-#endif
-
-instance Typeable ST.ClockTime where
-    typeOf _ = mkTypeName "ClockTime"
-instance Typeable ST.TimeDiff where
-    typeOf _ = mkTypeName "TimeDiff"
 
 instance Convertible Day SqlValue where
     safeConvert = return . SqlLocalDate
