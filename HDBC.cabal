@@ -28,17 +28,9 @@ flag buildtests
   description: Build the executable to run unit tests
   default: False
 
-flag time_gte_113
-  description: time > 1.1.3 has defined some more instances so omit them here
-
 library
   if flag(splitBase)
-    Build-Depends: base>=3 && <5, old-time, time>=1.1.2.4 && <=1.5, bytestring, containers, old-locale
-    if flag(time_gte_113)
-      Build-Depends: time>=1.1.3
-      CPP-OPTIONS: -DTIME_GT_113
-    else
-      Build-Depends: time<1.1.3
+    Build-Depends: base>=3 && <5, old-time, time>=1.1.3 && <=1.5, bytestring, containers, old-locale
   else
     Build-Depends: base<3
   Build-Depends: mtl, convertible >= 1.1.0.0, text, utf8-string
@@ -64,12 +56,7 @@ Executable runtests
       Build-Depends: HUnit, QuickCheck (>= 2.0), testpack (>= 2.0)
 
       if flag(splitBase)
-        Build-Depends: base>=3 && <5, old-time, time>=1.1.2.4 && <=1.5, bytestring, containers, old-locale
-        if flag(time_gte_113)
-          Build-Depends: time>=1.1.3
-          CPP-OPTIONS: -DTIME_GT_113
-        else
-          Build-Depends: time<1.1.3
+        Build-Depends: base>=3 && <5, old-time, time>=1.1.3 && <=1.5, bytestring, containers, old-locale
       else
         Build-Depends: base<3
       Build-Depends: mtl, convertible >= 1.1.0.0, utf8-string, text
