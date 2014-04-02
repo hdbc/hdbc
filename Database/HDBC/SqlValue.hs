@@ -61,7 +61,7 @@ iToSql = toSql
 posixToSql :: POSIXTime -> SqlValue
 posixToSql x = SqlPOSIXTime x
 
-{- | 'SqlValue' is he main type for expressing Haskell values to SQL databases.
+{- | 'SqlValue' is the main type for expressing Haskell values to SQL databases.
 
 /INTRODUCTION TO SQLVALUE/
 
