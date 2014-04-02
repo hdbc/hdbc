@@ -215,7 +215,7 @@ fetchRowAL sth =
         Just r -> do names <- getColumnNames sth
                      return $ Just $ zip names r
 
-{- | Strict version of 'fetchRowAL' -}
+{- | Strict version of 'fetchRowAL'. -}
 fetchRowAL' :: Statement -> IO (Maybe [(String, SqlValue)])
 fetchRowAL' sth =
     do res <- fetchRowAL sth
@@ -233,7 +233,7 @@ fetchRowMap sth =
               Nothing -> return Nothing
               Just x -> return $ Just $ Map.fromList x
 
-{- | Strict version of 'fetchRowMap' -}
+{- | Strict version of 'fetchRowMap'. -}
 fetchRowMap' :: Statement -> IO (Maybe (Map.Map String SqlValue))
 fetchRowMap' sth = 
     do res <- fetchRowMap sth
