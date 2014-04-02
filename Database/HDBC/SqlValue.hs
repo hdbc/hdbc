@@ -169,7 +169,7 @@ comparisons can be made, then they are not equal:
  * Both represent the same type and the encapsulated values are considered equal
    by applying (==) to them
 
- * The values of each, when converted to a string, are equal.
+ * The values of each, when converted to a string, are equal
 
 /STRING VERSIONS OF TIMES/
 
