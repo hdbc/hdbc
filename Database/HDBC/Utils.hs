@@ -272,7 +272,7 @@ fetchAllRowsMap' sth =
        return res
 
 {- | A quick way to do a query.  Similar to preparing, executing, and
-then calling 'fetchAllRows' on a statement. See also 'quickQuery'' -}
+then calling 'fetchAllRows' on a statement. See also 'quickQuery''. -}
 quickQuery :: IConnection conn => conn -> String -> [SqlValue] -> IO [[SqlValue]]
 quickQuery conn qrystr args =
     do sth <- prepare conn qrystr
