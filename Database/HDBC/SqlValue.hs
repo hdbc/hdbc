@@ -61,7 +61,7 @@ iToSql = toSql
 posixToSql :: POSIXTime -> SqlValue
 posixToSql x = SqlPOSIXTime x
 
-{- | 'SqlValue' is he main type for expressing Haskell values to SQL databases.
+{- | 'SqlValue' is the main type for expressing Haskell values to SQL databases.
 
 /INTRODUCTION TO SQLVALUE/
 
@@ -169,7 +169,7 @@ comparisons can be made, then they are not equal:
  * Both represent the same type and the encapsulated values are considered equal
    by applying (==) to them
 
- * The values of each, when converted to a string, are equal.
+ * The values of each, when converted to a string, are equal
 
 /STRING VERSIONS OF TIMES/
 
@@ -200,17 +200,17 @@ data SqlValue = SqlString String
               | SqlBool Bool
               | SqlDouble Double
               | SqlRational Rational
-              | SqlLocalDate Day            -- ^ Local YYYY-MM-DD (no timezone)
-              | SqlLocalTimeOfDay TimeOfDay -- ^ Local HH:MM:SS (no timezone)
+              | SqlLocalDate Day            -- ^ Local YYYY-MM-DD (no timezone).
+              | SqlLocalTimeOfDay TimeOfDay -- ^ Local HH:MM:SS (no timezone).
               | SqlZonedLocalTimeOfDay TimeOfDay TimeZone -- ^ Local HH:MM:SS -HHMM.  Converts to and from (TimeOfDay, TimeZone).
-              | SqlLocalTime LocalTime      -- ^ Local YYYY-MM-DD HH:MM:SS (no timezone)
+              | SqlLocalTime LocalTime      -- ^ Local YYYY-MM-DD HH:MM:SS (no timezone).
               | SqlZonedTime ZonedTime      -- ^ Local YYYY-MM-DD HH:MM:SS -HHMM.  Considered equal if both convert to the same UTC time.
-              | SqlUTCTime UTCTime          -- ^ UTC YYYY-MM-DD HH:MM:SS
+              | SqlUTCTime UTCTime          -- ^ UTC YYYY-MM-DD HH:MM:SS.
               | SqlDiffTime NominalDiffTime -- ^ Calendar diff between seconds.  Rendered as Integer when converted to String, but greater precision may be preserved for other types or to underlying database.
               | SqlPOSIXTime POSIXTime      -- ^ Time as seconds since midnight Jan 1 1970 UTC.  Integer rendering as for 'SqlDiffTime'.
               | SqlEpochTime Integer      -- ^ DEPRECATED Representation of ClockTime or CalendarTime.  Use SqlPOSIXTime instead.
               | SqlTimeDiff Integer -- ^ DEPRECATED Representation of TimeDiff.  Use SqlDiffTime instead.
-              | SqlNull         -- ^ NULL in SQL or Nothing in Haskell
+              | SqlNull         -- ^ NULL in SQL or Nothing in Haskell.
      deriving (Show, Typeable)
 
 instance Eq SqlValue where

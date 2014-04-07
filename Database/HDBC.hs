@@ -128,9 +128,9 @@ Features of HDBC include:
  * Support for querying database server properties
 
  * Add-on package (hdbc-missingh) to integrate with MissingH,
-   providing a database backend for AnyDBM.
+   providing a database backend for AnyDBM
 
- * Support for querying metadata such as column names.
+ * Support for querying metadata such as column names
 
  * Support for querying additional metadata (column types, etc.)
 -}
