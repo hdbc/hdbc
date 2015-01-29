@@ -27,10 +27,18 @@ flag splitBase
 flag buildtests
   description: Build the executable to run unit tests
   default: False
+flag minTime15
+  description: Use time 1.5 or higher.
+  default: True
 
 library
   if flag(splitBase)
-    Build-Depends: base>=3 && <5, old-time, time>=1.1.3 && <=1.5, bytestring, containers, old-locale
+    Build-Depends: base>=3 && <5, old-time, bytestring, containers
+    if flag(minTime15)
+      Build-Depends: time >= 1.5 && < 1.6
+      CPP-Options: -DMIN_TIME_15
+    else
+      Build-Depends: time < 1.5, old-locale
   else
     Build-Depends: base<3
   Build-Depends: mtl, convertible >= 1.1.0.0, text, utf8-string
@@ -56,7 +64,11 @@ Executable runtests
       Build-Depends: HUnit, QuickCheck (>= 2.0), testpack (>= 2.0)
 
       if flag(splitBase)
-        Build-Depends: base>=3 && <5, old-time, time>=1.1.3 && <=1.5, bytestring, containers, old-locale
+        Build-Depends: base>=3 && <5, old-time, bytestring, containers
+        if flag(minTime15)
+          Build-Depends: time >= 1.5 && < 1.6
+        else
+          Build-Depends: time < 1.5, old-locale
       else
         Build-Depends: base<3
       Build-Depends: mtl, convertible >= 1.1.0.0, utf8-string, text
