@@ -17,7 +17,11 @@ import Data.Char(ord,toUpper)
 import Data.Word
 import Data.Int
 import qualified System.Time as ST
-import Data.Time
+import Data.Time ( Day (ModifiedJulianDay), DiffTime, LocalTime, NominalDiffTime, ParseTime
+                 , TimeOfDay, TimeZone, UTCTime, ZonedTime, formatTime, localDay, localTimeOfDay
+                 , parseTime, timeOfDayToTime, timeToTimeOfDay, toModifiedJulianDay, utc
+                 , utcToZonedTime, zonedTimeToLocalTime, zonedTimeToUTC, zonedTimeZone
+                 )
 import Data.Time.Clock.POSIX
 import Database.HDBC.Locale (defaultTimeLocale, iso8601DateFormat)
 import Data.Ratio
