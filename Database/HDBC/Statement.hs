@@ -51,9 +51,17 @@ data Statement = Statement
 
         This is most useful for non-SELECT statements. -}
      executeMany :: [[SqlValue]] -> IO (),
-                 
-     {- | Abort a query in progress -- usually not needed. -}
+
+     {- | Abort a query in progress -- usually not needed. This allows
+        executing the query once again later with a different parameter set -}
      finish :: IO (),
+
+     {- | Finalizes the statement and immediately frees up any associated resources.
+          Doing anything with a finalized statement will break your program.
+
+          This is mainly intended for optimization to avoid waiting for GC to invoke
+          finalizer on the statement. -}
+     finalize :: IO (),
 
      {- | Fetches one row from the DB.  Returns 'Nothing' if there
         are no more rows.  Will automatically call 'finish' when
