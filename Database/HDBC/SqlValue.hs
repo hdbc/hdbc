@@ -17,7 +17,16 @@ import Data.Char(ord,toUpper)
 import Data.Word
 import Data.Int
 import qualified System.Time as ST
-import Data.Time
+import Data.Time ( Day (ModifiedJulianDay), DiffTime, LocalTime, NominalDiffTime, ParseTime
+                 , TimeOfDay, TimeZone, UTCTime, ZonedTime, formatTime, localDay, localTimeOfDay
+                 , timeOfDayToTime, timeToTimeOfDay, toModifiedJulianDay, utc
+                 , utcToZonedTime, zonedTimeToLocalTime, zonedTimeToUTC, zonedTimeZone
+#if MIN_TIME_15
+                 , parseTimeM
+#else
+                 , parseTime
+#endif
+                 )
 import Data.Time.Clock.POSIX
 import Database.HDBC.Locale (defaultTimeLocale, iso8601DateFormat)
 import Data.Ratio
@@ -661,7 +670,11 @@ instance Convertible (TimeOfDay, TimeZone) SqlValue where
 instance Convertible SqlValue (TimeOfDay, TimeZone) where
     safeConvert (SqlString x) = 
         do tod <- parseTime' "%T%Q %z" x
+#if MIN_TIME_15
+           tz <- case parseTimeM True defaultTimeLocale "%T%Q %z" x of
+#else
            tz <- case parseTime defaultTimeLocale "%T%Q %z" x of
+#endif
                       Nothing -> convError "Couldn't extract timezone in" (SqlString x)
                       Just y -> Right y
            return (tod, tz)
@@ -935,7 +948,11 @@ parseTime' _ inpstr =
 #else
 parseTime' :: (Typeable t, Convertible SqlValue t, ParseTime t) => String -> String -> ConvertResult t
 parseTime' fmtstr inpstr = 
+#if MIN_TIME_15
+    case parseTimeM True defaultTimeLocale fmtstr inpstr of
+#else
     case parseTime defaultTimeLocale fmtstr inpstr of
+#endif
       Nothing -> convError ("Cannot parse using default format string " ++ show fmtstr)
                  (SqlString inpstr)
       Just x -> Right x
