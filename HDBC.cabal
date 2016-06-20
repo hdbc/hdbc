@@ -57,7 +57,7 @@ library
   Extensions: ExistentialQuantification, CPP, MultiParamTypeClasses,
     FlexibleContexts, TypeSynonymInstances, TypeOperators, RankNTypes,
     FlexibleInstances, DeriveDataTypeable
-    
+
 Executable runtests
    if flag(buildtests)
       Buildable: True
@@ -87,4 +87,3 @@ Executable runtests
    Extensions: ExistentialQuantification, CPP, MultiParamTypeClasses,
      FlexibleContexts, TypeSynonymInstances, TypeOperators,
      RankNTypes, FlexibleInstances
-   
