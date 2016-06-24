@@ -14,7 +14,6 @@ module Control.Monad.HDBC
 where
 
 import Control.Monad.Reader
-
 import qualified Database.HDBC as HDBC
 
 type IConnection = HDBC.IConnection
