@@ -41,7 +41,7 @@ library
       Build-Depends: time < 1.5, old-locale
   else
     Build-Depends: base<3
-  Build-Depends: mtl, convertible >= 1.1.0.0, text, utf8-string
+  Build-Depends: mtl, convertible >= 1.1.0.0, text, utf8-string, transformers, constraints
 
   -- Hack for cabal-install weirdness.  cabal-install forces base 3,
   -- though it works fine for Setup.lhs manually.  Fix.
@@ -52,7 +52,7 @@ library
 
   Exposed-Modules: Database.HDBC, Database.HDBC.Types, Database.HDBC.DriverUtils,
     Database.HDBC.ColTypes, Database.HDBC.Statement, Database.HDBC.SqlValue,
-    Database.HDBC.Locale
+    Database.HDBC.Locale, Control.Monad.HDBC
   Other-Modules: Database.HDBC.Utils
   Extensions: ExistentialQuantification, CPP, MultiParamTypeClasses,
     FlexibleContexts, TypeSynonymInstances, TypeOperators, RankNTypes,
