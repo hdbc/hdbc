@@ -55,7 +55,7 @@ module Database.HDBC
      -- ** Statement Inquires
      describeResult,
      -- ** Miscellaneous
-     finish, originalQuery,
+     finish, finalize, originalQuery,
 
      -- * Exceptions
      SqlError(..),
