@@ -97,7 +97,9 @@ data Statement = Statement
           Please see caveats under 'getColumnNames' for information
           on the column name field here.
  -}
-     describeResult :: IO [(String, SqlColDesc)]
+     describeResult :: IO [(String, SqlColDesc)],
+     
+     nextResultSet :: IO (Maybe Int)
     }
 
 {- | The main HDBC exception object.  As much information as possible
