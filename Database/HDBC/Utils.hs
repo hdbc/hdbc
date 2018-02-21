@@ -80,7 +80,7 @@ sRun conn qry lst =
 
 {- | Like 'execute', but take a list of Maybe Strings instead of
    'SqlValue's. -}
-sExecute :: Statement -> [Maybe String] -> IO Integer
+sExecute :: Statement -> [Maybe String] -> IO (Maybe Integer)
 sExecute sth lst = execute sth (map toSql lst)
 
 {- | Like 'executeMany', but take a list of Maybe Strings instead of

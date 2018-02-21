@@ -31,7 +31,7 @@ data Statement = Statement
         This function should automatically call finish() to finish the previous
         execution, if necessary.
         -}
-     execute :: [SqlValue] -> IO Integer,
+     execute :: [SqlValue] -> IO (Maybe Integer),
 
      {- | Execute the statement as-is, without supplying any
         positional parameters.  This is intended for statements for
@@ -116,9 +116,5 @@ data SqlError = SqlError {seState :: String,
 #if __GLASGOW_HASKELL__ >= 610
 --data SqlException
 instance Exception SqlError where
-{-
-    toException = SomeException
-    fromException (SomeException e) = Just e
-    fromException _ = Nothing
--}
+
 #endif
