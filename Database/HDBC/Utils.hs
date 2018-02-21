@@ -74,13 +74,13 @@ handleSqlError action =
     where handler e = fail ("SQL error: " ++ show e)
 
 {- | Like 'run', but take a list of Maybe Strings instead of 'SqlValue's. -}
-sRun :: IConnection conn => conn -> String -> [Maybe String] -> IO Integer
+sRun :: IConnection conn => conn -> String -> [Maybe String] -> IO (Maybe Int)
 sRun conn qry lst =
     run conn qry (map toSql lst)
 
 {- | Like 'execute', but take a list of Maybe Strings instead of
    'SqlValue's. -}
-sExecute :: Statement -> [Maybe String] -> IO (Maybe Integer)
+sExecute :: Statement -> [Maybe String] -> IO (Maybe Int)
 sExecute sth lst = execute sth (map toSql lst)
 
 {- | Like 'executeMany', but take a list of Maybe Strings instead of

@@ -31,7 +31,7 @@ data Statement = Statement
         This function should automatically call finish() to finish the previous
         execution, if necessary.
         -}
-     execute :: [SqlValue] -> IO (Maybe Integer),
+     execute :: [SqlValue] -> IO (Maybe Int),
 
      {- | Execute the statement as-is, without supplying any
         positional parameters.  This is intended for statements for
@@ -99,7 +99,7 @@ data Statement = Statement
  -}
      describeResult :: IO [(String, SqlColDesc)],
      
-     nextResultSet :: IO (Maybe Int)
+     nextResultSet :: IO (Maybe (Maybe Int))
     }
 
 {- | The main HDBC exception object.  As much information as possible
