@@ -86,7 +86,7 @@ and vary by database.  So don't do it.
                    of rows modified (see 'execute' for details).
                    The second parameter is a list
                    of replacement values, if any. -}
-                run :: conn -> String -> [SqlValue] -> IO Integer
+                run :: conn -> String -> [SqlValue] -> IO (Maybe Int)
                 {- | Prepares a statement for execution. 
 
                    Question marks in the statement will be replaced by

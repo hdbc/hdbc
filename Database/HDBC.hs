@@ -12,7 +12,7 @@ Welcome to HDBC, the Haskell Database Connectivity library.
 Written by John Goerzen, jgoerzen\@complete.org
 -}
 
-module Database.HDBC 
+module Database.HDBC  
     (-- * Introduction
      -- $introduction
 
@@ -55,7 +55,7 @@ module Database.HDBC
      -- ** Statement Inquires
      describeResult,
      -- ** Miscellaneous
-     finish, originalQuery,
+     finish, originalQuery, nextResultSet,
 
      -- * Exceptions
      SqlError(..),
@@ -71,7 +71,6 @@ module Database.HDBC
      -- * Threading
      -- $threading
     )
-
 where
 import Database.HDBC.Utils(catchSql, handleSql, sqlExceptions,
                            handleSqlError, withTransaction,
