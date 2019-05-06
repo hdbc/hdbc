@@ -151,13 +151,6 @@ also an alpha-quality native MySQL driver available for download at
 <http://hackage.haskell.org/cgi-bin/hackage-scripts/package/HDBC-mysql> with a homepage
 at <http://www.maubi.net/~waterson/hacks/hdbc-mysql.html>.
 
-In addition, there is one integration package: /hdbc-anydbm/.  This
-integrates with the AnyDBM library <http://software.complete.org/anydbm>.
-It lets any HDBC database act as a backend for the
-AnyDBM interface.  Available from <http://software.complete.org/hdbc-anydbm>.  Or,
-to participate in development, use
-@darcs get --partial <http://darcs.complete.org/hdbc-anydbm>@
-
 The latest version of HDBC itself is available from
 <http://software.complete.org/hdbc>.  Or, to participate in development, use
 @git clone <git://git.complete.org/hdbc>@.
