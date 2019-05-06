@@ -152,8 +152,7 @@ also an alpha-quality native MySQL driver available for download at
 at <http://www.maubi.net/~waterson/hacks/hdbc-mysql.html>.
 
 The latest version of HDBC itself is available from
-<http://software.complete.org/hdbc>.  Or, to participate in development, use
-@git clone <git://git.complete.org/hdbc>@.
+<https://github.com/hdbc/hdbc>.
 -}
 
 {- $transactions
