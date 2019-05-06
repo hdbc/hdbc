@@ -137,19 +137,13 @@ Features of HDBC include:
 
 {- $drivers
 
-Here is a list of known drivers as of January 26, 2009:
+Here is a list of known drivers as of May 6, 2019:
 
-[@Sqlite v3@] Available from <http://software.complete.org/hdbc-sqlite3>.  Or, to
-participate in development, use 
-@git clone <git://git.complete.org/hdbc-sqlite3>@
+[@Sqlite v3@] Available from <https://github.com/hdbc/hdbc-sqlite3>.
 
-[@PostgreSQL@] Available from <http://software.complete.org/hdbc-postgresql>.  Or, to
-participate in development, use
-@git clone <git://git.complete.org/hdbc-postgresql>@
+[@PostgreSQL@] Available from <https://github.com/hdbc/hdbc-postgresql>.
 
-[@ODBC@] Available from <http://software.complete.org/hdbc-odbc>.  Or, to
-partitipace in development, use
-@git clone <git://git.complete.org/hdbc-odbc>@
+[@ODBC@] Available from <https://github.com/hdbc/hdbc-odbc>.
 
 [@MySQL@] MySQL users have two choices: the first is the ODBC driver, which works
 and has been tested against MySQL on both Linux\/Unix and Windows platforms.  There is
@@ -157,16 +151,8 @@ also an alpha-quality native MySQL driver available for download at
 <http://hackage.haskell.org/cgi-bin/hackage-scripts/package/HDBC-mysql> with a homepage
 at <http://www.maubi.net/~waterson/hacks/hdbc-mysql.html>.
 
-In addition, there is one integration package: /hdbc-anydbm/.  This
-integrates with the AnyDBM library <http://software.complete.org/anydbm>.
-It lets any HDBC database act as a backend for the
-AnyDBM interface.  Available from <http://software.complete.org/hdbc-anydbm>.  Or,
-to participate in development, use
-@darcs get --partial <http://darcs.complete.org/hdbc-anydbm>@
-
 The latest version of HDBC itself is available from
-<http://software.complete.org/hdbc>.  Or, to participate in development, use
-@git clone <git://git.complete.org/hdbc>@.
+<https://github.com/hdbc/hdbc>.
 -}
 
 {- $transactions
