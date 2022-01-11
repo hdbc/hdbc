@@ -35,7 +35,7 @@ library
   if flag(splitBase)
     Build-Depends: base>=3 && <5, old-time, bytestring, containers
     if flag(minTime15)
-      Build-Depends: time >= 1.5 && < 1.10
+      Build-Depends: time >= 1.5 && < 1.14
       CPP-Options: -DMIN_TIME_15
     else
       Build-Depends: time < 1.5, old-locale
