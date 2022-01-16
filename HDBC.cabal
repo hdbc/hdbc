@@ -38,7 +38,7 @@ library
       Build-Depends: time >= 1.5 && < 1.14
       CPP-Options: -DMIN_TIME_15
     else
-      Build-Depends: time < 1.5, old-locale
+      Build-Depends: time >= 1.2 && < 1.5, old-locale
   else
     Build-Depends: base<3
   Build-Depends: mtl, convertible >= 1.1.0.0, text, utf8-string
@@ -68,7 +68,7 @@ Executable runtests
         if flag(minTime15)
           Build-Depends: time >= 1.5 && < 1.9
         else
-          Build-Depends: time < 1.5, old-locale
+          Build-Depends: time >= 1.2 && < 1.5, old-locale
       else
         Build-Depends: base<3
       Build-Depends: mtl, convertible >= 1.1.0.0, utf8-string, text

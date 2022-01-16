@@ -18,6 +18,6 @@ import System.Locale (defaultTimeLocale)
 --   (compatible) version of it.
 iso8601DateFormat :: Maybe String -> String
 iso8601DateFormat mTimeFmt =
-    "%Y-%m-%d" ++ case mTimeFmt of
+    "%0Y-%m-%d" ++ case mTimeFmt of
              Nothing  -> ""
              Just fmt -> ' ' : fmt
