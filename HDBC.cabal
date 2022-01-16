@@ -61,12 +61,13 @@ library
 Executable runtests
    if flag(buildtests)
       Buildable: True
-      Build-Depends: HUnit, QuickCheck (>= 2.0), testpack (>= 2.0)
+      Build-Depends: HUnit, QuickCheck >= 2.0
 
       if flag(splitBase)
         Build-Depends: base>=3 && <5, old-time, bytestring, containers
         if flag(minTime15)
           Build-Depends: time >= 1.5 && < 1.14
+          CPP-Options: -DMIN_TIME_15
         else
           Build-Depends: time >= 1.2 && < 1.5, old-locale
       else
@@ -81,7 +82,6 @@ Executable runtests
       Buildable: False
    Main-Is: runtests.hs
    Other-Modules: TestSqlValue
-                  TestInfrastructure
    Hs-Source-Dirs: ., testsrc
    GHC-Options: -O2
    Extensions: ExistentialQuantification, CPP, MultiParamTypeClasses,
