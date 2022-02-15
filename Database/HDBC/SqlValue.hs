@@ -9,6 +9,7 @@ module Database.HDBC.SqlValue
     )
 
 where
+import Data.Data (Data)
 import Data.Dynamic
 import qualified Data.ByteString.UTF8 as BUTF8
 import qualified Data.ByteString as B
@@ -220,7 +221,7 @@ data SqlValue = SqlString String
               | SqlEpochTime Integer      -- ^ DEPRECATED Representation of ClockTime or CalendarTime.  Use SqlPOSIXTime instead.
               | SqlTimeDiff Integer -- ^ DEPRECATED Representation of TimeDiff.  Use SqlDiffTime instead.
               | SqlNull         -- ^ NULL in SQL or Nothing in Haskell.
-     deriving (Show, Typeable)
+     deriving (Show, Typeable, Data)
 
 instance Eq SqlValue where
     SqlString a == SqlString b = a == b
