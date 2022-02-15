@@ -9,6 +9,7 @@ module Database.HDBC.SqlValue
     )
 
 where
+import Data.Data (Data)
 import Data.Dynamic
 import qualified Data.ByteString.UTF8 as BUTF8
 import qualified Data.ByteString as B
@@ -217,10 +218,12 @@ data SqlValue = SqlString String
               | SqlUTCTime UTCTime          -- ^ UTC YYYY-MM-DD HH:MM:SS.
               | SqlDiffTime NominalDiffTime -- ^ Calendar diff between seconds.  Rendered as Integer when converted to String, but greater precision may be preserved for other types or to underlying database.
               | SqlPOSIXTime POSIXTime      -- ^ Time as seconds since midnight Jan 1 1970 UTC.  Integer rendering as for 'SqlDiffTime'.
-              | SqlEpochTime Integer      -- ^ DEPRECATED Representation of ClockTime or CalendarTime.  Use SqlPOSIXTime instead.
-              | SqlTimeDiff Integer -- ^ DEPRECATED Representation of TimeDiff.  Use SqlDiffTime instead.
+              | SqlEpochTime Integer        -- ^ Representation of ClockTime or CalendarTime.
+              | SqlTimeDiff Integer         -- ^ Representation of TimeDiff.
               | SqlNull         -- ^ NULL in SQL or Nothing in Haskell.
-     deriving (Show, Typeable)
+     deriving (Show, Typeable, Data)
+{-# DEPRECATED SqlEpochTime "Use 'SqlPOSIXTime' instead." #-}
+{-# DEPRECATED SqlTimeDiff "Use 'SqlDiffTime' instead." #-}
 
 instance Eq SqlValue where
     SqlString a == SqlString b = a == b
