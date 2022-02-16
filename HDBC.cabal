@@ -54,9 +54,10 @@ library
     Database.HDBC.ColTypes, Database.HDBC.Statement, Database.HDBC.SqlValue,
     Database.HDBC.Locale
   Other-Modules: Database.HDBC.Utils
-  Extensions: ExistentialQuantification, CPP, MultiParamTypeClasses,
+  Default-Extensions: ExistentialQuantification, CPP, MultiParamTypeClasses,
     FlexibleContexts, TypeSynonymInstances, TypeOperators, RankNTypes,
     FlexibleInstances, DeriveDataTypeable
+  Default-Language: Haskell2010
 
 Executable runtests
    if flag(buildtests)
@@ -84,6 +85,7 @@ Executable runtests
    Other-Modules: TestSqlValue
    Hs-Source-Dirs: ., testsrc
    GHC-Options: -O2
-   Extensions: ExistentialQuantification, CPP, MultiParamTypeClasses,
+   Default-Extensions: ExistentialQuantification, CPP, MultiParamTypeClasses,
      FlexibleContexts, TypeSynonymInstances, TypeOperators,
      RankNTypes, FlexibleInstances
+   Default-Language: Haskell2010
