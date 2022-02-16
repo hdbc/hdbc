@@ -1,14 +1,9 @@
 module Main where
 import qualified Test.HUnit as HU
-import Test.HUnit.Tools
+import Test.QuickCheck (quickCheck)
 
 import qualified TestSqlValue
 
-test1 = HU.TestCase ((HU.@=?) "x" "x")
-
-alltests = [HU.TestLabel "test1" test1,
-            tl "TestSqlValue" TestSqlValue.allt
-           ]
-
-main = do runVerboseTests (HU.TestList alltests)
+main = do HU.runTestTT (HU.TestList $ TestSqlValue.allHUnitTests)
+          traverse quickCheck TestSqlValue.allQuickCheckTests
           return ()
