@@ -16,7 +16,7 @@ Description: HDBC provides an abstraction layer between Haskell programs and SQL
 Stability: Stable
 Build-Type: Simple
 
-Cabal-Version: >=1.8
+Cabal-Version: >=1.10
 
 source-repository head
   type:            git
