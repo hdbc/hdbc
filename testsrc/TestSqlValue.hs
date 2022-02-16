@@ -13,7 +13,7 @@ import qualified Test.HUnit as HU
 import Database.HDBC
 import Data.Time.Format (parseTime)
 import Data.Time.LocalTime
-import Database.HDBC.Locale (defaultTimeLocale, iso8601DateFormat)
+import Database.HDBC.Locale (defaultTimeLocale, iso8601DateFormat, oldIso8601DateFormat)
 import Data.Maybe
 
 instance Eq ZonedTime where
@@ -37,15 +37,23 @@ testZonedTimeFrac :: ZonedTime
 testZonedTimeFrac = fromJust $ parseTime defaultTimeLocale (iso8601DateFormat (Just "%T%Q %z"))
                     testZonedTimeFracStr
 
+testZonedTimeTwoDigitYearStr = "89-08-01 15:33:01 -0500"
+testZonedTimeTwoDigitYear :: ZonedTime
+testZonedTimeTwoDigitYear = fromJust $ parseTime defaultTimeLocale (oldIso8601DateFormat (Just "%T %z"))
+                            testZonedTimeTwoDigitYearStr
+
 ztparsenf =
     (HU.@=?) testZonedTime (fromSql (SqlString testZonedTimeStr))
 ztparsef =
     (HU.@=?) testZonedTimeFrac (fromSql (SqlString testZonedTimeFracStr))
+ztparseTwoDigitYear =
+    (HU.@=?) testZonedTimeTwoDigitYear (fromSql (SqlString testZonedTimeTwoDigitYearStr))
 
 hut msg = HU.TestLabel msg . HU.TestCase
 
 allHUnitTests = [hut "non-frac parse" ztparsenf,
-                 hut "frac parse" ztparsef
+                 hut "frac parse" ztparsef,
+                 hut "old serialization of two digit year without leading zeros" ztparseTwoDigitYear
                 ]
 
 allQuickCheckTests = [toSql_Int,

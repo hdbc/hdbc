@@ -9,6 +9,7 @@ module Database.HDBC.SqlValue
     )
 
 where
+import Control.Applicative ((<|>))
 import Data.Dynamic
 import qualified Data.ByteString.UTF8 as BUTF8
 import qualified Data.ByteString as B
@@ -28,7 +29,7 @@ import Data.Time ( Day (ModifiedJulianDay), DiffTime, LocalTime, NominalDiffTime
 #endif
                  )
 import Data.Time.Clock.POSIX
-import Database.HDBC.Locale (defaultTimeLocale, iso8601DateFormat)
+import Database.HDBC.Locale (defaultTimeLocale, iso8601DateFormat, oldIso8601DateFormat)
 import Data.Ratio
 import Data.Convertible
 import Data.Fixed
@@ -609,7 +610,7 @@ instance Convertible SqlValue Rational where
 instance Convertible Day SqlValue where
     safeConvert = return . SqlLocalDate
 instance Convertible SqlValue Day where
-    safeConvert (SqlString x) = parseTime' (iso8601DateFormat Nothing) x
+    safeConvert (SqlString x) = parseTimeISO8601 Nothing x
     safeConvert (SqlByteString x) = safeConvert (SqlString (BUTF8.toString x))
     safeConvert (SqlInt32 x) = 
         return $ ModifiedJulianDay {toModifiedJulianDay = fromIntegral x}
@@ -704,7 +705,7 @@ instance Convertible SqlValue (TimeOfDay, TimeZone) where
 instance Convertible LocalTime SqlValue where
     safeConvert = return . SqlLocalTime
 instance Convertible SqlValue LocalTime where
-    safeConvert (SqlString x) = parseTime' (iso8601DateFormat (Just "%T%Q")) x
+    safeConvert (SqlString x) = parseTimeISO8601 (Just "%T%Q") x
     safeConvert (SqlByteString x) = safeConvert (SqlString (BUTF8.toString x))
     safeConvert y@(SqlInt32 _) = quickError y
     safeConvert y@(SqlInt64 _) = quickError y
@@ -730,7 +731,7 @@ instance Convertible SqlValue LocalTime where
 instance Convertible ZonedTime SqlValue where
     safeConvert = return . SqlZonedTime
 instance Convertible SqlValue ZonedTime where
-    safeConvert (SqlString x) = parseTime' (iso8601DateFormat (Just "%T%Q %z")) x
+    safeConvert (SqlString x) = parseTimeISO8601 (Just "%T%Q %z") x
     safeConvert (SqlByteString x) = safeConvert (SqlString (BUTF8.toString x))
     safeConvert (SqlInt32 x) = safeConvert (SqlInteger (fromIntegral x))
     safeConvert (SqlInt64 x) = safeConvert (SqlInteger (fromIntegral x))
@@ -756,7 +757,7 @@ instance Convertible SqlValue ZonedTime where
 instance Convertible UTCTime SqlValue where
     safeConvert = return . SqlUTCTime
 instance Convertible SqlValue UTCTime where
-    safeConvert (SqlString x) = parseTime' (iso8601DateFormat (Just "%T%Q")) x
+    safeConvert (SqlString x) = parseTimeISO8601 (Just "%T%Q") x
     safeConvert (SqlByteString x) = safeConvert (SqlString (BUTF8.toString x))
     safeConvert y@(SqlInt32 _) = safeConvert y >>= return . posixSecondsToUTCTime
     safeConvert y@(SqlInt64 _) = safeConvert y >>= return . posixSecondsToUTCTime
@@ -956,4 +957,17 @@ parseTime' fmtstr inpstr =
       Nothing -> convError ("Cannot parse using default format string " ++ show fmtstr)
                  (SqlString inpstr)
       Just x -> Right x
+#endif
+
+parseTimeISO8601 :: (Typeable t, Convertible SqlValue t, ParseTime t) => Maybe String -> String -> ConvertResult t
+parseTimeISO8601 fmtstr inpstr =
+  case tryParse iso8601DateFormat <|> tryParse oldIso8601DateFormat of
+    Nothing -> convError "Cannot parse ISO8601 timestamp" (SqlString inpstr)
+    Just x -> Right x
+  where
+  tryParse fmtFunction =
+#if MIN_TIME_15
+    parseTimeM True defaultTimeLocale (fmtFunction fmtstr) inpstr
+#else
+    parseTime defaultTimeLocale (fmtFunction fmtstr) inpstr
 #endif
