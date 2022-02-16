@@ -1,5 +1,5 @@
 Name: HDBC
-Version: 2.4.0.3
+Version: 2.4.0.4
 License: BSD3
 Maintainer: Nicolas Wu <nicolas.wu@gmail.com>
 Author: John Goerzen, Nicolas Wu
@@ -16,7 +16,7 @@ Description: HDBC provides an abstraction layer between Haskell programs and SQL
 Stability: Stable
 Build-Type: Simple
 
-Cabal-Version: >=1.8
+Cabal-Version: >=1.10
 
 source-repository head
   type:            git
