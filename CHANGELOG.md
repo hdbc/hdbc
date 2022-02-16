@@ -1,5 +1,9 @@
 # Changelog
 
+#### 2.4.0.4
+
+* Zero-prefix years when parsing dates.
+
 #### 2.4.0.3
 
 * Compatibility with GHC 8.8/time 1.9
