@@ -1,7 +1,7 @@
 Name: HDBC
-Version: 2.4.0.4
+Version: 2.4.0.5
 License: BSD3
-Maintainer: Nicolas Wu <nicolas.wu@gmail.com>
+Maintainer: Nicolas Wu <nicolas.wu@gmail.com>, David Johnson <code@dmj.io>
 Author: John Goerzen, Nicolas Wu
 homepage: https://github.com/hdbc/hdbc
 Copyright: Copyright (c) 2005-2011 John Goerzen
@@ -35,7 +35,7 @@ library
   if flag(splitBase)
     Build-Depends: base>=3 && <5, old-time, bytestring, containers
     if flag(minTime15)
-      Build-Depends: time >= 1.5 && < 1.16
+      Build-Depends: time >= 1.5 && < 1.17
       CPP-Options: -DMIN_TIME_15
     else
       Build-Depends: time >= 1.2 && < 1.5, old-locale
@@ -67,7 +67,7 @@ Executable runtests
       if flag(splitBase)
         Build-Depends: base>=3 && <5, old-time, bytestring, containers
         if flag(minTime15)
-          Build-Depends: time >= 1.5 && < 1.16
+          Build-Depends: time >= 1.5 && < 1.17
           CPP-Options: -DMIN_TIME_15
         else
           Build-Depends: time >= 1.2 && < 1.5, old-locale

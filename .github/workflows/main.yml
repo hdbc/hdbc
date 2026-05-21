@@ -1,0 +1,27 @@
+name: hdbc CI
+
+on:
+  push:
+    branches: main
+  pull_request:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: cachix/install-nix-action@v31
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          nix_path: nixpkgs=channel:nixpkgs-unstable
+
+      - run: nix-channel --update
+      - name: Build using Nix
+        run: nix-build
